@@ -1,131 +1,119 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../config/firebase';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import styled from 'styled-components';
+import { auth } from '../../config/firebase';
+
+interface RegisterProps {
+  onSwitchToLogin: () => void;
+}
 
 const RegisterContainer = styled.div`
-  max-width: 400px;
-  margin: 40px auto;
-  padding: 20px;
-  background: ${({ theme }) => theme.cardBackground};
+  background-color: ${({ theme }) => theme.background};
+  border: 1px solid ${({ theme }) => theme.textSecondary};
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
 `;
 
-const Title = styled.h2`
+const Title = styled.h1`
   text-align: center;
-  color: ${({ theme }) => theme.textPrimary};
-  margin-bottom: 24px;
+  margin-bottom: 2rem;
+  color: ${({ theme }) => theme.accent};
 `;
 
 const Input = styled(Field)`
   width: 100%;
-  padding: 10px;
-  margin-bottom: 16px;
-  border: 1px solid ${({ theme }) => theme.border};
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid ${({ theme }) => theme.textSecondary};
   border-radius: 4px;
-  background: ${({ theme }) => theme.inputBackground};
+  background-color: transparent;
   color: ${({ theme }) => theme.textPrimary};
+  
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.accent};
+  }
 `;
 
 const Button = styled.button`
   width: 100%;
-  padding: 12px;
-  background: ${({ theme }) => theme.accent};
-  color: white;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
   border: none;
   border-radius: 4px;
+  background-color: ${({ theme }) => theme.accent};
+  color: white;
   cursor: pointer;
   font-weight: 500;
-  margin-bottom: 16px;
-
+  
   &:hover {
     opacity: 0.9;
   }
-
+  
   &:disabled {
-    background: ${({ theme }) => theme.buttonBackground};
+    background-color: ${({ theme }) => theme.textSecondary};
     cursor: not-allowed;
   }
 `;
 
 const ErrorMessage = styled.div`
-  color: ${({ theme }) => theme.errorColor};
-  margin-bottom: 16px;
-  font-size: 14px;
+  color: #f44336;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
 `;
 
 const LinkText = styled.p`
   text-align: center;
-  color: ${({ theme }) => theme.textSecondary};
-  margin-top: 16px;
-
-  a {
+  margin-top: 1rem;
+  
+  span {
     color: ${({ theme }) => theme.accent};
     cursor: pointer;
+    
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `;
 
 const validationSchema = Yup.object().shape({
-  username: Yup.string()
-    .min(3, 'Le nom d\'utilisateur doit contenir au moins 3 caractères')
-    .required('Nom d\'utilisateur requis'),
   email: Yup.string()
     .email('Email invalide')
     .required('Email requis'),
   password: Yup.string()
-    .min(8, 'Le mot de passe doit contenir au moins 8 caractères')
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial'
-    )
+    .min(6, 'Le mot de passe doit contenir au moins 6 caractères')
     .required('Mot de passe requis'),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('password')], 'Les mots de passe ne correspondent pas')
     .required('Confirmation du mot de passe requise'),
 });
 
-interface RegisterProps {
-  onSwitchToLogin: () => void;
-}
-
 const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (values: { email: string; password: string }) => {
+    try {
+      await createUserWithEmailAndPassword(auth, values.email, values.password);
+    } catch (error: any) {
+      console.error('Register error:', error);
+      setError(error.message);
+    }
+  };
 
   return (
     <RegisterContainer>
-      <Title>Inscription</Title>
+      <Title>Crypto Tracker</Title>
       <Formik
-        initialValues={{
-          username: '',
-          email: '',
-          password: '',
-          confirmPassword: ''
-        }}
+        initialValues={{ email: '', password: '', confirmPassword: '' }}
         validationSchema={validationSchema}
-        onSubmit={async (values, { setSubmitting }) => {
-          try {
-            await createUserWithEmailAndPassword(auth, values.email, values.password);
-            // Ici, vous pouvez ajouter des informations supplémentaires de l'utilisateur dans Firestore
-          } catch (error: any) {
-            setError(error.message);
-          }
-          setSubmitting(false);
-        }}
+        onSubmit={handleSubmit}
       >
         {({ errors, touched, isSubmitting }) => (
           <Form>
-            <Input
-              type="text"
-              name="username"
-              placeholder="Nom d'utilisateur"
-            />
-            {errors.username && touched.username && (
-              <ErrorMessage>{errors.username}</ErrorMessage>
-            )}
-
             <Input
               type="email"
               name="email"
@@ -134,7 +122,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
             {errors.email && touched.email && (
               <ErrorMessage>{errors.email}</ErrorMessage>
             )}
-
+            
             <Input
               type="password"
               name="password"
@@ -143,7 +131,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
             {errors.password && touched.password && (
               <ErrorMessage>{errors.password}</ErrorMessage>
             )}
-
+            
             <Input
               type="password"
               name="confirmPassword"
@@ -152,19 +140,19 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
             {errors.confirmPassword && touched.confirmPassword && (
               <ErrorMessage>{errors.confirmPassword}</ErrorMessage>
             )}
-
+            
             {error && <ErrorMessage>{error}</ErrorMessage>}
-
+            
             <Button type="submit" disabled={isSubmitting}>
               S'inscrire
             </Button>
           </Form>
         )}
       </Formik>
-
+      
       <LinkText>
         Déjà un compte ?{' '}
-        <a onClick={onSwitchToLogin}>Se connecter</a>
+        <span onClick={onSwitchToLogin}>Se connecter</span>
       </LinkText>
     </RegisterContainer>
   );

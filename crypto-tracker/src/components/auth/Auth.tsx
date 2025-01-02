@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import Login from './Login';
 import Register from './Register';
@@ -6,19 +6,14 @@ import Register from './Register';
 const AuthContainer = styled.div`
   min-height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-  background: ${({ theme }) => theme.background};
+  align-items: center;
+  background-color: ${({ theme }) => theme.background};
+  color: ${({ theme }) => theme.textPrimary};
 `;
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
-
-  useEffect(() => {
-    console.log('Auth component mounted');
-  }, []);
-
-  console.log('Auth component rendering, isLogin:', isLogin);
 
   return (
     <AuthContainer>
