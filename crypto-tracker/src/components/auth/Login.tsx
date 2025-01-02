@@ -1,79 +1,91 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '../../config/firebase';
+import styled from 'styled-components';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import styled from 'styled-components';
 import { FaGoogle } from 'react-icons/fa';
+import { auth } from '../../config/firebase';
+
+interface LoginProps {
+  onSwitchToRegister: () => void;
+}
 
 const LoginContainer = styled.div`
-  max-width: 400px;
-  margin: 40px auto;
-  padding: 20px;
-  background: ${({ theme }) => theme.cardBackground};
+  background-color: ${({ theme }) => theme.background};
+  border: 1px solid ${({ theme }) => theme.textSecondary};
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
 `;
 
-const Title = styled.h2`
+const Title = styled.h1`
   text-align: center;
-  color: ${({ theme }) => theme.textPrimary};
-  margin-bottom: 24px;
+  margin-bottom: 2rem;
+  color: ${({ theme }) => theme.accent};
 `;
 
 const Input = styled(Field)`
   width: 100%;
-  padding: 10px;
-  margin-bottom: 16px;
-  border: 1px solid ${({ theme }) => theme.border};
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid ${({ theme }) => theme.textSecondary};
   border-radius: 4px;
-  background: ${({ theme }) => theme.inputBackground};
+  background-color: transparent;
   color: ${({ theme }) => theme.textPrimary};
+  
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.accent};
+  }
 `;
 
 const Button = styled.button`
   width: 100%;
-  padding: 12px;
-  background: ${({ theme }) => theme.accent};
-  color: white;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
   border: none;
   border-radius: 4px;
+  background-color: ${({ theme }) => theme.accent};
+  color: white;
   cursor: pointer;
   font-weight: 500;
-  margin-bottom: 16px;
-
+  
   &:hover {
     opacity: 0.9;
   }
-
+  
   &:disabled {
-    background: ${({ theme }) => theme.buttonBackground};
+    background-color: ${({ theme }) => theme.textSecondary};
     cursor: not-allowed;
   }
 `;
 
 const GoogleButton = styled(Button)`
-  background: #4285f4;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 0.5rem;
+  background-color: #4285f4;
 `;
 
 const ErrorMessage = styled.div`
-  color: ${({ theme }) => theme.errorColor};
-  margin-bottom: 16px;
-  font-size: 14px;
+  color: #f44336;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
 `;
 
 const LinkText = styled.p`
   text-align: center;
-  color: ${({ theme }) => theme.textSecondary};
-  margin-top: 16px;
-
-  a {
+  margin-top: 1rem;
+  
+  span {
     color: ${({ theme }) => theme.accent};
     cursor: pointer;
+    
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `;
 
@@ -86,64 +98,40 @@ const validationSchema = Yup.object().shape({
     .required('Mot de passe requis'),
 });
 
-interface LoginProps {
-  onSwitchToRegister: () => void;
-}
-
 const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState('');
 
   const handleGoogleLogin = async () => {
     try {
-      console.log('Starting Google login process...');
-      
-      const result = await signInWithPopup(auth, googleProvider);
-      console.log('Google login successful:', result.user);
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
     } catch (error: any) {
       console.error('Google login error:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-      
-      let errorMessage = 'Une erreur est survenue lors de la connexion.';
-      
-      switch (error.code) {
-        case 'auth/popup-blocked':
-          errorMessage = 'Le popup de connexion a été bloqué. Veuillez autoriser les popups pour ce site.';
-          break;
-        case 'auth/popup-closed-by-user':
-          errorMessage = 'La fenêtre de connexion a été fermée avant la fin du processus.';
-          break;
-        case 'auth/cancelled-popup-request':
-          errorMessage = 'La demande de connexion précédente est toujours en cours.';
-          break;
-        case 'auth/redirect-cancelled-by-user':
-          errorMessage = 'La redirection a été annulée.';
-          break;
-        case 'auth/redirect-operation-pending':
-          errorMessage = 'Une redirection est déjà en cours.';
-          break;
-        default:
-          errorMessage = error.message;
-      }
-      
-      setError(errorMessage);
+      setError(error.message);
+    }
+  };
+
+  const handleSubmit = async (values: { email: string; password: string }) => {
+    try {
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setError(error.message);
     }
   };
 
   return (
     <LoginContainer>
-      <Title>Connexion</Title>
+      <Title>Crypto Tracker</Title>
+      <GoogleButton type="button" onClick={handleGoogleLogin}>
+        <FaGoogle size={20} />
+        Continuer avec Google
+      </GoogleButton>
+      
       <Formik
         initialValues={{ email: '', password: '' }}
         validationSchema={validationSchema}
-        onSubmit={async (values, { setSubmitting }) => {
-          try {
-            await signInWithEmailAndPassword(auth, values.email, values.password);
-          } catch (error: any) {
-            setError(error.message);
-          }
-          setSubmitting(false);
-        }}
+        onSubmit={handleSubmit}
       >
         {({ errors, touched, isSubmitting }) => (
           <Form>
@@ -155,7 +143,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
             {errors.email && touched.email && (
               <ErrorMessage>{errors.email}</ErrorMessage>
             )}
-
+            
             <Input
               type="password"
               name="password"
@@ -164,24 +152,19 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
             {errors.password && touched.password && (
               <ErrorMessage>{errors.password}</ErrorMessage>
             )}
-
+            
             {error && <ErrorMessage>{error}</ErrorMessage>}
-
+            
             <Button type="submit" disabled={isSubmitting}>
               Se connecter
             </Button>
           </Form>
         )}
       </Formik>
-
-      <GoogleButton onClick={handleGoogleLogin}>
-        <FaGoogle />
-        Se connecter avec Google
-      </GoogleButton>
-
+      
       <LinkText>
         Pas encore de compte ?{' '}
-        <a onClick={onSwitchToRegister}>S'inscrire</a>
+        <span onClick={onSwitchToRegister}>S'inscrire</span>
       </LinkText>
     </LoginContainer>
   );

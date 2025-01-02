@@ -1,20 +1,30 @@
 import { useState, useEffect } from 'react';
-import { Theme, lightTheme, darkTheme } from '../theme';
+
+const lightTheme = {
+  background: '#ffffff',
+  textPrimary: '#1a1a1a',
+  textSecondary: '#666666',
+  accent: '#2196f3',
+};
+
+const darkTheme = {
+  background: '#1a1a1a',
+  textPrimary: '#ffffff',
+  textSecondary: '#999999',
+  accent: '#2196f3',
+};
 
 export const useTheme = () => {
-  const [isDarkMode, setIsDarkMode] = useState(() => 
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-  );
-
-  const theme: Theme = isDarkMode ? darkTheme : lightTheme;
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
-    
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
+
+  const theme = isDarkMode ? darkTheme : lightTheme;
 
   return { theme, isDarkMode, setIsDarkMode };
 }; 
