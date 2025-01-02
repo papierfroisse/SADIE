@@ -1,5 +1,3 @@
-import { ChartRenderer } from './ChartRenderer';
-
 export interface Candle {
   time: number;
   open: number;
@@ -9,364 +7,211 @@ export interface Candle {
   volume: number;
 }
 
-interface CandlestickStyle {
-  upColor: string;
-  downColor: string;
-  wickColor: string;
-  borderUpColor: string;
-  borderDownColor: string;
-  wickWidth: number;
-  bodyWidth: number;
+export interface Viewport {
+  xMin: number;
+  xMax: number;
+  yMin: number;
+  yMax: number;
 }
 
-interface CursorPosition {
-  x: number;
-  y: number;
-}
-
-export interface CandlestickOptions {
-  symbol: string;
-  interval: string;
-  style?: Partial<CandlestickStyle>;
-}
-
-export class CandlestickRenderer extends ChartRenderer {
+export class CandlestickRenderer {
   private candles: Candle[] = [];
-  private style: CandlestickStyle;
-  private cursorPosition: CursorPosition | null = null;
-  private hoveredCandle: Candle | null = null;
-  private volumeHeight: number = 100;  // Hauteur de la zone de volume en pixels
-  private symbol: string;
-  private interval: string;
-  private legendHeight: number = 40;  // Hauteur de la légende en pixels
+  private viewport: Viewport = {
+    xMin: 0,
+    xMax: 0,
+    yMin: 0,
+    yMax: 0
+  };
+  private options = {
+    backgroundColor: '#131722',
+    gridColor: '#1f2937',
+    upColor: '#26a69a',
+    downColor: '#ef5350',
+    textColor: '#787B86',
+    padding: 60,
+    candleWidth: 8,
+    wickWidth: 1,
+    fontSize: 11,
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+  };
 
-  constructor(
-    canvas: HTMLCanvasElement,
-    options: CandlestickOptions
-  ) {
-    super(canvas);
-    
-    // Style par défaut
-    this.style = {
-      upColor: '#26a69a',
-      downColor: '#ef5350',
-      wickColor: '#737375',
-      borderUpColor: '#26a69a',
-      borderDownColor: '#ef5350',
-      wickWidth: 1,
-      bodyWidth: 8,
-      ...options.style
-    };
+  constructor(private ctx: CanvasRenderingContext2D) {}
 
-    this.symbol = options.symbol;
-    this.interval = options.interval;
-
-    // Ajout des écouteurs d'événements pour le curseur
-    this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
-    this.canvas.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
-  }
-
-  public setCandles(candles: Candle[]): void {
+  setData(candles: Candle[]) {
     this.candles = candles;
-    
-    // Ajuster le viewport pour afficher tous les chandeliers
-    if (candles.length > 0) {
-      const times = candles.map(c => c.time);
-      const prices = candles.flatMap(c => [c.high, c.low]);
-      
-      const padding = {
-        x: (Math.max(...times) - Math.min(...times)) * 0.1,
-        y: (Math.max(...prices) - Math.min(...prices)) * 0.1
-      };
-
-      this.setViewport({
-        xMin: Math.min(...times) - padding.x,
-        xMax: Math.max(...times) + padding.x,
-        yMin: Math.min(...prices) - padding.y,
-        yMax: Math.max(...prices) + padding.y
-      });
-    }
+    this.updateViewport();
+    this.render();
   }
 
-  private handleMouseMove(e: MouseEvent): void {
-    const rect = this.canvas.getBoundingClientRect();
-    this.cursorPosition = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
+  private updateViewport() {
+    if (this.candles.length === 0) return;
+
+    let minPrice = Infinity;
+    let maxPrice = -Infinity;
+    let minTime = this.candles[0].time;
+    let maxTime = this.candles[this.candles.length - 1].time;
+
+    this.candles.forEach(candle => {
+      minPrice = Math.min(minPrice, candle.low);
+      maxPrice = Math.max(maxPrice, candle.high);
+    });
+
+    const priceMargin = (maxPrice - minPrice) * 0.1;
+    const timeMargin = (maxTime - minTime) * 0.05; // Réduit pour avoir plus de bougies visibles
+
+    this.viewport = {
+      xMin: minTime - timeMargin,
+      xMax: maxTime + timeMargin,
+      yMin: minPrice - priceMargin,
+      yMax: maxPrice + priceMargin
+    };
+  }
+
+  private toCanvasX(time: number): number {
+    const { width } = this.ctx.canvas;
+    const { xMin, xMax } = this.viewport;
+    const usableWidth = width - this.options.padding;
+    return this.options.padding + ((time - xMin) / (xMax - xMin)) * usableWidth;
+  }
+
+  private toCanvasY(price: number): number {
+    const { height } = this.ctx.canvas;
+    const { yMin, yMax } = this.viewport;
+    return height - ((price - yMin) / (yMax - yMin)) * height;
+  }
+
+  render() {
+    const { width, height } = this.ctx.canvas;
+    
+    // Fond
+    this.ctx.fillStyle = this.options.backgroundColor;
+    this.ctx.fillRect(0, 0, width, height);
+
+    // Grille
+    this.drawGrid();
+
+    // Bougies
+    this.candles.forEach(candle => {
+      this.drawCandle(candle);
+    });
+
+    // Axes
+    this.drawPriceAxis();
+    this.drawTimeAxis();
+  }
+
+  private drawGrid() {
+    const { width, height } = this.ctx.canvas;
+    const gridCount = {
+      x: Math.floor((width - this.options.padding) / 100),
+      y: Math.floor(height / 60)
     };
 
-    // Trouver le chandelier le plus proche
-    const worldX = this.toWorldX(this.cursorPosition.x);
-    this.hoveredCandle = this.findNearestCandle(worldX);
-
-    this.render();
-  }
-
-  private handleMouseLeave(): void {
-    this.cursorPosition = null;
-    this.hoveredCandle = null;
-    this.render();
-  }
-
-  private findNearestCandle(x: number): Candle | null {
-    if (this.candles.length === 0) return null;
-
-    let nearest = this.candles[0];
-    let minDistance = Math.abs(nearest.time - x);
-
-    for (const candle of this.candles) {
-      const distance = Math.abs(candle.time - x);
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearest = candle;
-      }
-    }
-
-    return nearest;
-  }
-
-  protected override render(): void {
-    super.render();  // Appel du rendu de base (grille)
-
-    const { height } = this.getDimensions();
-    const priceChartHeight = height - this.volumeHeight - this.legendHeight;
-    const chartTop = this.legendHeight;
-
-    // Rendu de la légende
-    this.renderLegend();
-
-    // Sauvegarde du contexte
-    this.ctx.save();
-
-    // Rendu de la zone des prix
-    this.ctx.beginPath();
-    this.ctx.rect(0, chartTop, this.getDimensions().width, priceChartHeight);
-    this.ctx.clip();
-    
-    // Rendu des chandeliers
-    for (const candle of this.candles) {
-      this.renderCandle(candle);
-    }
-
-    this.ctx.restore();
-
-    // Rendu des volumes
-    this.ctx.save();
-    this.ctx.beginPath();
-    this.ctx.rect(0, chartTop + priceChartHeight, this.getDimensions().width, this.volumeHeight);
-    this.ctx.clip();
-    
-    this.renderVolumes(chartTop + priceChartHeight);
-    
-    this.ctx.restore();
-
-    // Rendu du curseur et des infos
-    if (this.cursorPosition && this.hoveredCandle) {
-      this.renderCursor();
-      this.renderHoverInfo();
-    }
-  }
-
-  private renderLegend(): void {
-    if (this.candles.length === 0) return;
-
-    const lastCandle = this.candles[this.candles.length - 1];
-    const change = ((lastCandle.close - lastCandle.open) / lastCandle.open) * 100;
-    const isUp = lastCandle.close >= lastCandle.open;
-
-    // Style du texte
-    this.ctx.font = 'bold 14px sans-serif';
-    this.ctx.textBaseline = 'middle';
-    this.ctx.textAlign = 'left';
-
-    // Symbole et intervalle
-    this.ctx.fillStyle = '#d1d4dc';
-    this.ctx.fillText(`${this.symbol} • ${this.interval}`, 10, this.legendHeight / 2);
-
-    // Prix de clôture et variation
-    this.ctx.textAlign = 'right';
-    const { width } = this.getDimensions();
-    
-    // Prix de clôture
-    this.ctx.fillStyle = '#d1d4dc';
-    this.ctx.fillText(
-      `$${lastCandle.close.toFixed(2)}`,
-      width - 120,
-      this.legendHeight / 2
-    );
-
-    // Variation
-    this.ctx.fillStyle = isUp ? this.style.upColor : this.style.downColor;
-    this.ctx.fillText(
-      `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`,
-      width - 10,
-      this.legendHeight / 2
-    );
-  }
-
-  private renderVolumes(yOffset: number): void {
-    if (this.candles.length === 0) return;
-
-    // Calcul de l'échelle pour les volumes
-    const maxVolume = Math.max(...this.candles.map(c => c.volume));
-    const volumeScale = this.volumeHeight / maxVolume;
-
-    // Rendu des barres de volume
-    for (const candle of this.candles) {
-      const x = this.toCanvasX(candle.time);
-      const volumeHeight = candle.volume * volumeScale;
-      const isUp = candle.close >= candle.open;
-
-      this.ctx.fillStyle = isUp 
-        ? this.style.upColor + '40'  // 40 = 25% d'opacité
-        : this.style.downColor + '40';
-
-      const halfWidth = this.style.bodyWidth / 2;
-      this.ctx.fillRect(
-        x - halfWidth,
-        yOffset + this.volumeHeight - volumeHeight,
-        this.style.bodyWidth,
-        volumeHeight
-      );
-    }
-
-    // Ajout des graduations de volume
-    this.ctx.fillStyle = '#787b86';
-    this.ctx.font = '10px sans-serif';
-    this.ctx.textAlign = 'right';
-    this.ctx.textBaseline = 'middle';
-
-    const volumeSteps = [0, maxVolume / 2, maxVolume];
-    volumeSteps.forEach(volume => {
-      const y = yOffset + this.volumeHeight - (volume * volumeScale);
-      this.ctx.fillText(
-        volume.toLocaleString(undefined, { maximumFractionDigits: 0 }),
-        this.getDimensions().width - 5,
-        y
-      );
-    });
-  }
-
-  private renderCursor(): void {
-    if (!this.cursorPosition) return;
-
-    const { x, y } = this.cursorPosition;
-    const { width, height } = this.getDimensions();
-
-    // Lignes du curseur
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = 'rgba(150, 150, 150, 0.5)';
+    this.ctx.strokeStyle = this.options.gridColor;
     this.ctx.lineWidth = 1;
-    this.ctx.setLineDash([5, 5]);
 
-    // Ligne verticale
-    this.ctx.moveTo(x, 0);
-    this.ctx.lineTo(x, height);
+    // Lignes horizontales
+    for (let i = 0; i <= gridCount.y; i++) {
+      const y = (height * i) / gridCount.y;
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.options.padding, y);
+      this.ctx.lineTo(width, y);
+      this.ctx.stroke();
+    }
 
-    // Ligne horizontale
-    this.ctx.moveTo(0, y);
-    this.ctx.lineTo(width, y);
-
-    this.ctx.stroke();
-    this.ctx.setLineDash([]);
+    // Lignes verticales
+    for (let i = 0; i <= gridCount.x; i++) {
+      const x = this.options.padding + ((width - this.options.padding) * i) / gridCount.x;
+      this.ctx.beginPath();
+      this.ctx.moveTo(x, 0);
+      this.ctx.lineTo(x, height);
+      this.ctx.stroke();
+    }
   }
 
-  private renderHoverInfo(): void {
-    if (!this.cursorPosition || !this.hoveredCandle) return;
-
-    const { x, y } = this.cursorPosition;
-    const candle = this.hoveredCandle;
-    const { width, height } = this.getDimensions();
-
-    // Style du texte
-    this.ctx.font = '12px sans-serif';
-    this.ctx.fillStyle = '#d1d4dc';
-    this.ctx.textBaseline = 'middle';
-
-    // Prix au survol
-    const price = this.toWorldY(y).toFixed(2);
-    this.ctx.textAlign = 'left';
-    this.ctx.fillText(`$${price}`, width - 100, y);
-
-    // Informations du chandelier
-    const date = new Date(candle.time).toLocaleString();
-    const info = [
-      `Date: ${date}`,
-      `O: ${candle.open.toFixed(2)}`,
-      `H: ${candle.high.toFixed(2)}`,
-      `L: ${candle.low.toFixed(2)}`,
-      `C: ${candle.close.toFixed(2)}`,
-      `V: ${candle.volume.toFixed(0)}`
-    ];
-
-    // Fond de l'info-bulle
-    const padding = 10;
-    const lineHeight = 20;
-    const boxWidth = 150;
-    const boxHeight = info.length * lineHeight + padding * 2;
-    let boxX = x + 20;
-    let boxY = y - boxHeight / 2;
-
-    // Ajustement si l'info-bulle dépasse les bords
-    if (boxX + boxWidth > width) boxX = x - boxWidth - 20;
-    if (boxY < 0) boxY = 0;
-    if (boxY + boxHeight > height) boxY = height - boxHeight;
-
-    // Rendu du fond
-    this.ctx.fillStyle = 'rgba(32, 35, 43, 0.9)';
-    this.ctx.strokeStyle = '#363a45';
-    this.ctx.lineWidth = 1;
-    this.ctx.beginPath();
-    this.ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 4);
-    this.ctx.fill();
-    this.ctx.stroke();
-
-    // Rendu du texte
-    this.ctx.fillStyle = '#d1d4dc';
-    this.ctx.textAlign = 'left';
-    info.forEach((text, i) => {
-      this.ctx.fillText(text, boxX + padding, boxY + padding + i * lineHeight + lineHeight / 2);
-    });
-  }
-
-  private renderCandle(candle: Candle): void {
-    const isUp = candle.close >= candle.open;
-    
-    // Coordonnées en pixels
+  private drawCandle(candle: Candle) {
     const x = this.toCanvasX(candle.time);
-    const open = this.toCanvasY(candle.open);
-    const close = this.toCanvasY(candle.close);
-    const high = this.toCanvasY(candle.high);
-    const low = this.toCanvasY(candle.low);
+    const openY = this.toCanvasY(candle.open);
+    const highY = this.toCanvasY(candle.high);
+    const lowY = this.toCanvasY(candle.low);
+    const closeY = this.toCanvasY(candle.close);
 
-    // Rendu de la mèche
+    const isGreen = candle.close >= candle.open;
+    const color = isGreen ? this.options.upColor : this.options.downColor;
+
+    // Mèche
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = this.options.wickWidth;
     this.ctx.beginPath();
-    this.ctx.strokeStyle = this.style.wickColor;
-    this.ctx.lineWidth = this.style.wickWidth;
-    this.ctx.moveTo(x, high);
-    this.ctx.lineTo(x, low);
+    this.ctx.moveTo(x, highY);
+    this.ctx.lineTo(x, lowY);
     this.ctx.stroke();
 
-    // Rendu du corps
-    const bodyTop = Math.min(open, close);
-    const bodyBottom = Math.max(open, close);
-    const bodyHeight = Math.max(bodyBottom - bodyTop, 1);  // Hauteur minimale de 1px
-
-    this.ctx.fillStyle = isUp ? this.style.upColor : this.style.downColor;
-    this.ctx.strokeStyle = isUp ? this.style.borderUpColor : this.style.borderDownColor;
-    this.ctx.lineWidth = 1;
-
-    const halfWidth = this.style.bodyWidth / 2;
-    this.ctx.fillRect(x - halfWidth, bodyTop, this.style.bodyWidth, bodyHeight);
-    this.ctx.strokeRect(x - halfWidth, bodyTop, this.style.bodyWidth, bodyHeight);
+    // Corps
+    this.ctx.fillStyle = color;
+    const candleHeight = Math.max(Math.abs(closeY - openY), 1);
+    this.ctx.fillRect(
+      x - this.options.candleWidth / 2,
+      isGreen ? closeY : openY,
+      this.options.candleWidth,
+      candleHeight
+    );
   }
 
-  public setStyle(style: Partial<CandlestickStyle>): void {
-    this.style = { ...this.style, ...style };
+  private drawPriceAxis() {
+    const { height } = this.ctx.canvas;
+    const priceCount = 8;
+
+    this.ctx.font = `${this.options.fontSize}px ${this.options.fontFamily}`;
+    this.ctx.fillStyle = this.options.textColor;
+    this.ctx.textAlign = 'right';
+
+    for (let i = 0; i <= priceCount; i++) {
+      const price = this.viewport.yMin + ((this.viewport.yMax - this.viewport.yMin) * i) / priceCount;
+      const y = this.toCanvasY(price);
+
+      this.ctx.fillText(
+        price.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }),
+        this.ctx.canvas.width - 10,
+        y + this.options.fontSize / 3
+      );
+    }
+  }
+
+  private drawTimeAxis() {
+    const { width } = this.ctx.canvas;
+    const timeCount = 8;
+
+    this.ctx.font = `${this.options.fontSize}px ${this.options.fontFamily}`;
+    this.ctx.fillStyle = this.options.textColor;
+    this.ctx.textAlign = 'center';
+
+    for (let i = 0; i <= timeCount; i++) {
+      const time = this.viewport.xMin + ((this.viewport.xMax - this.viewport.xMin) * i) / timeCount;
+      const x = this.toCanvasX(time);
+      const date = new Date(time);
+      
+      this.ctx.fillText(
+        date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        x,
+        this.ctx.canvas.height - 5
+      );
+    }
+  }
+
+  resize(width: number, height: number) {
+    this.ctx.canvas.width = width;
+    this.ctx.canvas.height = height;
     this.render();
   }
 
-  public getStyle(): CandlestickStyle {
-    return { ...this.style };
+  dispose() {
+    this.candles = [];
+    if (this.ctx.canvas) {
+      this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    }
   }
 } 

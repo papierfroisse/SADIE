@@ -1,93 +1,94 @@
-# DEVBOOK - Crypto Tracker
+# DEVBOOK - Crypto Chart Project
 
 ## État Actuel
-- Structure de base du projet React/TypeScript
-- Configuration initiale de PostgreSQL
-- Services de base pour les exchanges (Binance/Kraken)
 
-## Priorités
+### Composants Principaux
+- ✅ ChartRenderer : Gestionnaire de base du canvas avec support du zoom et du déplacement
+- ✅ CandlestickRenderer : Rendu des chandeliers japonais avec volumes
+- ✅ Chart : Composant React pour l'intégration du renderer
+- ✅ ChartTest : Composant de test avec données simulées
 
-### 1. Système de Collecte et Stockage des Données (En cours)
-- [ ] Définir le schéma de base de données pour les données de marché
-  - Tables pour les bougies (OHLCV)
-  - Tables pour les paires de trading
-  - Tables pour les exchanges
-- [ ] Créer un service de collecte de données
-  - Collecte historique avec gestion de rate limiting
-  - WebSocket pour les mises à jour en temps réel
-  - Système de fallback en cas de déconnexion
-- [ ] Implémenter un système de mise en cache
-  - Cache en mémoire pour les données récentes
-  - Stratégie de mise à jour optimisée
-- [ ] Système de synchronisation avec la base de données
-  - Batch inserts pour les performances
-  - Gestion des conflits et des mises à jour
+### Fonctionnalités Implémentées
+- ✅ Affichage des chandeliers avec couleurs différentes pour hausse/baisse
+- ✅ Affichage des volumes en bas du graphique
+- ✅ Légende avec symbole, intervalle et dernier prix
+- ✅ Curseur interactif et info-bulle au survol
+- ✅ Grille adaptative avec graduations
+- ✅ Zoom et déplacement avec la souris
+- ✅ Support des écrans haute résolution (HiDPI)
 
-### 2. Module de Rendu de Graphique (À venir)
-- [ ] Créer un canvas renderer personnalisé
-  - Système de coordonnées et de mise à l'échelle
-  - Gestion des événements souris/tactile
-  - Support du zoom et du défilement
-- [ ] Implémenter le rendu des bougies japonaises
-  - Optimisation du rendu pour grandes quantités de données
-  - Gestion des différentes échelles de temps
-- [ ] Ajouter le support des overlays
-  - Système de calques pour les indicateurs
-  - Gestion des styles et des couleurs
-- [ ] Créer un système d'annotations
-  - Support des lignes de tendance
-  - Marqueurs et étiquettes
+## Prochaines Étapes
 
-### 3. Calcul d'Indicateurs Techniques (À venir)
-- [ ] Implémenter les indicateurs de base
-  - Moyennes mobiles (SMA, EMA, WMA)
-  - Oscillateurs (RSI, Stochastique)
-  - Bandes de Bollinger
-  - MACD
-- [ ] Créer un système extensible pour les indicateurs
-  - Architecture plugin pour nouveaux indicateurs
-  - Cache des calculs pour les performances
-- [ ] Optimisation des calculs
-  - Calculs incrémentaux quand possible
-  - Parallélisation des calculs lourds
+### 1. Indicateurs Techniques
+- [ ] Implémentation des moyennes mobiles (SMA, EMA)
+- [ ] Bandes de Bollinger
+- [ ] RSI (Relative Strength Index)
+- [ ] MACD (Moving Average Convergence Divergence)
+- [ ] Volume moyen
+- [ ] Interface pour ajouter/supprimer des indicateurs
 
-### 4. Système de Backtesting (À venir)
-- [ ] Créer le moteur de backtesting
-  - Replay précis des données historiques
-  - Gestion des ordres et des positions
-  - Calcul des performances
-- [ ] Implémenter les métriques de performance
-  - Ratio de Sharpe
-  - Drawdown maximum
-  - Rendement ajusté au risque
-- [ ] Ajouter des outils d'analyse
-  - Visualisation des trades
-  - Rapports de performance
-  - Export des résultats
+### 2. Gestion des Données
+- [ ] Service de collecte de données en temps réel
+- [ ] Mise en cache des données historiques
+- [ ] Gestion des différents intervalles de temps
+- [ ] Optimisation des performances de rendu
+- [ ] Compression des données historiques
 
-## Prochaines Étapes Immédiates
-1. Créer le schéma de base de données
-2. Implémenter le service de collecte de données
-3. Mettre en place le système de synchronisation
-4. Commencer le développement du renderer de graphique
+### 3. Interface Utilisateur
+- [ ] Barre d'outils pour les indicateurs
+- [ ] Sélecteur de paires de trading
+- [ ] Sélecteur d'intervalle de temps
+- [ ] Personnalisation des couleurs et du style
+- [ ] Mode plein écran
+- [ ] Gestion des thèmes (clair/sombre)
+
+### 4. Outils de Trading
+- [ ] Outils de dessin (lignes, rectangles, etc.)
+- [ ] Fibonacci retracement
+- [ ] Mesure de prix/temps
+- [ ] Annotations sur le graphique
+- [ ] Sauvegarde des configurations
+
+### 5. Performance et Optimisation
+- [ ] Optimisation du rendu canvas
+- [ ] Gestion de la mémoire pour les données historiques
+- [ ] Mise en cache des calculs d'indicateurs
+- [ ] Lazy loading des données historiques
+- [ ] Optimisation des calculs de viewport
+
+### 6. Tests et Documentation
+- [ ] Tests unitaires pour les renderers
+- [ ] Tests d'intégration pour les composants React
+- [ ] Tests de performance
+- [ ] Documentation technique
+- [ ] Guide d'utilisation
 
 ## Notes Techniques
-- Utiliser des transactions pour la cohérence des données
-- Implémenter des tests unitaires pour chaque composant
-- Documenter l'API et les structures de données
-- Maintenir une couverture de code élevée
 
-## Conventions de Commit
-- feat: Nouvelle fonctionnalité
-- fix: Correction de bug
-- refactor: Refactoring du code
-- docs: Mise à jour de la documentation
-- test: Ajout ou modification de tests
-- chore: Maintenance générale
+### Architecture
+- Séparation claire entre la logique de rendu (renderers) et les composants React
+- Utilisation de Canvas pour les performances optimales
+- Gestion efficace des événements souris
+- Support des écrans haute résolution
 
-## Structure des Branches
-- main: Code de production
-- develop: Développement principal
-- feature/*: Nouvelles fonctionnalités
-- fix/*: Corrections de bugs
-- release/*: Préparation des releases 
+### Conventions de Code
+- TypeScript strict mode
+- Composants React fonctionnels avec hooks
+- Styled-components pour le styling
+- Tests avec Jest et React Testing Library
+
+### Git
+- Une branche par fonctionnalité
+- Messages de commit descriptifs
+- Pull requests pour les fonctionnalités majeures
+- Code review avant merge
+
+## Bugs Connus
+- Aucun bug majeur pour le moment
+
+## Idées d'Amélioration
+- Support du multi-touch pour mobile
+- Export des données et captures d'écran
+- Comparaison de plusieurs symboles
+- Intégration avec différentes sources de données
+- Mode de trading en papier pour les tests 
