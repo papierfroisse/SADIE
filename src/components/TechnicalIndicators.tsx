@@ -1,260 +1,284 @@
-import { useRef, useEffect } from 'react';
-import { CandleData } from '../data/types';
-import { calculateRSI, calculateMACD, MACDResult, calculateVolume } from '../utils/indicators';
+import React from 'react';
+import { Candle } from '../data/types';
 
 interface TechnicalIndicatorsProps {
-  data: CandleData[];
+  data: Candle[];
   width: number;
   height: number;
 }
 
 export function TechnicalIndicators({ data, width, height }: TechnicalIndicatorsProps) {
-  const rsiCanvasRef = useRef<HTMLCanvasElement>(null);
-  const macdCanvasRef = useRef<HTMLCanvasElement>(null);
-  const volumeCanvasRef = useRef<HTMLCanvasElement>(null);
+  const rsiCanvasRef = React.useRef<HTMLCanvasElement>(null);
+  const macdCanvasRef = React.useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
-    if (!data.length || !rsiCanvasRef.current || !macdCanvasRef.current || !volumeCanvasRef.current) return;
+  React.useEffect(() => {
+    const rsiCanvas = rsiCanvasRef.current;
+    const macdCanvas = macdCanvasRef.current;
+    if (!rsiCanvas || !macdCanvas || !data.length) return;
 
-    // Calculer les indicateurs
-    const rsiData = calculateRSI(data, 14);
-    const macdData = calculateMACD(data);
-    const volumeData = calculateVolume(data);
+    const rsiCtx = rsiCanvas.getContext('2d');
+    const macdCtx = macdCanvas.getContext('2d');
+    if (!rsiCtx || !macdCtx) return;
 
-    // Configurer les canvas
-    const rsiCtx = rsiCanvasRef.current.getContext('2d');
-    const macdCtx = macdCanvasRef.current.getContext('2d');
-    const volumeCtx = volumeCanvasRef.current.getContext('2d');
+    // Configuration des canvas pour les écrans HiDPI
+    const scale = window.devicePixelRatio;
+    const rsiHeight = height * 0.4;
+    const macdHeight = height * 0.6;
 
-    if (!rsiCtx || !macdCtx || !volumeCtx) return;
+    // RSI Canvas
+    rsiCanvas.width = width * scale;
+    rsiCanvas.height = rsiHeight * scale;
+    rsiCanvas.style.width = `${width}px`;
+    rsiCanvas.style.height = `${rsiHeight}px`;
+    rsiCtx.scale(scale, scale);
 
-    // Configuration commune
-    const setupCanvas = (ctx: CanvasRenderingContext2D) => {
-      ctx.canvas.style.width = `${width}px`;
-      ctx.canvas.style.height = `${ctx.canvas.height}px`;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    };
+    // MACD Canvas
+    macdCanvas.width = width * scale;
+    macdCanvas.height = macdHeight * scale;
+    macdCanvas.style.width = `${width}px`;
+    macdCanvas.style.height = `${macdHeight}px`;
+    macdCtx.scale(scale, scale);
 
-    setupCanvas(rsiCtx);
-    setupCanvas(macdCtx);
-    setupCanvas(volumeCtx);
+    // Calcul des indicateurs
+    const rsiValues = calculateRSI(data, 14);
+    const macdValues = calculateMACD(data);
 
-    // Dessiner RSI
-    const drawRSI = () => {
-      rsiCtx.clearRect(0, 0, width, height);
-
-      // Fond
-      rsiCtx.fillStyle = '#131722';
-      rsiCtx.fillRect(0, 0, width, height);
-
-      // Grille
-      rsiCtx.strokeStyle = '#2A2E39';
-      rsiCtx.lineWidth = 1;
-
-      // Lignes horizontales
-      [0, 30, 50, 70, 100].forEach(level => {
-        const y = height - (level / 100) * height;
-        rsiCtx.beginPath();
-        rsiCtx.moveTo(0, y);
-        rsiCtx.lineTo(width, y);
-        rsiCtx.stroke();
-
-        // Labels
-        rsiCtx.fillStyle = '#787B86';
-        rsiCtx.font = '10px sans-serif';
-        rsiCtx.textAlign = 'right';
-        rsiCtx.fillText(level.toString(), width - 5, y - 3);
-      });
-
-      // Lignes de survente/surachat
-      rsiCtx.strokeStyle = '#787B86';
-      rsiCtx.setLineDash([2, 2]);
-      
-      [30, 70].forEach(level => {
-        const y = height - (level / 100) * height;
-        rsiCtx.beginPath();
-        rsiCtx.moveTo(0, y);
-        rsiCtx.lineTo(width, y);
-        rsiCtx.stroke();
-      });
-
-      rsiCtx.setLineDash([]);
-
-      // Dessiner la ligne RSI
-      rsiCtx.strokeStyle = '#2196F3';
-      rsiCtx.lineWidth = 1.5;
-      rsiCtx.beginPath();
-
-      rsiData.forEach((value: number, i: number) => {
-        const x = (width * i) / rsiData.length;
-        const y = height - (value / 100) * height;
-        if (i === 0) rsiCtx.moveTo(x, y);
-        else rsiCtx.lineTo(x, y);
-      });
-
-      rsiCtx.stroke();
-    };
-
-    // Dessiner MACD
-    const drawMACD = () => {
-      macdCtx.clearRect(0, 0, width, height);
-
-      // Fond
-      macdCtx.fillStyle = '#131722';
-      macdCtx.fillRect(0, 0, width, height);
-
-      // Grille
-      macdCtx.strokeStyle = '#2A2E39';
-      macdCtx.lineWidth = 1;
-
-      // Ligne zéro
-      const zeroY = height / 2;
-      macdCtx.strokeStyle = '#787B86';
-      macdCtx.setLineDash([2, 2]);
-      macdCtx.beginPath();
-      macdCtx.moveTo(0, zeroY);
-      macdCtx.lineTo(width, zeroY);
-      macdCtx.stroke();
-      macdCtx.setLineDash([]);
-
-      // Trouver les valeurs min/max pour l'échelle
-      const allValues = [...macdData.macd, ...macdData.signal];
-      const maxValue = Math.max(...allValues);
-      const minValue = Math.min(...allValues);
-      const valueRange = maxValue - minValue;
-
-      // Dessiner l'histogramme
-      const barWidth = Math.max(1, (width / macdData.histogram.length) - 1);
-      macdData.histogram.forEach((value: number, i: number) => {
-        const x = (width * i) / macdData.histogram.length;
-        const barHeight = (value / valueRange) * (height / 4);
-        
-        macdCtx.fillStyle = value >= 0 ? '#26A69A' : '#EF5350';
-        macdCtx.fillRect(x, zeroY, barWidth, -barHeight);
-      });
-
-      // Dessiner les lignes
-      const drawLine = (data: number[], color: string) => {
-        macdCtx.strokeStyle = color;
-        macdCtx.lineWidth = 1.5;
-        macdCtx.beginPath();
-        data.forEach((value: number, i: number) => {
-          const x = (width * i) / data.length;
-          const y = height - ((value - minValue) / valueRange) * height;
-          if (i === 0) macdCtx.moveTo(x, y);
-          else macdCtx.lineTo(x, y);
-        });
-        macdCtx.stroke();
-      };
-
-      drawLine(macdData.macd, '#2196F3');
-      drawLine(macdData.signal, '#FF9800');
-    };
-
-    // Dessiner Volume
-    const drawVolume = () => {
-      volumeCtx.clearRect(0, 0, width, height);
-
-      // Fond
-      volumeCtx.fillStyle = '#131722';
-      volumeCtx.fillRect(0, 0, width, height);
-
-      // Grille
-      volumeCtx.strokeStyle = '#2A2E39';
-      volumeCtx.lineWidth = 1;
-
-      const maxVolume = Math.max(...volumeData);
-      const barWidth = Math.max(1, (width / volumeData.length) - 1);
-
-      // Dessiner les barres de volume
-      volumeData.forEach((volume: number, i: number) => {
-        const x = (width * i) / volumeData.length;
-        const barHeight = (volume / maxVolume) * height;
-        const y = height - barHeight;
-
-        volumeCtx.fillStyle = data[i].close >= data[i].open ? '#26A69A' : '#EF5350';
-        volumeCtx.fillRect(x, y, barWidth, barHeight);
-      });
-
-      // Labels de volume
-      volumeCtx.fillStyle = '#787B86';
-      volumeCtx.font = '10px sans-serif';
-      volumeCtx.textAlign = 'right';
-      volumeCtx.fillText(formatVolume(maxVolume), width - 5, 12);
-      volumeCtx.fillText('0', width - 5, height - 3);
-    };
-
-    drawRSI();
-    drawMACD();
-    drawVolume();
+    // Dessiner les indicateurs
+    drawRSI(rsiCtx, width, rsiHeight, rsiValues);
+    drawMACD(macdCtx, width, macdHeight, macdValues);
   }, [data, width, height]);
 
-  const formatVolume = (volume: number): string => {
-    if (volume >= 1_000_000_000) return `${(volume / 1_000_000_000).toFixed(1)}B`;
-    if (volume >= 1_000_000) return `${(volume / 1_000_000).toFixed(1)}M`;
-    if (volume >= 1_000) return `${(volume / 1_000).toFixed(1)}K`;
-    return volume.toString();
-  };
-
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '1px',
-      background: '#131722',
-      padding: '4px'
-    }}>
-      <div style={{ height: '150px', position: 'relative' }}>
-        <div style={{
-          position: 'absolute',
-          left: '8px',
-          top: '8px',
-          color: '#787B86',
-          fontSize: '12px'
-        }}>
-          RSI (14)
+    <div className="indicators-container">
+      {/* RSI */}
+      <div className="indicator">
+        <div className="indicator-header">
+          <span>RSI (14)</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <span>70</span>
+            <span>30</span>
+          </div>
         </div>
-        <canvas
-          ref={rsiCanvasRef}
-          width={width * window.devicePixelRatio}
-          height={150 * window.devicePixelRatio}
-          style={{ width: `${width}px`, height: '150px' }}
-        />
+        <div className="indicator-content">
+          <canvas
+            ref={rsiCanvasRef}
+            style={{
+              width: '100%',
+              height: '100%'
+            }}
+          />
+        </div>
       </div>
-      <div style={{ height: '150px', position: 'relative' }}>
-        <div style={{
-          position: 'absolute',
-          left: '8px',
-          top: '8px',
-          color: '#787B86',
-          fontSize: '12px'
-        }}>
-          MACD (12, 26, 9)
+
+      {/* MACD */}
+      <div className="indicator">
+        <div className="indicator-header">
+          <span>MACD (12, 26, 9)</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <span style={{ color: '#2962FF' }}>MACD</span>
+            <span style={{ color: '#FF9800' }}>Signal</span>
+            <span style={{ color: '#26A69A' }}>Histogramme</span>
+          </div>
         </div>
-        <canvas
-          ref={macdCanvasRef}
-          width={width * window.devicePixelRatio}
-          height={150 * window.devicePixelRatio}
-          style={{ width: `${width}px`, height: '150px' }}
-        />
-      </div>
-      <div style={{ height: '100px', position: 'relative' }}>
-        <div style={{
-          position: 'absolute',
-          left: '8px',
-          top: '8px',
-          color: '#787B86',
-          fontSize: '12px'
-        }}>
-          Volume
+        <div className="indicator-content">
+          <canvas
+            ref={macdCanvasRef}
+            style={{
+              width: '100%',
+              height: '100%'
+            }}
+          />
         </div>
-        <canvas
-          ref={volumeCanvasRef}
-          width={width * window.devicePixelRatio}
-          height={100 * window.devicePixelRatio}
-          style={{ width: `${width}px`, height: '100px' }}
-        />
       </div>
     </div>
   );
+}
+
+// Fonction pour calculer le RSI
+function calculateRSI(data: Candle[], period: number): number[] {
+  const rsi: number[] = [];
+  let gains = 0;
+  let losses = 0;
+
+  // Initialisation
+  for (let i = 1; i < period + 1; i++) {
+    const change = data[i].close - data[i - 1].close;
+    if (change >= 0) {
+      gains += change;
+    } else {
+      losses -= change;
+    }
+  }
+
+  // Première valeur RSI
+  let avgGain = gains / period;
+  let avgLoss = losses / period;
+  let rs = avgGain / avgLoss;
+  rsi.push(100 - (100 / (1 + rs)));
+
+  // Calcul des valeurs suivantes
+  for (let i = period + 1; i < data.length; i++) {
+    const change = data[i].close - data[i - 1].close;
+    let currentGain = 0;
+    let currentLoss = 0;
+
+    if (change >= 0) {
+      currentGain = change;
+    } else {
+      currentLoss = -change;
+    }
+
+    avgGain = ((avgGain * (period - 1)) + currentGain) / period;
+    avgLoss = ((avgLoss * (period - 1)) + currentLoss) / period;
+
+    rs = avgGain / avgLoss;
+    rsi.push(100 - (100 / (1 + rs)));
+  }
+
+  return rsi;
+}
+
+// Fonction pour calculer le MACD
+function calculateMACD(data: Candle[]): { macd: number[], signal: number[], histogram: number[] } {
+  const closePrices = data.map(candle => candle.close);
+  const ema12 = calculateEMA(closePrices, 12);
+  const ema26 = calculateEMA(closePrices, 26);
+  
+  const macd = ema12.map((value, index) => value - ema26[index]);
+  const signal = calculateEMA(macd, 9);
+  const histogram = macd.map((value, index) => value - signal[index]);
+
+  return { macd, signal, histogram };
+}
+
+// Fonction pour calculer l'EMA
+function calculateEMA(data: number[], period: number): number[] {
+  const k = 2 / (period + 1);
+  const ema: number[] = [data[0]];
+
+  for (let i = 1; i < data.length; i++) {
+    ema.push(data[i] * k + ema[i - 1] * (1 - k));
+  }
+
+  return ema;
+}
+
+// Fonction pour dessiner le RSI
+function drawRSI(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  rsiValues: number[]
+) {
+  // Effacer le canvas
+  ctx.clearRect(0, 0, width, height);
+
+  // Dessiner les lignes de niveau
+  ctx.strokeStyle = '#2A2E39';
+  ctx.setLineDash([5, 5]);
+  
+  // Ligne 70
+  ctx.beginPath();
+  ctx.moveTo(0, (30 / 100) * height);
+  ctx.lineTo(width, (30 / 100) * height);
+  ctx.stroke();
+  
+  // Ligne 30
+  ctx.beginPath();
+  ctx.moveTo(0, (70 / 100) * height);
+  ctx.lineTo(width, (70 / 100) * height);
+  ctx.stroke();
+  
+  ctx.setLineDash([]);
+
+  // Dessiner le RSI
+  ctx.strokeStyle = '#2962FF';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  
+  for (let i = 0; i < rsiValues.length; i++) {
+    const x = (i / rsiValues.length) * width;
+    const y = ((100 - rsiValues[i]) / 100) * height;
+    
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  
+  ctx.stroke();
+}
+
+// Fonction pour dessiner le MACD
+function drawMACD(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  macdValues: { macd: number[], signal: number[], histogram: number[] }
+) {
+  // Effacer le canvas
+  ctx.clearRect(0, 0, width, height);
+  
+  // Trouver les valeurs min/max pour l'échelle
+  const allValues = [
+    ...macdValues.macd,
+    ...macdValues.signal,
+    ...macdValues.histogram
+  ];
+  const min = Math.min(...allValues);
+  const max = Math.max(...allValues);
+  const range = max - min;
+
+  // Fonction pour convertir une valeur en coordonnée y
+  const getY = (value: number) => {
+    return ((max - value) / range) * height;
+  };
+
+  // Dessiner l'histogramme
+  const barWidth = width / macdValues.histogram.length;
+  
+  for (let i = 0; i < macdValues.histogram.length; i++) {
+    const value = macdValues.histogram[i];
+    const x = i * barWidth;
+    const y = getY(Math.max(0, value));
+    const barHeight = Math.abs(getY(value) - getY(0));
+    
+    ctx.fillStyle = value >= 0 ? '#26A69A' : '#EF5350';
+    ctx.fillRect(x, y, barWidth - 1, barHeight);
+  }
+
+  // Dessiner la ligne MACD
+  ctx.strokeStyle = '#2962FF';
+  ctx.beginPath();
+  
+  for (let i = 0; i < macdValues.macd.length; i++) {
+    const x = i * barWidth + barWidth / 2;
+    const y = getY(macdValues.macd[i]);
+    
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  
+  ctx.stroke();
+
+  // Dessiner la ligne de signal
+  ctx.strokeStyle = '#FF9800';
+  ctx.beginPath();
+  
+  for (let i = 0; i < macdValues.signal.length; i++) {
+    const x = i * barWidth + barWidth / 2;
+    const y = getY(macdValues.signal[i]);
+    
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  
+  ctx.stroke();
 } 
