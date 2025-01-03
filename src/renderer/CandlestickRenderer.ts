@@ -1,217 +1,91 @@
-export interface Candle {
-  time: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-}
-
-export interface Viewport {
-  xMin: number;
-  xMax: number;
-  yMin: number;
-  yMax: number;
-}
+import { Candle } from '../data/types';
 
 export class CandlestickRenderer {
-  private candles: Candle[] = [];
-  private viewport: Viewport = {
-    xMin: 0,
-    xMax: 0,
-    yMin: 0,
-    yMax: 0
-  };
-  private options = {
-    backgroundColor: '#131722',
-    gridColor: '#1f2937',
-    upColor: '#26a69a',
-    downColor: '#ef5350',
-    textColor: '#787B86',
-    padding: 60,
-    candleWidth: 8,
-    wickWidth: 1,
-    fontSize: 11,
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-  };
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private data: Candle[] = [];
+  private priceRange: { min: number; max: number } = { min: 0, max: 0 };
+  private timeRange: { start: number; end: number } = { start: 0, end: 0 };
 
-  constructor(private ctx: CanvasRenderingContext2D) {}
+  constructor(canvas: HTMLCanvasElement) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d')!;
+  }
 
-  setData(candles: Candle[]) {
-    this.candles = candles;
-    this.updateViewport();
+  draw(data: Candle[]) {
+    this.data = data;
+    this.calculateRanges();
     this.render();
   }
 
-  private updateViewport() {
-    if (this.candles.length === 0) return;
+  private calculateRanges() {
+    if (this.data.length === 0) return;
 
-    let minPrice = Infinity;
-    let maxPrice = -Infinity;
-    let minTime = this.candles[0].time;
-    let maxTime = this.candles[this.candles.length - 1].time;
+    const prices = this.data.flatMap(c => [c.high, c.low]);
+    const times = this.data.map(c => c.timestamp);
 
-    this.candles.forEach(candle => {
-      minPrice = Math.min(minPrice, candle.low);
-      maxPrice = Math.max(maxPrice, candle.high);
-    });
+    this.priceRange = {
+      min: Math.min(...prices),
+      max: Math.max(...prices)
+    };
 
-    const priceMargin = (maxPrice - minPrice) * 0.1;
-    const timeMargin = (maxTime - minTime) * 0.05; // Réduit pour avoir plus de bougies visibles
-
-    this.viewport = {
-      xMin: minTime - timeMargin,
-      xMax: maxTime + timeMargin,
-      yMin: minPrice - priceMargin,
-      yMax: maxPrice + priceMargin
+    this.timeRange = {
+      start: Math.min(...times),
+      end: Math.max(...times)
     };
   }
 
-  private toCanvasX(time: number): number {
-    const { width } = this.ctx.canvas;
-    const { xMin, xMax } = this.viewport;
-    const usableWidth = width - this.options.padding;
-    return this.options.padding + ((time - xMin) / (xMax - xMin)) * usableWidth;
-  }
+  private render() {
+    if (!this.ctx || this.data.length === 0) return;
 
-  private toCanvasY(price: number): number {
-    const { height } = this.ctx.canvas;
-    const { yMin, yMax } = this.viewport;
-    return height - ((price - yMin) / (yMax - yMin)) * height;
-  }
+    const { width, height } = this.canvas;
+    const padding = { top: 10, right: 60, bottom: 20, left: 60 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
 
-  render() {
-    const { width, height } = this.ctx.canvas;
-    
-    // Fond
-    this.ctx.fillStyle = this.options.backgroundColor;
-    this.ctx.fillRect(0, 0, width, height);
+    // Clear canvas
+    this.ctx.clearRect(0, 0, width, height);
 
-    // Grille
-    this.drawGrid();
+    // Calculate scaling factors
+    const priceRange = this.priceRange.max - this.priceRange.min;
+    const timeRange = this.timeRange.end - this.timeRange.start;
+    const candleWidth = chartWidth / this.data.length;
 
-    // Bougies
-    this.candles.forEach(candle => {
-      this.drawCandle(candle);
-    });
+    // Draw candles
+    this.data.forEach((candle, i) => {
+      const x = padding.left + (i * candleWidth);
+      const open = chartHeight - ((candle.open - this.priceRange.min) / priceRange * chartHeight) + padding.top;
+      const close = chartHeight - ((candle.close - this.priceRange.min) / priceRange * chartHeight) + padding.top;
+      const high = chartHeight - ((candle.high - this.priceRange.min) / priceRange * chartHeight) + padding.top;
+      const low = chartHeight - ((candle.low - this.priceRange.min) / priceRange * chartHeight) + padding.top;
 
-    // Axes
-    this.drawPriceAxis();
-    this.drawTimeAxis();
-  }
-
-  private drawGrid() {
-    const { width, height } = this.ctx.canvas;
-    const gridCount = {
-      x: Math.floor((width - this.options.padding) / 100),
-      y: Math.floor(height / 60)
-    };
-
-    this.ctx.strokeStyle = this.options.gridColor;
-    this.ctx.lineWidth = 1;
-
-    // Lignes horizontales
-    for (let i = 0; i <= gridCount.y; i++) {
-      const y = (height * i) / gridCount.y;
+      // Draw wick
       this.ctx.beginPath();
-      this.ctx.moveTo(this.options.padding, y);
-      this.ctx.lineTo(width, y);
+      this.ctx.moveTo(x + candleWidth / 2, high);
+      this.ctx.lineTo(x + candleWidth / 2, low);
+      this.ctx.strokeStyle = candle.close >= candle.open ? '#26A69A' : '#EF5350';
       this.ctx.stroke();
-    }
 
-    // Lignes verticales
-    for (let i = 0; i <= gridCount.x; i++) {
-      const x = this.options.padding + ((width - this.options.padding) * i) / gridCount.x;
-      this.ctx.beginPath();
-      this.ctx.moveTo(x, 0);
-      this.ctx.lineTo(x, height);
-      this.ctx.stroke();
-    }
-  }
-
-  private drawCandle(candle: Candle) {
-    const x = this.toCanvasX(candle.time);
-    const openY = this.toCanvasY(candle.open);
-    const highY = this.toCanvasY(candle.high);
-    const lowY = this.toCanvasY(candle.low);
-    const closeY = this.toCanvasY(candle.close);
-
-    const isGreen = candle.close >= candle.open;
-    const color = isGreen ? this.options.upColor : this.options.downColor;
-
-    // Mèche
-    this.ctx.strokeStyle = color;
-    this.ctx.lineWidth = this.options.wickWidth;
-    this.ctx.beginPath();
-    this.ctx.moveTo(x, highY);
-    this.ctx.lineTo(x, lowY);
-    this.ctx.stroke();
-
-    // Corps
-    this.ctx.fillStyle = color;
-    const candleHeight = Math.max(Math.abs(closeY - openY), 1);
-    this.ctx.fillRect(
-      x - this.options.candleWidth / 2,
-      isGreen ? closeY : openY,
-      this.options.candleWidth,
-      candleHeight
-    );
-  }
-
-  private drawPriceAxis() {
-    const { height } = this.ctx.canvas;
-    const priceCount = 8;
-
-    this.ctx.font = `${this.options.fontSize}px ${this.options.fontFamily}`;
-    this.ctx.fillStyle = this.options.textColor;
-    this.ctx.textAlign = 'right';
-
-    for (let i = 0; i <= priceCount; i++) {
-      const price = this.viewport.yMin + ((this.viewport.yMax - this.viewport.yMin) * i) / priceCount;
-      const y = this.toCanvasY(price);
-
-      this.ctx.fillText(
-        price.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        }),
-        this.ctx.canvas.width - 10,
-        y + this.options.fontSize / 3
-      );
-    }
-  }
-
-  private drawTimeAxis() {
-    const { width } = this.ctx.canvas;
-    const timeCount = 8;
-
-    this.ctx.font = `${this.options.fontSize}px ${this.options.fontFamily}`;
-    this.ctx.fillStyle = this.options.textColor;
-    this.ctx.textAlign = 'center';
-
-    for (let i = 0; i <= timeCount; i++) {
-      const time = this.viewport.xMin + ((this.viewport.xMax - this.viewport.xMin) * i) / timeCount;
-      const x = this.toCanvasX(time);
-      const date = new Date(time);
-      
-      this.ctx.fillText(
-        date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      // Draw body
+      this.ctx.fillStyle = candle.close >= candle.open ? '#26A69A' : '#EF5350';
+      this.ctx.fillRect(
         x,
-        this.ctx.canvas.height - 5
+        Math.min(open, close),
+        candleWidth,
+        Math.abs(close - open)
       );
+    });
+  }
+
+  resize() {
+    if (this.canvas.parentElement) {
+      this.canvas.width = this.canvas.parentElement.clientWidth;
+      this.canvas.height = this.canvas.parentElement.clientHeight;
+      this.render();
     }
   }
 
-  resize(width: number, height: number) {
-    this.ctx.canvas.width = width;
-    this.ctx.canvas.height = height;
-    this.render();
-  }
-
-  dispose() {
-    this.candles = [];
-    if (this.ctx.canvas) {
-      this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    }
+  destroy() {
+    // Cleanup if needed
   }
 } 

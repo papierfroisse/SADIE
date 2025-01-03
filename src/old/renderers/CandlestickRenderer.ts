@@ -1,6 +1,6 @@
 import { Candle } from '../data/types';
 
-interface CandlestickRendererOptions {
+export interface CandlestickRendererOptions {
   upColor: string;
   downColor: string;
   wickColor: string;
@@ -24,10 +24,7 @@ const defaultOptions: CandlestickRendererOptions = {
 
 export class CandlestickRenderer {
   private ctx: CanvasRenderingContext2D;
-  private data: Candle[] = [];
   private options: CandlestickRendererOptions;
-  private width = 0;
-  private height = 0;
   private scaleX = 1;
   private scaleY = 1;
   private offsetX = 0;
@@ -40,58 +37,45 @@ export class CandlestickRenderer {
     this.options = { ...defaultOptions, ...options };
   }
 
-  public setData(data: Candle[]) {
-    this.data = data;
-    this.calculateScales();
-    this.render();
-  }
-
-  public resize(width: number, height: number) {
-    this.width = width;
-    this.height = height;
-    this.calculateScales();
-    this.render();
-  }
-
-  private calculateScales() {
-    if (!this.data.length) return;
+  private calculateScales(data: Candle[]) {
+    if (!data.length) return;
 
     // Calculer les prix min/max
-    this.minPrice = Math.min(...this.data.map(d => d.low));
-    this.maxPrice = Math.max(...this.data.map(d => d.high));
+    this.minPrice = Math.min(...data.map(d => d.low));
+    this.maxPrice = Math.max(...data.map(d => d.high));
     this.priceRange = this.maxPrice - this.minPrice;
 
-    // Ajouter une marge de 5% en haut et en bas
+    // Ajouter une marge de 5%
     const margin = this.priceRange * 0.05;
     this.minPrice -= margin;
     this.maxPrice += margin;
     this.priceRange = this.maxPrice - this.minPrice;
 
     // Calculer l'échelle X
-    const totalWidth = (this.options.candleWidth + this.options.spacing) * this.data.length;
-    this.scaleX = this.width / totalWidth;
+    const { width } = this.ctx.canvas;
+    const totalWidth = (this.options.candleWidth + this.options.spacing) * data.length;
+    this.scaleX = width / totalWidth;
     
-    // Calculer l'échelle Y
-    this.scaleY = this.height / this.priceRange;
-
     // Calculer le décalage X pour centrer les bougies
-    this.offsetX = (this.width - totalWidth * this.scaleX) / 2;
+    this.offsetX = (width - totalWidth * this.scaleX) / 2;
   }
 
-  private render() {
-    if (!this.data.length) return;
+  public draw(data: Candle[]) {
+    if (!data.length) return;
 
-    this.ctx.clearRect(0, 0, this.width, this.height);
+    this.calculateScales(data);
 
-    for (let i = 0; i < this.data.length; i++) {
-      const candle = this.data[i];
+    const { width, height } = this.ctx.canvas;
+
+    for (let i = 0; i < data.length; i++) {
+      const candle = data[i];
       const x = this.offsetX + i * (this.options.candleWidth + this.options.spacing) * this.scaleX;
       
       // Convertir les prix en coordonnées Y
-      const openY = this.height - (candle.open - this.minPrice) * this.scaleY;
-      const closeY = this.height - (candle.close - this.minPrice) * this.scaleY;
-      const highY = this.height - (candle.high - this.minPrice) * this.scaleY;
-      const lowY = this.height - (candle.low - this.minPrice) * this.scaleY;
+      const openY = height - ((candle.open - this.minPrice) / this.priceRange) * height;
+      const closeY = height - ((candle.close - this.minPrice) / this.priceRange) * height;
+      const highY = height - ((candle.high - this.minPrice) / this.priceRange) * height;
+      const lowY = height - ((candle.low - this.minPrice) / this.priceRange) * height;
 
       const isUp = candle.close >= candle.open;
       const candleHeight = Math.abs(closeY - openY);

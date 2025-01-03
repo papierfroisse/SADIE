@@ -1,151 +1,132 @@
-import { BaseIndicator } from './BaseIndicator';
-import { IndicatorConfig, IndicatorValue, Viewport } from './types';
-import { Candle } from '../CandlestickRenderer';
+import { Candle } from '../../data/types';
 
-export class RSIIndicator extends BaseIndicator {
-  constructor(id: string, period: number = 14) {
-    super({
-      id,
-      type: 'rsi',
-      params: {
-        period,
-        source: 'close',
-        overBought: 70,
-        overSold: 30
-      },
-      style: {
-        color: '#2962FF',
-        lineWidth: 1.5,
-        opacity: 1
-      },
-      visible: true,
-      overlay: false,
-      height: 100
+interface RSIOptions {
+  period: number;
+  overbought: number;
+  oversold: number;
+}
+
+export class RSIIndicator {
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private options: RSIOptions;
+  private data: number[] = [];
+
+  constructor(canvas: HTMLCanvasElement, options: RSIOptions = { period: 14, overbought: 70, oversold: 30 }) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d')!;
+    this.options = options;
+  }
+
+  calculate(candles: Candle[]): number[] {
+    if (candles.length < this.options.period + 1) {
+      return [];
+    }
+
+    const changes = candles.map((candle, i) => {
+      if (i === 0) return 0;
+      return candle.close - candles[i - 1].close;
+    }).slice(1);
+
+    let gains = changes.map(change => change > 0 ? change : 0);
+    let losses = changes.map(change => change < 0 ? -change : 0);
+
+    // Calcul des moyennes initiales
+    let avgGain = gains.slice(0, this.options.period).reduce((a, b) => a + b) / this.options.period;
+    let avgLoss = losses.slice(0, this.options.period).reduce((a, b) => a + b) / this.options.period;
+
+    const rsiValues: number[] = [];
+    rsiValues.push(100 - (100 / (1 + avgGain / avgLoss)));
+
+    // Calcul du RSI pour les périodes restantes
+    for (let i = this.options.period + 1; i < changes.length; i++) {
+      avgGain = ((avgGain * (this.options.period - 1)) + (gains[i] || 0)) / this.options.period;
+      avgLoss = ((avgLoss * (this.options.period - 1)) + (losses[i] || 0)) / this.options.period;
+      
+      if (avgLoss === 0) {
+        rsiValues.push(100);
+      } else {
+        rsiValues.push(100 - (100 / (1 + avgGain / avgLoss)));
+      }
+    }
+
+    return rsiValues;
+  }
+
+  draw(data: Candle[]) {
+    const rsiValues = this.calculate(data);
+    if (rsiValues.length === 0) return;
+
+    const { width, height } = this.canvas;
+    const padding = { top: 10, right: 60, bottom: 20, left: 60 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+
+    // Clear canvas
+    this.ctx.clearRect(0, 0, width, height);
+
+    // Draw background
+    this.ctx.fillStyle = '#131722';
+    this.ctx.fillRect(0, 0, width, height);
+
+    // Draw overbought/oversold zones
+    this.ctx.fillStyle = 'rgba(76, 175, 80, 0.1)';
+    const oversoldY = chartHeight * (100 - this.options.oversold) / 100 + padding.top;
+    this.ctx.fillRect(padding.left, oversoldY, chartWidth, chartHeight - oversoldY + padding.top);
+
+    this.ctx.fillStyle = 'rgba(244, 67, 54, 0.1)';
+    const overboughtY = chartHeight * (100 - this.options.overbought) / 100 + padding.top;
+    this.ctx.fillRect(padding.left, padding.top, chartWidth, overboughtY - padding.top);
+
+    // Draw RSI line
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = '#2962FF';
+    this.ctx.lineWidth = 1.5;
+
+    const step = chartWidth / (rsiValues.length - 1);
+    rsiValues.forEach((value, i) => {
+      const x = padding.left + (i * step);
+      const y = chartHeight * (100 - value) / 100 + padding.top;
+      
+      if (i === 0) {
+        this.ctx.moveTo(x, y);
+      } else {
+        this.ctx.lineTo(x, y);
+      }
+    });
+
+    this.ctx.stroke();
+
+    // Draw levels
+    this.ctx.strokeStyle = '#363A45';
+    this.ctx.lineWidth = 1;
+    [0, 20, 50, 80, 100].forEach(level => {
+      const y = chartHeight * (100 - level) / 100 + padding.top;
+      this.ctx.beginPath();
+      this.ctx.moveTo(padding.left, y);
+      this.ctx.lineTo(width - padding.right, y);
+      this.ctx.stroke();
+
+      // Draw level labels
+      this.ctx.fillStyle = '#787B86';
+      this.ctx.font = '11px sans-serif';
+      this.ctx.textAlign = 'right';
+      this.ctx.fillText(level.toString(), padding.left - 5, y + 4);
     });
   }
 
-  calculate(candles: Candle[]): IndicatorValue[] {
-    const { period = 14, source = 'close' } = this.config.params;
-    const values: IndicatorValue[] = [];
-
-    if (candles.length < period + 1) {
-      return values;
+  resize() {
+    if (this.canvas.parentElement) {
+      this.canvas.width = this.canvas.parentElement.clientWidth;
+      this.canvas.height = this.canvas.parentElement.clientHeight;
+      if (this.data.length > 0) {
+        // TODO: Stocker les données brutes pour le redimensionnement
+        // this.draw(this.data);
+      }
     }
-
-    // Calculer les variations de prix
-    const changes: number[] = [];
-    for (let i = 1; i < candles.length; i++) {
-      changes.push(candles[i][source] - candles[i - 1][source]);
-    }
-
-    // Calculer les premiers gains et pertes moyens
-    let sumGains = 0;
-    let sumLosses = 0;
-    for (let i = 0; i < period; i++) {
-      const change = changes[i];
-      if (change > 0) sumGains += change;
-      else sumLosses -= change;
-    }
-
-    let avgGain = sumGains / period;
-    let avgLoss = sumLosses / period;
-
-    // Calculer le premier RSI
-    let rsi = 100 - (100 / (1 + avgGain / avgLoss));
-    values.push({
-      time: candles[period].time,
-      value: rsi
-    });
-
-    // Calculer les RSI suivants avec la méthode de lissage
-    for (let i = period; i < changes.length; i++) {
-      const change = changes[i];
-      const gain = change > 0 ? change : 0;
-      const loss = change < 0 ? -change : 0;
-
-      avgGain = (avgGain * (period - 1) + gain) / period;
-      avgLoss = (avgLoss * (period - 1) + loss) / period;
-
-      rsi = 100 - (100 / (1 + avgGain / avgLoss));
-      values.push({
-        time: candles[i + 1].time,
-        value: rsi,
-        color: this.getRSIColor(rsi)
-      });
-    }
-
-    return values;
   }
 
-  private getRSIColor(rsi: number): string {
-    const { overBought = 70, overSold = 30 } = this.config.params;
-    if (rsi >= overBought) return '#EF5350';  // Rouge pour suracheté
-    if (rsi <= overSold) return '#26A69A';    // Vert pour survendu
-    return this.config.style.color;           // Couleur par défaut
-  }
-
-  render(ctx: CanvasRenderingContext2D, viewport: Viewport): void {
-    if (!this.config.visible || this.values.length === 0) return;
-
-    const { width, height } = ctx.canvas;
-    const { xMin, xMax } = viewport;
-    const { overBought = 70, overSold = 30 } = this.config.params;
-
-    // Dessiner les lignes de surachat/survente
-    ctx.strokeStyle = '#363A45';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([5, 5]);
-
-    const overBoughtY = height * (1 - overBought / 100);
-    const overSoldY = height * (1 - overSold / 100);
-    const middleY = height * 0.5;  // Ligne 50
-
-    ctx.beginPath();
-    ctx.moveTo(0, overBoughtY);
-    ctx.lineTo(width, overBoughtY);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(0, overSoldY);
-    ctx.lineTo(width, overSoldY);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(0, middleY);
-    ctx.lineTo(width, middleY);
-    ctx.stroke();
-
-    ctx.setLineDash([]);
-
-    // Dessiner les labels
-    ctx.fillStyle = '#787B86';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText('70', width - 5, overBoughtY - 5);
-    ctx.fillText('30', width - 5, overSoldY + 15);
-    ctx.fillText('50', width - 5, middleY + 5);
-
-    // Dessiner la ligne du RSI
-    ctx.beginPath();
-    ctx.strokeStyle = this.config.style.color;
-    ctx.lineWidth = this.config.style.lineWidth;
-
-    this.values.forEach((value, i) => {
-      const x = ((value.time - xMin) / (xMax - xMin)) * width;
-      const y = height * (1 - value.value / 100);
-
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-
-    ctx.stroke();
-  }
-
-  onMouseMove(x: number, y: number): void {
-    const value = this.getValueAtTime(x);
-    if (value !== null) {
-      // TODO: Afficher une info-bulle avec la valeur du RSI
-      console.log(`RSI(${this.config.params.period}): ${value.toFixed(2)}`);
-    }
+  destroy() {
+    // Cleanup if needed
   }
 } 
