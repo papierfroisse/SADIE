@@ -1,257 +1,189 @@
-import { BaseIndicator } from './BaseIndicator';
-import { IndicatorConfig, IndicatorValue, Viewport } from './types';
-import { Candle } from '../CandlestickRenderer';
+import { Candle } from '../../data/types';
 
-type PriceSource = 'open' | 'high' | 'low' | 'close';
+interface MACDOptions {
+  fastPeriod: number;
+  slowPeriod: number;
+  signalPeriod: number;
+}
 
-const isPriceSource = (source: string): source is PriceSource => {
-  return ['open', 'high', 'low', 'close'].includes(source);
-};
+interface MACDResult {
+  macd: number[];
+  signal: number[];
+  histogram: number[];
+}
 
-export class MACDIndicator extends BaseIndicator {
+export class MACDIndicator {
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private options: MACDOptions;
+  private rawData: Candle[] = [];
+
   constructor(
-    id: string,
-    fastPeriod: number = 12,
-    slowPeriod: number = 26,
-    signalPeriod: number = 9
+    canvas: HTMLCanvasElement,
+    options: MACDOptions = { fastPeriod: 12, slowPeriod: 26, signalPeriod: 9 }
   ) {
-    super({
-      id,
-      type: 'macd',
-      params: {
-        fastPeriod,
-        slowPeriod,
-        signalPeriod,
-        source: 'close' as PriceSource
-      },
-      style: {
-        color: '#2962FF',      // Ligne MACD
-        lineWidth: 1.5,
-        opacity: 1,
-        fillColor: '#787B86'   // Histogramme
-      },
-      visible: true,
-      overlay: false,
-      height: 150
-    });
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d')!;
+    this.options = options;
   }
 
-  calculate(candles: Candle[]): IndicatorValue[] {
-    const {
-      fastPeriod = 12,
-      slowPeriod = 26,
-      signalPeriod = 9,
-      source = 'close'
-    } = this.config.params;
+  private calculateEMA(prices: number[], period: number): number[] {
+    const multiplier = 2 / (period + 1);
+    const ema: number[] = [];
+    
+    // Initialiser avec la moyenne simple
+    let sum = 0;
+    for (let i = 0; i < period; i++) {
+      sum += prices[i];
+    }
+    ema.push(sum / period);
+    
+    // Calculer l'EMA pour les périodes restantes
+    for (let i = period; i < prices.length; i++) {
+      const value = (prices[i] - ema[ema.length - 1]) * multiplier + ema[ema.length - 1];
+      ema.push(value);
+    }
+    
+    return ema;
+  }
 
-    if (candles.length < Math.max(fastPeriod, slowPeriod) + signalPeriod) {
-      return [];
+  calculate(candles: Candle[]): MACDResult {
+    if (candles.length < this.options.slowPeriod) {
+      return { macd: [], signal: [], histogram: [] };
     }
 
-    // Vérifier que la source est valide
-    if (!isPriceSource(source)) {
-      console.error(`Invalid price source: ${source}`);
-      return [];
-    }
-
-    // Calculer les EMA
-    const fastEMA = this.calculateEMA(candles, fastPeriod, source);
-    const slowEMA = this.calculateEMA(candles, slowPeriod, source);
+    const prices = candles.map(c => c.close);
+    const fastEMA = this.calculateEMA(prices, this.options.fastPeriod);
+    const slowEMA = this.calculateEMA(prices, this.options.slowPeriod);
 
     // Calculer la ligne MACD
     const macdLine: number[] = [];
-    const maxLength = Math.max(fastEMA.length, slowEMA.length);
-    for (let i = 0; i < maxLength; i++) {
-      if (fastEMA[i] !== undefined && slowEMA[i] !== undefined) {
-        macdLine.push(fastEMA[i] - slowEMA[i]);
+    const startIndex = this.options.slowPeriod - 1;
+    for (let i = 0; i < fastEMA.length; i++) {
+      if (i >= startIndex) {
+        macdLine.push(fastEMA[i] - slowEMA[i - (this.options.slowPeriod - this.options.fastPeriod)]);
       }
     }
 
-    // Calculer la ligne de signal (EMA du MACD)
-    const signalLine = this.calculateEMAFromValues(macdLine, signalPeriod);
+    // Calculer la ligne de signal
+    const signalLine = this.calculateEMA(macdLine, this.options.signalPeriod);
 
     // Calculer l'histogramme
-    const values: IndicatorValue[] = [];
-    const startIndex = slowPeriod - 1;
-    for (let i = 0; i < macdLine.length; i++) {
-      if (signalLine[i] !== undefined) {
-        const time = candles[i + startIndex].time;
-        const macd = macdLine[i];
-        const signal = signalLine[i];
-        const histogram = macd - signal;
+    const histogram = macdLine.slice(this.options.signalPeriod - 1).map(
+      (macd, i) => macd - signalLine[i]
+    );
 
-        // Ajouter les trois composantes : MACD, Signal, Histogramme
-        values.push(
-          {
-            time,
-            value: macd,
-            color: this.config.style.color
-          },
-          {
-            time,
-            value: signal,
-            color: '#FF6B6B'  // Rouge pour la ligne de signal
-          },
-          {
-            time,
-            value: histogram,
-            color: histogram >= 0 ? '#26A69A' : '#EF5350'  // Vert/Rouge pour l'histogramme
-          }
-        );
-      }
-    }
-
-    return values;
+    return {
+      macd: macdLine.slice(this.options.signalPeriod - 1),
+      signal: signalLine,
+      histogram
+    };
   }
 
-  private calculateEMA(candles: Candle[], period: number, source: PriceSource): number[] {
-    const values: number[] = [];
-    const multiplier = 2 / (period + 1);
+  draw(data: Candle[]) {
+    this.rawData = data;
+    const result = this.calculate(data);
+    if (result.macd.length === 0) return;
 
-    // Calculer la première moyenne simple
-    let sum = 0;
-    for (let i = 0; i < period; i++) {
-      sum += candles[i][source];
-    }
-    let ema = sum / period;
-    values.push(ema);
+    const { width, height } = this.canvas;
+    const padding = { top: 10, right: 60, bottom: 20, left: 60 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
 
-    // Calculer les EMA suivantes
-    for (let i = period; i < candles.length; i++) {
-      ema = (candles[i][source] - ema) * multiplier + ema;
-      values.push(ema);
-    }
+    // Clear canvas
+    this.ctx.clearRect(0, 0, width, height);
 
-    return values;
-  }
-
-  private calculateEMAFromValues(values: number[], period: number): number[] {
-    const result: number[] = [];
-    const multiplier = 2 / (period + 1);
-
-    // Calculer la première moyenne simple
-    let sum = 0;
-    for (let i = 0; i < period; i++) {
-      sum += values[i];
-    }
-    let ema = sum / period;
-    result.push(ema);
-
-    // Calculer les EMA suivantes
-    for (let i = period; i < values.length; i++) {
-      ema = (values[i] - ema) * multiplier + ema;
-      result.push(ema);
-    }
-
-    return result;
-  }
-
-  render(ctx: CanvasRenderingContext2D, viewport: Viewport): void {
-    if (!this.config.visible || this.values.length === 0) return;
-
-    const { width, height } = ctx.canvas;
-    const { xMin, xMax } = viewport;
+    // Draw background
+    this.ctx.fillStyle = '#131722';
+    this.ctx.fillRect(0, 0, width, height);
 
     // Trouver les valeurs min/max pour l'échelle
-    let minValue = Infinity;
-    let maxValue = -Infinity;
-    this.values.forEach(value => {
-      minValue = Math.min(minValue, value.value);
-      maxValue = Math.max(maxValue, value.value);
+    const allValues = [...result.macd, ...result.signal, ...result.histogram];
+    const minValue = Math.min(...allValues);
+    const maxValue = Math.max(...allValues);
+    const valueRange = maxValue - minValue;
+
+    // Fonction pour convertir une valeur en coordonnée Y
+    const toY = (value: number) => (
+      chartHeight * (1 - (value - minValue) / valueRange) + padding.top
+    );
+
+    // Draw zero line
+    this.ctx.strokeStyle = '#363A45';
+    this.ctx.lineWidth = 1;
+    const zeroY = toY(0);
+    this.ctx.beginPath();
+    this.ctx.moveTo(padding.left, zeroY);
+    this.ctx.lineTo(width - padding.right, zeroY);
+    this.ctx.stroke();
+
+    // Draw histogram
+    const barWidth = chartWidth / result.histogram.length;
+    result.histogram.forEach((value, i) => {
+      const x = padding.left + (i * barWidth);
+      const y = toY(Math.max(0, value));
+      const barHeight = Math.abs(toY(value) - toY(0));
+
+      this.ctx.fillStyle = value >= 0 ? '#26A69A' : '#EF5350';
+      this.ctx.fillRect(x, y, barWidth - 1, barHeight);
     });
 
-    const range = maxValue - minValue;
-    const padding = range * 0.1;
-    const scale = height / (range + 2 * padding);
-    const zero = height * (maxValue + padding) / (range + 2 * padding);
-
-    // Dessiner la ligne zéro
-    ctx.strokeStyle = '#363A45';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([5, 5]);
-    ctx.beginPath();
-    ctx.moveTo(0, zero);
-    ctx.lineTo(width, zero);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Séparer les valeurs en composantes
-    const macdLine: IndicatorValue[] = [];
-    const signalLine: IndicatorValue[] = [];
-    const histogram: IndicatorValue[] = [];
-
-    for (let i = 0; i < this.values.length; i += 3) {
-      macdLine.push(this.values[i]);
-      signalLine.push(this.values[i + 1]);
-      histogram.push(this.values[i + 2]);
-    }
-
-    // Dessiner l'histogramme
-    const barWidth = Math.max(1, width / histogram.length * 0.8);
-    histogram.forEach(value => {
-      const x = ((value.time - xMin) / (xMax - xMin)) * width;
-      const y = zero - value.value * scale;
-      const barHeight = value.value * scale;
-
-      ctx.fillStyle = value.color || this.config.style.fillColor || '#787B86';
-      ctx.fillRect(
-        x - barWidth / 2,
-        y,
-        barWidth,
-        Math.max(1, Math.abs(barHeight))
-      );
+    // Draw MACD line
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = '#2962FF';
+    this.ctx.lineWidth = 1.5;
+    result.macd.forEach((value, i) => {
+      const x = padding.left + (i * barWidth) + barWidth / 2;
+      const y = toY(value);
+      
+      if (i === 0) {
+        this.ctx.moveTo(x, y);
+      } else {
+        this.ctx.lineTo(x, y);
+      }
     });
+    this.ctx.stroke();
 
-    // Dessiner la ligne MACD
-    ctx.beginPath();
-    ctx.strokeStyle = this.config.style.color;
-    ctx.lineWidth = this.config.style.lineWidth;
-    macdLine.forEach((value, i) => {
-      const x = ((value.time - xMin) / (xMax - xMin)) * width;
-      const y = zero - value.value * scale;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
+    // Draw signal line
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = '#FF6B6B';
+    this.ctx.lineWidth = 1.5;
+    result.signal.forEach((value, i) => {
+      const x = padding.left + (i * barWidth) + barWidth / 2;
+      const y = toY(value);
+      
+      if (i === 0) {
+        this.ctx.moveTo(x, y);
+      } else {
+        this.ctx.lineTo(x, y);
+      }
     });
-    ctx.stroke();
+    this.ctx.stroke();
 
-    // Dessiner la ligne de signal
-    ctx.beginPath();
-    ctx.strokeStyle = '#FF6B6B';
-    ctx.lineWidth = this.config.style.lineWidth;
-    signalLine.forEach((value, i) => {
-      const x = ((value.time - xMin) / (xMax - xMin)) * width;
-      const y = zero - value.value * scale;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-
-    // Dessiner les labels
-    ctx.fillStyle = '#787B86';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText(maxValue.toFixed(2), width - 5, 15);
-    ctx.fillText('0', width - 5, zero + 5);
-    ctx.fillText(minValue.toFixed(2), width - 5, height - 5);
+    // Draw labels
+    this.ctx.fillStyle = '#787B86';
+    this.ctx.font = '11px sans-serif';
+    this.ctx.textAlign = 'right';
+    
+    // Min/Max labels
+    this.ctx.fillText(maxValue.toFixed(2), padding.left - 5, padding.top + 15);
+    this.ctx.fillText(minValue.toFixed(2), padding.left - 5, height - padding.bottom - 5);
+    
+    // Zero label
+    this.ctx.fillText('0', padding.left - 5, zeroY + 4);
   }
 
-  onMouseMove(x: number, y: number): void {
-    const value = this.getValueAtTime(x);
-    if (value !== null) {
-      const index = this.values.findIndex(v => v.time >= x);
-      if (index >= 0 && index % 3 === 0) {
-        const macd = this.values[index].value;
-        const signal = this.values[index + 1].value;
-        const histogram = this.values[index + 2].value;
-
-        // TODO: Afficher une info-bulle avec les valeurs
-        console.log(
-          `MACD(${this.config.params.fastPeriod},${this.config.params.slowPeriod},${this.config.params.signalPeriod}):`,
-          `\nMACD: ${macd.toFixed(2)}`,
-          `\nSignal: ${signal.toFixed(2)}`,
-          `\nHistogram: ${histogram.toFixed(2)}`
-        );
+  resize() {
+    if (this.canvas.parentElement) {
+      this.canvas.width = this.canvas.parentElement.clientWidth;
+      this.canvas.height = this.canvas.parentElement.clientHeight;
+      if (this.rawData.length > 0) {
+        this.draw(this.rawData);
       }
     }
+  }
+
+  destroy() {
+    // Cleanup if needed
   }
 } 

@@ -1,52 +1,72 @@
 import { useState, useEffect } from 'react';
-import { MarketData, TimeInterval } from '../data/types';
-import { dataManager } from '../data/DataManager';
+import { Candle, TimeInterval } from '../data/types';
 
-interface UseMarketDataProps {
+interface MarketDataParams {
   symbol: string;
   interval: TimeInterval;
 }
 
-interface UseMarketDataResult {
-  data: MarketData | null;
-  loading: boolean;
-  error: Error | null;
+interface MarketData {
+  candles: Candle[];
 }
 
-export function useMarketData({ symbol, interval }: UseMarketDataProps): UseMarketDataResult {
+// Fonction pour générer des données de test
+const generateTestData = (count: number): Candle[] => {
+  const now = Date.now();
+  const oneHour = 60 * 60 * 1000;
+  const data: Candle[] = [];
+
+  let lastClose = 50000; // Prix de départ pour BTC/USD
+  
+  for (let i = 0; i < count; i++) {
+    const timestamp = now - (count - i) * oneHour;
+    const volatility = lastClose * 0.02; // 2% de volatilité
+    const change = (Math.random() - 0.5) * volatility;
+    
+    const open = lastClose;
+    const close = open + change;
+    const high = Math.max(open, close) * (1 + Math.random() * 0.01);
+    const low = Math.min(open, close) * (1 - Math.random() * 0.01);
+    const volume = 100 + Math.random() * 900; // Volume entre 100 et 1000
+
+    data.push({
+      timestamp,
+      open,
+      high,
+      low,
+      close,
+      volume
+    });
+
+    lastClose = close;
+  }
+
+  return data;
+};
+
+export function useMarketData({ symbol, interval }: MarketDataParams) {
   const [data, setData] = useState<MarketData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!symbol || typeof symbol !== 'string') {
-      setError(new Error('Invalid symbol: must be a non-empty string'));
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
+    setError(null);
 
-    const formattedSymbol = symbol.toUpperCase();
-
-    async function fetchData() {
+    // Simuler un appel API avec un délai
+    const timer = setTimeout(() => {
       try {
-        setLoading(true);
-        setError(null);
-        const marketData = await dataManager.fetchHistory(formattedSymbol, interval);
-        setData(marketData);
+        const testData = generateTestData(100);
+        setData({ candles: testData });
+        setLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err : new Error('An error occurred while fetching data'));
-      } finally {
+        setError(err instanceof Error ? err : new Error('Unknown error'));
         setLoading(false);
       }
-    }
-
-    fetchData();
-
-    // S'abonner aux mises à jour en temps réel
-    dataManager.subscribe(formattedSymbol, interval);
+    }, 500);
 
     return () => {
-      dataManager.unsubscribe(formattedSymbol, interval);
+      clearTimeout(timer);
     };
   }, [symbol, interval]);
 
