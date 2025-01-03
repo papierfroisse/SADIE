@@ -17,19 +17,65 @@ interface ChartContainerProps {
 export function ChartContainer({
   symbol,
   interval: initialInterval,
-  width = window.innerWidth - 300, // 300px pour le panneau droit
-  height = window.innerHeight - 100 // 48px pour l'en-tête + marges
+  width = window.innerWidth - 300,
+  height = window.innerHeight - 100
 }: ChartContainerProps) {
+  // Valider le symbole
+  if (!symbol || typeof symbol !== 'string') {
+    console.error('Invalid symbol provided to ChartContainer:', symbol);
+    return <div>Invalid symbol</div>;
+  }
+
   const mainCanvasRef = useRef<HTMLCanvasElement>(null);
+  const gridCanvasRef = useRef<HTMLCanvasElement>(null);
   const [renderer, setRenderer] = useState<CandlestickRenderer | null>(null);
   const [drawingTools, setDrawingTools] = useState<DrawingTools | null>(null);
   const [interval, setInterval] = useState<TimeInterval>(initialInterval);
   
   const { data, loading, error } = useMarketData({
-    symbol,
+    symbol: symbol.toUpperCase(),
     interval
   });
 
+  // Effet pour dessiner la grille
+  useEffect(() => {
+    const canvas = gridCanvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const scale = window.devicePixelRatio;
+    canvas.width = canvas.clientWidth * scale;
+    canvas.height = canvas.clientHeight * scale;
+    ctx.scale(scale, scale);
+
+    // Dessiner la grille
+    const gridSize = 50; // Taille des cellules de la grille
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+
+    ctx.strokeStyle = 'rgba(42, 46, 57, 0.5)';
+    ctx.lineWidth = 1;
+
+    // Lignes verticales
+    for (let x = 0; x < width; x += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+
+    // Lignes horizontales
+    for (let y = 0; y < height; y += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+  }, [width, height]);
+
+  // Effet pour initialiser le canvas et les renderers
   useEffect(() => {
     const canvas = mainCanvasRef.current;
     if (!canvas) return;
@@ -38,13 +84,24 @@ export function ChartContainer({
     if (!ctx) return;
 
     const scale = window.devicePixelRatio;
-    canvas.width = width * scale;
-    canvas.height = height * scale;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    const canvasWidth = canvas.clientWidth * scale;
+    const canvasHeight = canvas.clientHeight * scale;
+    
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
     ctx.scale(scale, scale);
 
-    const newRenderer = new CandlestickRenderer(ctx);
+    const newRenderer = new CandlestickRenderer(ctx, {
+      upColor: '#26A69A',
+      downColor: '#EF5350',
+      wickColor: '#787B86',
+      borderUpColor: '#26A69A',
+      borderDownColor: '#EF5350',
+      showWicks: true,
+      candleWidth: 8,
+      spacing: 2
+    });
+    
     const newDrawingTools = new DrawingTools(ctx);
     
     setRenderer(newRenderer);
@@ -55,39 +112,48 @@ export function ChartContainer({
         newRenderer.dispose();
       }
     };
-  }, [width, height]);
+  }, []);
 
+  // Effet pour mettre à jour les données
   useEffect(() => {
     if (!renderer || !data?.candles) return;
     renderer.setData(data.candles);
   }, [renderer, data]);
 
+  // Effet pour redimensionner le canvas
   useEffect(() => {
-    if (!renderer) return;
-    renderer.resize(width, height);
+    if (!renderer || !mainCanvasRef.current) return;
+    const canvas = mainCanvasRef.current;
+    const scale = window.devicePixelRatio;
+    const canvasWidth = canvas.clientWidth * scale;
+    const canvasHeight = canvas.clientHeight * scale;
+    
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.scale(scale, scale);
+    }
+    
+    renderer.resize(canvas.clientWidth, canvas.clientHeight);
   }, [renderer, width, height]);
-
-  const mainChartHeight = Math.floor(height * 0.7);
-  const indicatorsHeight = height - mainChartHeight - 40;
 
   const handleIndicatorAdd = (type: string) => {
     console.log('Adding indicator:', type);
   };
 
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'minmax(0, 1fr) 300px',
-      width: '100%',
-      height: '100%',
-      background: '#131722'
-    }}>
-      {/* Zone du graphique */}
+    <div className="chart-container">
+      {/* Zone principale */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        minWidth: 0,
-        height: '100%'
+        height: '100%',
+        overflow: 'hidden'
       }}>
         {/* Barre d'outils */}
         <ChartToolbar
@@ -96,13 +162,26 @@ export function ChartContainer({
           currentInterval={interval}
         />
 
-        {/* Graphique */}
+        {/* Conteneur du graphique */}
         <div style={{
           position: 'relative',
-          flex: 1,
+          flex: '1 1 70%',
           minHeight: 0,
           background: '#131722'
         }}>
+          {/* Grille */}
+          <canvas
+            ref={gridCanvasRef}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 1
+            }}
+          />
+
           {loading && (
             <div style={{
               position: 'absolute',
@@ -115,14 +194,7 @@ export function ChartContainer({
               gap: '8px',
               color: '#D1D4DC'
             }}>
-              <div style={{
-                width: '16px',
-                height: '16px',
-                border: '2px solid #2196F3',
-                borderTopColor: 'transparent',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite'
-              }} />
+              <div className="loading-spinner" />
               Loading...
             </div>
           )}
@@ -130,13 +202,16 @@ export function ChartContainer({
           <canvas
             ref={mainCanvasRef}
             style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
               width: '100%',
               height: '100%',
-              display: 'block'
+              zIndex: 2
             }}
           />
 
-          {/* Overlay des prix */}
+          {/* Échelle des prix */}
           <div style={{
             position: 'absolute',
             top: 0,
@@ -150,7 +225,8 @@ export function ChartContainer({
             justifyContent: 'space-between',
             padding: '8px 4px',
             fontSize: '12px',
-            color: '#787B86'
+            color: '#787B86',
+            zIndex: 3
           }}>
             {data?.candles && Array.from({ length: 5 }).map((_, i) => {
               const price = data.candles[data.candles.length - 1].high -
@@ -164,13 +240,17 @@ export function ChartContainer({
           </div>
         </div>
 
-        {/* Indicateurs */}
+        {/* Zone des indicateurs */}
         {data?.candles && (
-          <div style={{ height: `${indicatorsHeight}px` }}>
+          <div style={{
+            flex: '1 1 30%',
+            minHeight: 0,
+            borderTop: '1px solid #2A2E39'
+          }}>
             <TechnicalIndicators
               data={data.candles}
               width={width}
-              height={indicatorsHeight}
+              height={height * 0.3}
             />
           </div>
         )}
@@ -181,15 +261,15 @@ export function ChartContainer({
         display: 'flex',
         flexDirection: 'column',
         borderLeft: '1px solid #2A2E39',
-        background: '#1E222D'
+        background: '#1E222D',
+        overflow: 'hidden'
       }}>
-        {/* Liste des tickers */}
         <TopTickers />
-
+        
         {/* Statistiques */}
         <div style={{
           padding: '16px',
-          borderBottom: '1px solid #2A2E39'
+          borderTop: '1px solid #2A2E39'
         }}>
           <div style={{
             fontSize: '16px',
@@ -206,94 +286,20 @@ export function ChartContainer({
             fontSize: '14px'
           }}>
             <div style={{ color: '#787B86' }}>Volume 24h</div>
-            <div style={{ color: '#D1D4DC', textAlign: 'right' }}>{data?.candles?.[data.candles.length - 1]?.volume.toLocaleString()}</div>
+            <div style={{ color: '#D1D4DC', textAlign: 'right' }}>
+              {data?.candles?.[data.candles.length - 1]?.volume.toLocaleString()}
+            </div>
             <div style={{ color: '#787B86' }}>Plus haut 24h</div>
-            <div style={{ color: '#D1D4DC', textAlign: 'right' }}>${data?.candles?.[data.candles.length - 1]?.high.toFixed(2)}</div>
+            <div style={{ color: '#D1D4DC', textAlign: 'right' }}>
+              ${data?.candles?.[data.candles.length - 1]?.high.toFixed(2)}
+            </div>
             <div style={{ color: '#787B86' }}>Plus bas 24h</div>
-            <div style={{ color: '#D1D4DC', textAlign: 'right' }}>${data?.candles?.[data.candles.length - 1]?.low.toFixed(2)}</div>
-            <div style={{ color: '#787B86' }}>Cap. marché</div>
-            <div style={{ color: '#D1D4DC', textAlign: 'right' }}>$890.00B</div>
-            <div style={{ color: '#787B86' }}>Volume total</div>
-            <div style={{ color: '#D1D4DC', textAlign: 'right' }}>$25.00B</div>
-          </div>
-        </div>
-
-        {/* Volumes par exchange */}
-        <div style={{
-          padding: '16px',
-          marginTop: 'auto',
-          borderTop: '1px solid #2A2E39'
-        }}>
-          <div style={{
-            fontSize: '14px',
-            color: '#787B86',
-            marginBottom: '12px'
-          }}>
-            Volumes par exchange
-          </div>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'auto 1fr auto',
-            gap: '8px',
-            fontSize: '14px'
-          }}>
-            <div style={{ color: '#D1D4DC' }}>Binance</div>
-            <div style={{
-              background: '#2962FF',
-              height: '4px',
-              alignSelf: 'center',
-              borderRadius: '2px',
-              width: '45%'
-            }} />
-            <div style={{ color: '#787B86' }}>45%</div>
-            <div style={{ color: '#D1D4DC' }}>Coinbase</div>
-            <div style={{
-              background: '#2962FF',
-              height: '4px',
-              alignSelf: 'center',
-              borderRadius: '2px',
-              width: '25%'
-            }} />
-            <div style={{ color: '#787B86' }}>25%</div>
-            <div style={{ color: '#D1D4DC' }}>FTX</div>
-            <div style={{
-              background: '#2962FF',
-              height: '4px',
-              alignSelf: 'center',
-              borderRadius: '2px',
-              width: '15%'
-            }} />
-            <div style={{ color: '#787B86' }}>15%</div>
-            <div style={{ color: '#D1D4DC' }}>Kraken</div>
-            <div style={{
-              background: '#2962FF',
-              height: '4px',
-              alignSelf: 'center',
-              borderRadius: '2px',
-              width: '10%'
-            }} />
-            <div style={{ color: '#787B86' }}>10%</div>
-            <div style={{ color: '#D1D4DC' }}>Autres</div>
-            <div style={{
-              background: '#2962FF',
-              height: '4px',
-              alignSelf: 'center',
-              borderRadius: '2px',
-              width: '5%'
-            }} />
-            <div style={{ color: '#787B86' }}>5%</div>
+            <div style={{ color: '#D1D4DC', textAlign: 'right' }}>
+              ${data?.candles?.[data.candles.length - 1]?.low.toFixed(2)}
+            </div>
           </div>
         </div>
       </div>
-
-      <style>
-        {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}
-      </style>
     </div>
   );
 } 

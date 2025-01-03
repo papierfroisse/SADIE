@@ -1,88 +1,82 @@
 import React from 'react';
 
-interface Ticker {
-  symbol: string;
-  name: string;
-  price: number;
-  change: number;
+interface TopTickersProps {
+  // Props futures pour la personnalisation
 }
 
-const topTickers: Ticker[] = [
-  { symbol: 'BTCUSDT', name: 'Bitcoin', price: 47000.00, change: 2.73 },
-  { symbol: 'ETHUSDT', name: 'Ethereum', price: 3200.00, change: -1.2 },
-  { symbol: 'BNBUSDT', name: 'BNB', price: 420.00, change: 0.8 },
-  { symbol: 'ADAUSDT', name: 'Cardano', price: 1.20, change: 5.3 },
-  { symbol: 'SOLUSDT', name: 'Solana', price: 180.00, change: -2.1 },
-  { symbol: 'XRPUSDT', name: 'Ripple', price: 0.85, change: 1.5 },
-  { symbol: 'DOTUSDT', name: 'Polkadot', price: 25.40, change: -0.7 },
-  { symbol: 'DOGEUSDT', name: 'Dogecoin', price: 0.15, change: 3.2 },
-  { symbol: 'AVAXUSDT', name: 'Avalanche', price: 85.60, change: 4.1 },
-  { symbol: 'LUNAUSDT', name: 'Terra', price: 95.30, change: -1.8 }
-];
+export function TopTickers({}: TopTickersProps) {
+  // Données de test
+  const tickers = [
+    { symbol: 'BTC/USD', name: 'Bitcoin', price: 43250.50, change: 2.5, volume: '12.5B' },
+    { symbol: 'ETH/USD', name: 'Ethereum', price: 2250.75, change: -1.2, volume: '8.2B' },
+    { symbol: 'BNB/USD', name: 'Binance Coin', price: 305.25, change: 0.8, volume: '1.5B' },
+    { symbol: 'XRP/USD', name: 'Ripple', price: 0.55, change: -0.5, volume: '2.1B' },
+    { symbol: 'SOL/USD', name: 'Solana', price: 98.75, change: 5.2, volume: '3.8B' },
+  ];
 
-export function TopTickers() {
   return (
     <div style={{
-      width: '100%',
-      background: '#1E222D',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      height: '100%',
+      maxHeight: '50%',
+      background: '#1E222D',
+      color: '#D1D4DC'
     }}>
+      {/* En-tête */}
       <div style={{
-        padding: '8px 12px',
-        borderBottom: '1px solid #2A2E39'
+        padding: '12px 16px',
+        borderBottom: '1px solid #2A2E39',
+        fontSize: '16px',
+        fontWeight: 'bold'
       }}>
-        <input
-          type="text"
-          placeholder="Rechercher un symbole..."
-          style={{
-            width: '100%',
-            padding: '6px 10px',
-            background: '#131722',
-            border: '1px solid #2A2E39',
-            borderRadius: '4px',
-            color: '#D1D4DC',
-            fontSize: '13px',
-            outline: 'none'
-          }}
-        />
+        Ticker
       </div>
+
+      {/* Liste des tickers */}
       <div style={{
-        maxHeight: '300px',
-        overflowY: 'auto'
+        flex: 1,
+        overflowY: 'auto',
+        padding: '8px 0'
       }}>
-        {topTickers.map(ticker => (
+        {tickers.map((ticker, index) => (
           <div
             key={ticker.symbol}
             className="ticker-item"
             style={{
-              padding: '8px 12px',
-              borderBottom: '1px solid #2A2E39',
-              cursor: 'pointer'
+              display: 'grid',
+              gridTemplateColumns: '1fr auto',
+              gap: '8px',
+              padding: '8px 16px',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s'
             }}
           >
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginBottom: '2px'
-            }}>
-              <div style={{ color: '#D1D4DC', fontWeight: 'bold', fontSize: '13px' }}>
+            <div>
+              <div style={{
+                fontSize: '14px',
+                fontWeight: 'bold',
+                marginBottom: '4px'
+              }}>
                 {ticker.symbol}
               </div>
-              <div style={{ color: '#D1D4DC', fontSize: '13px' }}>
-                ${ticker.price.toLocaleString()}
-              </div>
-            </div>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between'
-            }}>
-              <div style={{ color: '#787B86', fontSize: '11px' }}>
+              <div style={{
+                fontSize: '12px',
+                color: '#787B86'
+              }}>
                 {ticker.name}
               </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
               <div style={{
-                color: ticker.change >= 0 ? '#26A69A' : '#EF5350',
-                fontSize: '11px'
+                fontSize: '14px',
+                marginBottom: '4px'
+              }}>
+                ${ticker.price.toLocaleString()}
+              </div>
+              <div style={{
+                fontSize: '12px',
+                color: ticker.change >= 0 ? '#26A69A' : '#EF5350'
               }}>
                 {ticker.change >= 0 ? '+' : ''}{ticker.change}%
               </div>
@@ -94,7 +88,7 @@ export function TopTickers() {
       <style>
         {`
           .ticker-item:hover {
-            background: #2A2E39;
+            background-color: #2A2E39;
           }
         `}
       </style>
