@@ -1,30 +1,54 @@
 # SADIE - Work in Progress
 
-## Completed Tasks
-- ✅ Initial project structure setup
-- ✅ Basic configuration files (vite, typescript, package.json)
-- ✅ Project organization and folder structure
+## Version Actuelle : 0.2.0
 
-## Current Sprint
-- 🔄 Setting up development environment
-- 🔄 Basic project configuration
-- 🔄 Directory structure organization
+### Tâches Complétées
+- ✅ Collecteurs de données avancés
+  - Order Books L2/L3
+  - Données tick-by-tick
+  - Transactions en temps réel
+- ✅ Système de stockage optimisé
+  - Compression multi-algorithmes
+  - Partitionnement adaptatif
+  - Gestion hot/warm/cold data
+- ✅ Analyse en temps réel
+  - Métriques de marché
+  - Indicateurs techniques
+  - Analyse de liquidité
 
-## Next Steps
-1. Configure API services for crypto data
-2. Implement basic chart component
-3. Set up WebSocket connections
-4. Create layout components
-5. Implement authentication system
+### Sprint Actuel (v0.2.1)
+- 🔄 Collecte Alternative
+  - ✅ Twitter Sentiment Analysis
+  - 🔄 Reddit Analysis
+  - 🔄 News Analysis
+- 🔄 Métriques Avancées
+  - ✅ Sentiment global
+  - 🔄 Engagement social
+  - ⏳ Impact des news
 
-## Technical Decisions
-- Using Vite for faster development experience
-- TypeScript for type safety
-- Lightweight-charts for performance
-- Styled-components for styling
-- Axios for HTTP requests
+### Prochaines Étapes (v0.2.2)
+1. Cache Prédictif
+   - Modèle de prédiction d'accès
+   - Préchargement intelligent
+   - Cache multi-niveaux
 
-## Notes
-- Project structure follows feature-based organization
-- Using alias paths for better import management
-- Following strict TypeScript configuration 
+2. Optimisation Mémoire
+   - Compression en mémoire
+   - Structures optimisées
+   - Monitoring avancé
+
+## Décisions Techniques
+- Python 3.9+ pour les performances
+- TimescaleDB pour le stockage temporel
+- Redis pour le cache distribué
+- Kafka pour le streaming
+- Docker et Kubernetes pour le déploiement
+
+## Notes Importantes
+- Architecture modulaire et extensible
+- Tests de performance systématiques
+- Documentation continue
+- Revue de code obligatoire
+
+---
+Dernière mise à jour : 2024-01-08 
