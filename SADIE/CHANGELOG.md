@@ -20,8 +20,14 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Callbacks pour les métriques en temps réel
   - Tests unitaires et d'intégration complets
 
-### En cours
 - Flux de transactions en temps réel
+  - Collecte des transactions via WebSocket
+  - Métriques avancées (VWAP, ratio achat/vente)
+  - Cache circulaire optimisé avec deque
+  - Callbacks pour le monitoring en temps réel
+  - Tests unitaires et documentation complète
+
+### En cours
 - Tests de charge et de résilience
 
 ## [0.1.2] - 2024-01-08
