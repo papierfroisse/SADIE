@@ -28,11 +28,21 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Tests unitaires et documentation complète
 
 - Tests de charge et de résilience
-  - Mesures de performance (mémoire, CPU, latence)
-  - Tests de charge avec multiples symboles
-  - Tests de résilience (reconnexion, récupération d'erreurs)
-  - Vérification de la cohérence des données
+  - Mesures de performance optimisées (mémoire, CPU, latence)
+  - Tests de charge avec gestion efficace des ressources
+  - Monitoring détaillé avec resource_monitor
+  - Gestion des timeouts et retries
+  - Tests de résilience améliorés
+  - Métriques P95 pour la latence
+  - Taux d'erreur maximum de 1%
   - Documentation détaillée des procédures de test
+
+### Optimisé
+- Gestion de la mémoire avec garbage collection périodique
+- Monitoring des ressources système pendant les tests
+- Mécanisme de retry avec timeout pour les opérations critiques
+- Traitement par lots pour réduire la charge système
+- Gestion améliorée des erreurs et des cas limites
 
 ## [0.1.2] - 2024-01-08
 ### Ajouté
