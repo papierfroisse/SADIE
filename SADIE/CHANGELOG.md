@@ -27,8 +27,12 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Callbacks pour le monitoring en temps réel
   - Tests unitaires et documentation complète
 
-### En cours
 - Tests de charge et de résilience
+  - Mesures de performance (mémoire, CPU, latence)
+  - Tests de charge avec multiples symboles
+  - Tests de résilience (reconnexion, récupération d'erreurs)
+  - Vérification de la cohérence des données
+  - Documentation détaillée des procédures de test
 
 ## [0.1.2] - 2024-01-08
 ### Ajouté
