@@ -1,200 +1,165 @@
 """
-Module de gestion du cache pour les données.
+Module de cache pour SADIE.
+
+Implémente un système de cache efficace pour les données de marché
+avec gestion de la mémoire et expiration des données.
 """
 
-import datetime
-import json
-import os
-import pickle
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+import time
+from typing import Dict, List, Any, Optional
+from collections import deque
+import threading
 
-class DataCache:
-    """Gestionnaire de cache pour les données."""
+class Cache:
+    """Cache avec gestion de la mémoire et expiration."""
     
-    def __init__(self, cache_dir: Union[str, Path]):
-        """
-        Initialise le gestionnaire de cache.
-        
-        Args:
-            cache_dir: Chemin du répertoire de cache
-        """
-        self.cache_dir = Path(cache_dir)
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
-    
-    def _get_cache_path(
+    def __init__(
         self,
-        source: str,
-        symbol: str,
-        data_type: str,
-        interval: Optional[str] = None
-    ) -> Path:
-        """
-        Génère le chemin du fichier de cache.
+        max_size: int = 1000000,
+        expiry_seconds: Optional[int] = None
+    ):
+        """Initialise le cache.
         
         Args:
-            source: Source des données
-            symbol: Symbole
-            data_type: Type de données
-            interval: Intervalle de temps (optionnel)
-            
-        Returns:
-            Chemin du fichier de cache
+            max_size: Taille maximale par clé
+            expiry_seconds: Durée de vie des données en secondes
         """
-        filename = f"{symbol.replace('/', '_')}_{data_type}"
-        if interval:
-            filename += f"_{interval}"
-        filename += ".pkl"
-        return self.cache_dir / source / filename
-    
-    def save(
-        self,
-        data: Any,
-        source: str,
-        symbol: str,
-        data_type: str,
-        interval: Optional[str] = None,
-        metadata: Optional[Dict] = None
-    ) -> None:
-        """
-        Sauvegarde des données dans le cache.
+        self._max_size = max_size
+        self._expiry = expiry_seconds
+        self._data: Dict[str, deque] = {}
+        self._timestamps: Dict[str, deque] = {}
+        self._lock = threading.Lock()
+        
+    def add(self, key: str, value: Any) -> None:
+        """Ajoute une valeur au cache.
         
         Args:
-            data: Données à sauvegarder
-            source: Source des données
-            symbol: Symbole
-            data_type: Type de données
-            interval: Intervalle de temps (optionnel)
-            metadata: Métadonnées (optionnel)
+            key: Clé d'identification
+            value: Valeur à stocker
         """
-        cache_path = self._get_cache_path(source, symbol, data_type, interval)
-        cache_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        cache_data = {
-            "data": data,
-            "metadata": metadata or {},
-            "timestamp": datetime.datetime.now().timestamp()
-        }
-        
-        with open(cache_path, "wb") as f:
-            pickle.dump(cache_data, f)
-    
-    def load(
-        self,
-        source: str,
-        symbol: str,
-        data_type: str,
-        interval: Optional[str] = None,
-        max_age: Optional[int] = None
-    ) -> Optional[Dict[str, Any]]:
-        """
-        Charge des données depuis le cache.
-        
-        Args:
-            source: Source des données
-            symbol: Symbole
-            data_type: Type de données
-            interval: Intervalle de temps (optionnel)
-            max_age: Âge maximum des données en secondes (optionnel)
+        with self._lock:
+            # Initialiser les queues si nécessaire
+            if key not in self._data:
+                self._data[key] = deque(maxlen=self._max_size)
+                self._timestamps[key] = deque(maxlen=self._max_size)
             
-        Returns:
-            Données et métadonnées ou None si non trouvées ou expirées
-        """
-        cache_path = self._get_cache_path(source, symbol, data_type, interval)
-        if not cache_path.exists():
-            return None
-        
-        try:
-            with open(cache_path, "rb") as f:
-                cache_data = pickle.load(f)
+            # Ajouter la valeur et son timestamp
+            self._data[key].append(value)
+            self._timestamps[key].append(time.time())
             
-            # Vérification de l'âge des données
-            if max_age is not None:
-                age = datetime.datetime.now().timestamp() - cache_data["timestamp"]
-                if age > max_age:
-                    return None
-            
-            return cache_data
-        except (pickle.UnpicklingError, KeyError, EOFError):
-            return None
-    
-    def clear(
-        self,
-        source: Optional[str] = None,
-        symbol: Optional[str] = None,
-        data_type: Optional[str] = None,
-        interval: Optional[str] = None
-    ) -> None:
-        """
-        Supprime des données du cache.
-        
-        Args:
-            source: Source des données (optionnel)
-            symbol: Symbole (optionnel)
-            data_type: Type de données (optionnel)
-            interval: Intervalle de temps (optionnel)
-        """
-        if source:
-            source_dir = self.cache_dir / source
-            if not source_dir.exists():
-                return
-            
-            if symbol:
-                pattern = f"{symbol.replace('/', '_')}"
-                if data_type:
-                    pattern += f"_{data_type}"
-                    if interval:
-                        pattern += f"_{interval}"
-                pattern += ".pkl"
+            # Nettoyer les données expirées
+            if self._expiry:
+                self._cleanup_expired(key)
                 
-                for file in source_dir.glob(pattern):
-                    file.unlink()
+    def get(self, key: str) -> deque:
+        """Récupère toutes les valeurs pour une clé.
+        
+        Args:
+            key: Clé d'identification
+            
+        Returns:
+            Queue des valeurs
+        """
+        with self._lock:
+            if key not in self._data:
+                return deque()
+                
+            if self._expiry:
+                self._cleanup_expired(key)
+                
+            return self._data[key]
+            
+    def get_latest(self, key: str, limit: int = 1) -> List[Any]:
+        """Récupère les dernières valeurs pour une clé.
+        
+        Args:
+            key: Clé d'identification
+            limit: Nombre de valeurs à récupérer
+            
+        Returns:
+            Liste des dernières valeurs
+        """
+        with self._lock:
+            if key not in self._data:
+                return []
+                
+            if self._expiry:
+                self._cleanup_expired(key)
+                
+            return list(self._data[key])[-limit:]
+            
+    def clear(self, key: Optional[str] = None) -> None:
+        """Vide le cache.
+        
+        Args:
+            key: Clé spécifique à vider (tout le cache si None)
+        """
+        with self._lock:
+            if key:
+                if key in self._data:
+                    self._data[key].clear()
+                    self._timestamps[key].clear()
             else:
-                for file in source_dir.glob("*.pkl"):
-                    file.unlink()
-                if not any(source_dir.iterdir()):
-                    source_dir.rmdir()
-        else:
-            for source_dir in self.cache_dir.glob("*"):
-                if source_dir.is_dir():
-                    for file in source_dir.glob("*.pkl"):
-                        file.unlink()
-                    if not any(source_dir.iterdir()):
-                        source_dir.rmdir()
-    
-    def get_info(self) -> Dict[str, Any]:
+                self._data.clear()
+                self._timestamps.clear()
+                
+    def _cleanup_expired(self, key: str) -> None:
+        """Nettoie les données expirées pour une clé.
+        
+        Args:
+            key: Clé à nettoyer
         """
-        Récupère des informations sur le cache.
+        if not self._expiry:
+            return
+            
+        current_time = time.time()
+        while (
+            self._timestamps[key] and
+            current_time - self._timestamps[key][0] > self._expiry
+        ):
+            self._timestamps[key].popleft()
+            self._data[key].popleft()
+            
+    def get_size(self, key: Optional[str] = None) -> int:
+        """Retourne la taille du cache.
+        
+        Args:
+            key: Clé spécifique (taille totale si None)
+            
+        Returns:
+            Nombre d'éléments dans le cache
+        """
+        with self._lock:
+            if key:
+                return len(self._data.get(key, deque()))
+            return sum(len(q) for q in self._data.values())
+            
+    def get_keys(self) -> List[str]:
+        """Retourne la liste des clés dans le cache.
         
         Returns:
-            Dictionnaire contenant les informations sur le cache
+            Liste des clés
         """
-        info = {
-            "size": 0,
-            "files": 0,
-            "sources": {}
-        }
+        with self._lock:
+            return list(self._data.keys())
+            
+    def get_stats(self) -> Dict[str, Any]:
+        """Retourne des statistiques sur le cache.
         
-        for source_dir in self.cache_dir.glob("*"):
-            if source_dir.is_dir():
-                source_info = {
-                    "size": 0,
-                    "files": 0,
-                    "symbols": set()
-                }
-                
-                for file in source_dir.glob("*.pkl"):
-                    source_info["size"] += file.stat().st_size
-                    source_info["files"] += 1
-                    
-                    # Extraction du symbole
-                    symbol = file.stem.split("_")[0].replace("_", "/")
-                    source_info["symbols"].add(symbol)
-                
-                if source_info["files"] > 0:
-                    info["size"] += source_info["size"]
-                    info["files"] += source_info["files"]
-                    source_info["symbols"] = sorted(source_info["symbols"])
-                    info["sources"][source_dir.name] = source_info
-        
-        return info 
+        Returns:
+            Dictionnaire des statistiques
+        """
+        with self._lock:
+            return {
+                "total_keys": len(self._data),
+                "total_items": self.get_size(),
+                "keys": {
+                    key: len(self._data[key])
+                    for key in self._data
+                },
+                "memory_usage": sum(
+                    len(str(item).encode())
+                    for queue in self._data.values()
+                    for item in queue
+                )
+            } 

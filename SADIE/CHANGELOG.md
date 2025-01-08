@@ -5,6 +5,19 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - En développement
+### Ajouté
+- Collecteur de données tick par tick
+  - Support WebSocket pour les données en temps réel
+  - Traitement par lots avec statistiques
+  - Cache optimisé pour les données haute fréquence
+  - Tests unitaires complets
+
+### En cours
+- Carnets d'ordres complets
+- Flux de transactions en temps réel
+- Tests de charge et de résilience
+
 ## [0.1.2] - 2024-01-08
 ### Ajouté
 - Classe de base BaseCollector pour standardiser les collecteurs de données
