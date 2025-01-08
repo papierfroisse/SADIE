@@ -1,121 +1,132 @@
-# SADIE Project Roadmap
+# SADIE - Roadmap de Développement
 
-## Phase 1: Infrastructure et Collecte de Données ✅
-- [x] Structure du projet
-- [x] Configuration Git et GitHub Actions
-- [x] Documentation de base
-- [x] Tests unitaires de base
-- [x] Intégration Binance API
-- [x] Intégration Alpha Vantage
-- [x] Configuration PostgreSQL/TimescaleDB
+## Version 0.1.x - Infrastructure de Base
+### 0.1.0 ✓ (2024-01-08)
+- [x] Structure initiale du projet
+  - [x] Configuration Git et GitHub Actions
+  - [x] Documentation de base (README, CONTRIBUTING)
+  - [x] Tests unitaires de base
+  - [x] Configuration de l'environnement de développement
 
-## Phase 2: Maximisation de la Qualité des Données 🔄
-### 2.1 Enrichissement Multi-Source
-- [ ] Données de marché traditionnelles
-  - [ ] Order books complets
-  - [ ] Carnets d'ordres en L2/L3
+### 0.1.1 ✓ (2024-01-08)
+- [x] Intégration des APIs de base
+  - [x] Binance API
+  - [x] Alpha Vantage API
+- [x] Configuration de la base de données
+  - [x] Setup PostgreSQL/TimescaleDB
+  - [x] Schéma de base de données
+- [x] Système de cache
+  - [x] Implémentation du cache en mémoire
+  - [x] Gestion de la persistance
+
+### 0.1.2 🔄 (En cours)
+- [ ] Collecteurs de données de base
+  - [x] Classe de base BaseCollector
+  - [x] Collecteur OrderBook (L2/L3)
+  - [ ] Tests des collecteurs
+  - [ ] Documentation des collecteurs
+- [ ] Validation et tests
+  - [ ] Tests d'intégration
+  - [ ] Tests de performance
+  - [ ] Benchmarks initiaux
+
+## Version 0.2.x - Enrichissement des Données
+### 0.2.0 (Prévu : 2024-02)
+- [ ] Données de marché avancées
   - [ ] Données tick par tick
+  - [ ] Carnets d'ordres complets
+  - [ ] Flux de transactions en temps réel
+- [ ] Tests et validation
+  - [ ] Tests de charge
+  - [ ] Tests de résilience
+  - [ ] Documentation des performances
+
+### 0.2.1 (Prévu : 2024-02)
 - [ ] Données alternatives
-  - [ ] Sentiment des réseaux sociaux (Twitter, Reddit)
+  - [ ] API Twitter pour sentiment
+  - [ ] API Reddit pour analyse communautaire
   - [ ] Flux d'actualités en temps réel
-  - [ ] Positions des investisseurs institutionnels
-  - [ ] Données ESG et facteurs environnementaux
-- [ ] Données on-chain et DeFi
-  - [ ] Flux de transactions
-  - [ ] Métriques de liquidité
-  - [ ] Activité des wallets
+- [ ] Système de stockage optimisé
+  - [ ] Compression intelligente
+  - [ ] Partitionnement adaptatif
+  - [ ] Cache prédictif
 
-### 2.2 Prétraitement Intelligent
-- [ ] Correction avancée des biais
-  - [ ] Détection des splits et événements exceptionnels
-  - [ ] Normalisation multi-source
-  - [ ] Gestion des outliers contextuels
-- [ ] Génération de données synthétiques
-  - [ ] GANs pour scénarios rares
-  - [ ] Simulation de crises
-  - [ ] Augmentation de données
-- [ ] Annotations intelligentes
-  - [ ] Marquage automatique des événements
-  - [ ] Classification des périodes de marché
-  - [ ] Détection des régimes de volatilité
+### 0.2.2 (Prévu : 2024-03)
+- [ ] Données on-chain
+  - [ ] Connexion aux nodes ETH/BTC
+  - [ ] Métriques DeFi
+  - [ ] Analyse on-chain
+- [ ] Infrastructure de traitement
+  - [ ] Pipeline de traitement distribué
+  - [ ] Système de backup automatique
+  - [ ] Monitoring avancé
 
-### 2.3 Multi-Temporalité
-- [ ] Granularité fine (tick, 1s, 1min)
-- [ ] Granularité moyenne (5min, 15min, 1h)
-- [ ] Granularité large (4h, 1j, 1sem)
-- [ ] Agrégation intelligente des timeframes
-
-## Phase 3: Modèles Prédictifs Ultra-Avancés 🧠
-### 3.1 Architecture LSTM Optimisée
-- [ ] Couches spécialisées
+## Version 0.3.x - Modèles Prédictifs
+### 0.3.0 (Prévu : 2024-04)
+- [ ] Architecture LSTM avancée
   - [ ] LSTM pour tendances
   - [ ] LSTM pour volatilité
   - [ ] LSTM pour volumes
-- [ ] Optimisation avancée
-  - [ ] Bayesian optimization des hyperparamètres
-  - [ ] Architecture search automatique
-  - [ ] Pruning intelligent
+- [ ] Optimisation des modèles
+  - [ ] Optimisation bayésienne
+  - [ ] Validation croisée temporelle
+  - [ ] Métriques de performance
 
-### 3.2 Modèles Hybrides Nouvelle Génération
-- [ ] LSTM + Attention
-  - [ ] Self-attention pour événements importants
-  - [ ] Cross-attention pour corrélations
-  - [ ] Attention temporelle adaptative
-- [ ] LSTM + GAN
-  - [ ] Génération de scénarios
-  - [ ] Validation adversariale
-  - [ ] Apprentissage par renforcement
-- [ ] Ensemble Models
-  - [ ] Spécialisation par régime de marché
-  - [ ] Agrégation bayésienne
-  - [ ] Meta-learning
+### 0.3.1 (Prévu : 2024-05)
+- [ ] Modèles hybrides
+  - [ ] LSTM + Attention
+  - [ ] LSTM + GAN
+  - [ ] Ensemble models
+- [ ] Pipeline d'entraînement
+  - [ ] Distribution des calculs
+  - [ ] Gestion des checkpoints
+  - [ ] Logging des expériences
 
-## Phase 4: Optimisation de Portefeuille Avancée 💼
-### 4.1 Stratégies Multi-Objectifs
-- [ ] Optimisation dynamique
-  - [ ] Allocation adaptative
-  - [ ] Rebalancement intelligent
-  - [ ] Gestion des coûts de transaction
-- [ ] Gestion des risques avancée
-  - [ ] VaR conditionnelle dynamique
-  - [ ] Stress testing adaptatif
-  - [ ] Hedging automatique
+## Version 0.4.x - Optimisation et Production
+### 0.4.0 (Prévu : 2024-06)
+- [ ] Optimisation de portefeuille
+  - [ ] Allocation dynamique
+  - [ ] Gestion des risques avancée
+  - [ ] Backtesting sophistiqué
+- [ ] Infrastructure production
+  - [ ] Déploiement automatisé
+  - [ ] Monitoring en temps réel
+  - [ ] Alertes intelligentes
 
-### 4.2 Validation Ultra-Robuste
-- [ ] Backtesting avancé
-  - [ ] Walk-forward analysis
-  - [ ] Monte Carlo simulations
-  - [ ] Tests de robustesse
-- [ ] Métriques sophistiquées
-  - [ ] Ratios de performance avancés
-  - [ ] Métriques de stabilité
-  - [ ] Indicateurs de robustesse
+### 0.4.1 (Prévu : 2024-07)
+- [ ] Interface utilisateur
+  - [ ] Dashboard de trading
+  - [ ] Visualisations avancées
+  - [ ] Contrôles en temps réel
+- [ ] Documentation complète
+  - [ ] Guide utilisateur
+  - [ ] Documentation API
+  - [ ] Exemples d'utilisation
 
-## Phase 5: Production et Monitoring 🚀
-### 5.1 Infrastructure Scalable
-- [ ] Déploiement cloud optimisé
-- [ ] Microservices spécialisés
-- [ ] Pipeline temps réel
+## Conventions de Versionnage
+- **x.y.z** format:
+  - **x**: Changements majeurs/incompatibles
+  - **y**: Nouvelles fonctionnalités
+  - **z**: Corrections de bugs et améliorations mineures
 
-### 5.2 Monitoring Avancé
-- [ ] Surveillance des modèles
-- [ ] Détection des dérives
-- [ ] Alertes intelligentes
+## Processus de Validation
+Pour chaque version :
+1. **Tests**
+   - Tests unitaires (coverage > 80%)
+   - Tests d'intégration
+   - Tests de performance
 
-## Phase 6: Amélioration Continue et R&D 🔄
-### 6.1 Recherche Avancée
-- [ ] Nouveaux modèles hybrides
-- [ ] Techniques d'optimisation innovantes
-- [ ] Intégration de données alternatives
+2. **Documentation**
+   - Mise à jour du CHANGELOG
+   - Documentation technique
+   - Exemples de code
 
-### 6.2 Optimisation Continue
-- [ ] Auto-adaptation des modèles
-- [ ] Amélioration des performances
-- [ ] Réduction de la latence
+3. **Review**
+   - Code review
+   - Tests de non-régression
+   - Validation des performances
 
-## Notes de Version
-- v0.1.0: Infrastructure initiale ✅
-- v0.2.0: Pipeline de données enrichi 🔄
-- v0.3.0: Modèles prédictifs avancés
-- v0.4.0: Optimisation sophistiquée
-- v0.5.0: Production et monitoring 
+4. **Déploiement**
+   - Tests en environnement de staging
+   - Déploiement progressif
+   - Monitoring post-déploiement 

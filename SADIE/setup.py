@@ -14,7 +14,7 @@ with open("requirements.txt", "r", encoding="utf-8") as f:
 
 setup(
     name="sadie",
-    version="0.1.0",
+    version="0.1.1",
     description="Système d'Analyse et de Décision pour l'Investissement en Cryptomonnaies",
     long_description=long_description,
     long_description_content_type="text/markdown",
