@@ -1,139 +1,183 @@
 # SADIE (Système Avancé D'Intelligence et d'Exécution)
 
 ## Description
-SADIE est un système avancé d'intelligence artificielle conçu pour l'analyse des marchés financiers et l'optimisation de portefeuille. Il combine des collecteurs de données haute performance, des analyses en temps réel et des stratégies d'exécution optimisées.
+SADIE est une plateforme sophistiquée d'analyse de marché et d'optimisation de portefeuille, actuellement en version 0.2.0. Le projet combine des collecteurs de données haute performance, des systèmes de stockage optimisés, et des capacités d'analyse en temps réel.
 
-## Fonctionnalités Principales
+## État Actuel (v0.2.0)
 
-### 1. Collecte de Données Avancée
-- **Données de Marché**
-  - Order Books L2/L3 en temps réel
-  - Données tick-by-tick avec WebSocket
-  - Transactions et flux d'ordres
-  - Métriques de marché avancées
+### Fonctionnalités Implémentées
 
-- **Données Alternatives**
-  - Analyse de sentiment Twitter
-  - Analyse communautaire Reddit
-  - Actualités financières en temps réel
-  - Métriques de sentiment multilingues
+#### 1. Collecte de Données
+- Order Books L2/L3 complets avec WebSocket optimisé
+- Données tick-by-tick en temps réel
+- Transactions en temps réel avec analyse de flux
+- Tests de performance et métriques de latence
 
-### 2. Système de Stockage Optimisé
-- **Compression Intelligente**
-  - Multi-algorithmes (LZ4, ZLIB, SNAPPY)
-  - Profils adaptés par type de données
-  - Optimisation automatique des ratios
+#### 2. Stockage Optimisé
+- Compression multi-algorithmes (LZ4, ZLIB, SNAPPY)
+- Partitionnement adaptatif des données
+- Gestion hot/warm/cold data
+- Cache prédictif en développement
 
-- **Partitionnement Adaptatif**
-  - Stratégies temps/symbole/hybride
-  - Gestion hot/warm/cold data
-  - Optimisation des accès
+#### 3. Analyse en Temps Réel
+- Métriques de marché avancées
+- Indicateurs techniques personnalisés
+- Analyse de liquidité et profondeur
+- Intégration avec OrderBookAnalyzer
 
-### 3. Analyse en Temps Réel
-- **Métriques de Marché**
-  - Profondeur et liquidité
-  - Déséquilibres order book
-  - Indicateurs techniques avancés
+## Infrastructure Technique
 
-- **Analyse de Sentiment**
-  - Polarité et subjectivité
-  - Engagement communautaire
-  - Diversité des sources
+### Stack Technologique
+- Python 3.9+ pour le backend
+- TimescaleDB pour le stockage temporel
+- Redis pour le cache distribué
+- Kafka pour le streaming de données
+- Docker pour la conteneurisation
+- Kubernetes pour l'orchestration
 
-## Architecture
-```
-SADIE/
-├── src/
-│   └── sadie/
-│       ├── data/
-│       │   └── collectors/     # Collecteurs de données
-│       ├── analysis/          # Modules d'analyse
-│       ├── storage/           # Gestion du stockage
-│       └── execution/         # Stratégies d'exécution
-├── tests/
-│   ├── unit/                 # Tests unitaires
-│   ├── integration/          # Tests d'intégration
-│   └── performance/          # Tests de performance
-└── docs/                     # Documentation
-```
+### Configuration Requise
+- CPU : 8+ cœurs recommandés
+- RAM : Minimum 16GB, 32GB recommandé
+- Stockage : SSD avec minimum 500GB
+- Réseau : Connexion faible latence (<50ms)
+- OS : Linux (Ubuntu 20.04+ recommandé)
 
 ## Installation
 
 ### Prérequis
-- Python 3.8+
-- TimescaleDB
-- Redis (optionnel)
-
-### Installation rapide
 ```bash
-git clone https://github.com/votre-repo/SADIE.git
-cd SADIE
-pip install -r requirements.txt
+# Dépendances système
+sudo apt-get update
+sudo apt-get install -y python3.9 python3.9-dev python3-pip
+
+# Dépendances de base de données
+sudo apt-get install -y postgresql postgresql-contrib
+
+# Outils de développement
+sudo apt-get install -y build-essential git
 ```
 
-### Configuration
-1. Copier `.env.example` vers `.env`
-2. Configurer les variables d'environnement
-3. Initialiser la base de données : `python setup.py init_db`
+### Installation avec Docker
+```bash
+# Cloner le repository
+git clone https://github.com/votre-repo/SADIE.git
+cd SADIE
+
+# Construire l'image
+docker-compose build
+
+# Démarrer les services
+docker-compose up -d
+```
+
+### Installation Manuelle
+```bash
+# Créer un environnement virtuel
+python3.9 -m venv venv
+source venv/bin/activate
+
+# Installer les dépendances
+pip install -r requirements.txt
+
+# Configuration
+cp .env.example .env
+# Éditer .env avec vos paramètres
+```
 
 ## Utilisation
 
 ### Collecte de Données
 ```python
-from sadie.data.collectors import OrderBookCollector, TickCollector
+from sadie.data.collectors import OrderBookCollector
+from sadie.data.collectors.tick import TickCollector
 
 # Initialiser les collecteurs
-orderbook = OrderBookCollector()
-tick = TickCollector()
+orderbook = OrderBookCollector(
+    symbols=["BTC/USD", "ETH/USD"],
+    depth_level="L2"
+)
 
-# Démarrer la collecte
-orderbook.start()
-tick.start()
+tick = TickCollector(
+    symbols=["BTC/USD"],
+    batch_size=1000
+)
+
+# Démarrer la collecte avec métriques
+orderbook.start(enable_metrics=True)
+tick.start(enable_metrics=True)
+
+# Récupérer les données
+order_book_data = orderbook.get_current_book("BTC/USD")
+tick_data = tick.get_latest_ticks("BTC/USD", limit=100)
 ```
 
 ### Analyse en Temps Réel
 ```python
-from sadie.analysis import MarketAnalyzer, SentimentAnalyzer
+from sadie.analysis.orderbook_metrics import OrderBookAnalyzer
+from sadie.analysis.indicators import TechnicalIndicators
 
-# Analyser les données
-market = MarketAnalyzer()
-sentiment = SentimentAnalyzer()
+# Analyse du carnet d'ordres
+analyzer = OrderBookAnalyzer(orderbook)
+metrics = analyzer.compute_metrics()
 
-# Obtenir les métriques
-metrics = market.get_metrics()
-sentiment_scores = sentiment.analyze()
+# Indicateurs techniques
+indicators = TechnicalIndicators()
+rsi = indicators.calculate_rsi(tick_data, period=14)
+vwap = indicators.calculate_vwap(tick_data)
 ```
 
-## Tests
+## Tests et Validation
+
+### Tests Unitaires
 ```bash
-# Tests unitaires
-pytest tests/unit
+# Exécuter tous les tests
+pytest
 
-# Tests de performance
-pytest tests/performance
-
-# Tests d'intégration
-pytest tests/integration
+# Tests spécifiques
+pytest tests/unit/test_collectors.py
+pytest tests/performance/test_orderbook_perf.py
 ```
+
+### Tests de Performance
+```bash
+# Tests de charge
+python -m sadie.tests.load_testing
+
+# Tests de latence
+python -m sadie.tests.latency_testing
+```
+
+## Monitoring
+
+### Métriques Disponibles
+- Latence des collecteurs (p95, p99)
+- Utilisation des ressources système
+- Performance du cache
+- Santé des connexions WebSocket
+
+### Dashboard
+- Accès Grafana : http://localhost:3000
+- Métriques Prometheus : http://localhost:9090
 
 ## Documentation
 - [Guide Développeur](docs/DEVBOOK.md)
-- [Documentation API](docs/API.md)
-- [Guide Performance](docs/PERFORMANCE.md)
+- [Guide Performance](docs/performance.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Changelog](CHANGELOG.md)
 
-## Roadmap
-Voir [ROADMAP.md](docs/ROADMAP.md) pour les détails sur les développements futurs.
+## Sécurité
+- [Guide de Sécurité](docs/SECURITY.md)
+- [Politique de Confidentialité](docs/PRIVACY.md)
 
-## Changelog
-Voir [CHANGELOG.md](CHANGELOG.md) pour l'historique des versions.
-
-## Contribution
-Les contributions sont les bienvenues ! Voir [CONTRIBUTING.md](docs/CONTRIBUTING.md) pour les guidelines.
+## Support et Contact
+- Documentation : /docs/
+- Issues : GitHub Issues
+- Discussion : GitHub Discussions
+- Wiki : GitHub Wiki
 
 ## Licence
 Ce projet est sous licence MIT. Voir [LICENSE](LICENSE) pour plus de détails.
 
-## Contact
-- Email : contact@sadie.ai
-- Twitter : @SADIE_AI
-- Discord : [Serveur SADIE](https://discord.gg/sadie) 
+---
+Dernière mise à jour : 2024-01-08
+Version actuelle : 0.2.0 
