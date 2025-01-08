@@ -1,186 +1,179 @@
-# Tests de Charge et de Résilience
+# Tests de Performance SADIE
 
-## Vue d'ensemble
+Ce document décrit le framework de tests de performance et de résilience pour le projet SADIE.
 
-Les tests de charge et de résilience sont essentiels pour garantir la fiabilité et la performance des collecteurs de données en conditions réelles d'utilisation. Ces tests vérifient la capacité du système à :
-- Gérer une charge importante
-- Maintenir des performances acceptables
-- Récupérer après des erreurs
-- Assurer la cohérence des données
+## Objectifs
 
-## Tests de Charge
+Les tests de performance visent à :
 
-### Métriques Mesurées
+1. Mesurer et valider les performances des collecteurs de données
+2. Vérifier la résilience du système sous charge
+3. Identifier les goulots d'étranglement potentiels
+4. Établir des références de performance
 
-#### Utilisation Mémoire
-- Mesure de la consommation mémoire sous charge
-- Détection des fuites mémoire
-- Vérification des limites de mémoire
+## Métriques Mesurées
 
-```python
-memory_usage = PerformanceMetrics.measure_memory_usage()  # En MB
-```
+### Utilisation des Ressources
 
-#### Utilisation CPU
-- Surveillance de l'utilisation CPU
-- Identification des goulots d'étranglement
-- Optimisation des performances
+- **Mémoire**
+  - Utilisation moyenne
+  - Pics d'utilisation
+  - Fuites mémoire potentielles
 
-```python
-cpu_usage = PerformanceMetrics.measure_cpu_usage()  # En pourcentage
-```
+- **CPU**
+  - Utilisation moyenne
+  - Pics d'utilisation
+  - Distribution de la charge
 
-#### Latence
-- Mesure des temps de réponse
-- Analyse des pics de latence
-- Optimisation des performances
+- **Réseau**
+  - Bande passante utilisée
+  - Latence des requêtes
+  - Taux d'erreur
 
-```python
-latency = await PerformanceMetrics.measure_latency(func)  # En ms
-```
+### Métriques Spécifiques
 
-### Scénarios de Test
+- **Latence des Collecteurs**
+  - Temps de réponse moyen
+  - 95e percentile
+  - 99e percentile
+  - Latence maximale
 
-#### Test de Charge Mémoire
-```python
-@pytest.mark.performance
-async def test_memory_usage(collectors):
-    """Test memory usage under load."""
-    initial_memory = PerformanceMetrics.measure_memory_usage()
-    # Generate load...
-    assert memory_increase < 500  # Max 500MB increase
-```
+- **Débit**
+  - Transactions par seconde
+  - Messages WebSocket par seconde
+  - Taux de mise à jour des order books
 
-#### Test de Charge CPU
-```python
-@pytest.mark.performance
-async def test_cpu_usage(collectors):
-    """Test CPU usage under load."""
-    cpu_usage_samples = []
-    # Generate load and measure...
-    assert avg_cpu_usage < 80  # Max 80% CPU usage
-```
+- **Fiabilité**
+  - Taux de succès des requêtes
+  - Taux de reconnexion
+  - Temps moyen entre les erreurs
 
-#### Test de Latence
-```python
-@pytest.mark.performance
-async def test_latency(collectors):
-    """Test response latency under load."""
-    latencies = []
-    # Measure latencies...
-    assert avg_latency < 50  # Max 50ms average
-```
+## Scénarios de Test
 
-## Tests de Résilience
-
-### Scénarios Testés
-
-#### Reconnexion WebSocket
-- Test de la récupération après déconnexion
-- Vérification de la reprise des données
-- Mesure du temps de reconnexion
+### 1. Tests de Charge Normale
 
 ```python
-@pytest.mark.resilience
-async def test_reconnection(collector):
-    """Test WebSocket reconnection."""
-    # Force disconnect...
-    await asyncio.sleep(6)
-    # Verify recovery...
+# Exemple de test de charge normale
+async def test_normal_load():
+    collector = OrderBookCollector(symbols=["BTCUSDT"])
+    await collector.start()
+    
+    # Collecter les métriques pendant 1 heure
+    metrics = await collect_metrics(duration=3600)
+    assert metrics.avg_response_time < 0.1  # 100ms max
 ```
 
-#### Récupération d'Erreurs
-- Test de la gestion des erreurs
-- Vérification de la continuité du service
-- Validation de la cohérence des données
+### 2. Tests de Charge Élevée
 
 ```python
-@pytest.mark.resilience
-async def test_error_recovery(collector):
-    """Test error recovery."""
-    # Simulate errors...
-    # Verify functionality...
+# Exemple de test de charge élevée
+async def test_high_load():
+    collector = OrderBookCollector(symbols=["BTCUSDT", "ETHUSDT", "BNBUSDT"])
+    await collector.start()
+    
+    # Simuler une charge élevée
+    await generate_high_load(tps=1000, duration=300)
+    
+    metrics = await collect_metrics()
+    assert metrics.error_rate < 0.01  # Max 1% d'erreurs
 ```
 
-#### Cohérence des Données
-- Validation de l'intégrité des données
-- Test de la synchronisation
-- Vérification des contraintes métier
+### 3. Tests de Résilience
 
 ```python
-@pytest.mark.resilience
-async def test_data_consistency(collector):
-    """Test data consistency."""
-    # Generate updates...
-    # Verify consistency...
+# Exemple de test de résilience
+async def test_network_issues():
+    collector = TransactionCollector(symbols=["BTCUSDT"])
+    await collector.start()
+    
+    # Simuler des problèmes réseau
+    await simulate_network_issues(duration=60)
+    
+    # Vérifier la récupération
+    metrics = await collect_metrics()
+    assert metrics.recovery_time < 5.0  # Récupération en moins de 5s
 ```
+
+## Seuils de Performance
+
+### Collecteur OrderBook
+
+- Temps de réponse moyen < 100ms
+- Utilisation CPU < 30%
+- Utilisation mémoire < 200MB
+- Taux d'erreur < 0.1%
+
+### Collecteur de Transactions
+
+- Latence de traitement < 50ms
+- Capacité > 1000 TPS
+- Perte de messages < 0.01%
+- Temps de récupération < 5s
+
+### WebSocket
+
+- Temps de reconnexion < 1s
+- Taux de perte de connexion < 0.1%
+- Latence moyenne < 50ms
 
 ## Exécution des Tests
 
-### Tests de Charge
+### Prérequis
+
 ```bash
-pytest tests/performance/test_load.py -v -m performance
+pip install pytest-benchmark pytest-asyncio
 ```
 
-### Tests de Résilience
+### Commandes
+
 ```bash
-pytest tests/performance/test_load.py -v -m resilience
+# Tests de performance complets
+pytest tests/performance/
+
+# Tests spécifiques
+pytest tests/performance/test_orderbook_perf.py
+pytest tests/performance/test_transaction_perf.py
+
+# Tests avec métriques détaillées
+pytest tests/performance/ --benchmark-only
 ```
 
-## Configuration
+### Environnement de Test
 
-### Seuils de Performance
-- Mémoire : Max 500MB d'augmentation
-- CPU : Max 80% d'utilisation
-- Latence : Max 50ms en moyenne, 200ms en pic
+- Utiliser un environnement isolé
+- Monitorer les ressources système
+- Exécuter les tests à différents moments
+- Documenter les conditions de test
 
-### Paramètres de Test
-- Durée des tests : Variable selon le scénario
-- Nombre de symboles : 5 par défaut
-- Fréquence des requêtes : Adaptée au test
+## Analyse des Résultats
 
-## Bonnes Pratiques
+### Génération de Rapports
 
-### Exécution des Tests
-1. Exécuter sur un environnement dédié
-2. Éviter les interférences externes
-3. Monitorer les ressources système
-4. Collecter les métriques détaillées
+```bash
+# Générer un rapport HTML
+pytest tests/performance/ --benchmark-only --benchmark-json output.json
+pytest-benchmark compare output.json --csv output.csv
+```
 
-### Analyse des Résultats
-1. Examiner les logs de performance
-2. Identifier les tendances
-3. Investiguer les anomalies
-4. Optimiser les points faibles
+### Interprétation
 
-### Maintenance
-1. Mettre à jour les seuils régulièrement
-2. Adapter les tests aux nouveaux cas d'usage
-3. Documenter les changements
-4. Automatiser les tests critiques
+- Comparer avec les seuils définis
+- Analyser les tendances
+- Identifier les anomalies
+- Documenter les résultats
 
-## Limitations Connues
+## Maintenance
 
-### Tests de Charge
-- Impact des autres processus système
-- Variations selon l'environnement
-- Limites des ressources disponibles
+### Mise à Jour des Tests
 
-### Tests de Résilience
-- Simulation limitée des conditions réelles
-- Dépendance aux services externes
-- Temps d'exécution parfois long
+- Réviser régulièrement les seuils
+- Ajouter de nouveaux scénarios
+- Mettre à jour les métriques
+- Optimiser les tests
 
-## Prochaines Évolutions
+### Intégration Continue
 
-### Améliorations Prévues
-- Tests de charge distribués
-- Simulation de conditions réseau
-- Métriques additionnelles
-- Automatisation complète
-
-### Nouvelles Fonctionnalités
-- Profiling détaillé
-- Rapports automatisés
-- Intégration CI/CD
-- Monitoring en temps réel 
+- Exécuter les tests de performance dans CI
+- Alerter sur les régressions
+- Archiver les résultats
+- Générer des rapports de tendance 

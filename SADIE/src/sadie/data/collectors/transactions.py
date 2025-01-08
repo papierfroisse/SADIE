@@ -1,283 +1,263 @@
-"""Real-time transaction flow collector for SADIE."""
-from typing import Dict, List, Optional, Tuple, Callable, Any
+"""Real-time transaction flow collector with advanced metrics."""
 import asyncio
 import logging
+from typing import Dict, List, Optional, Tuple, Callable, Any
+from dataclasses import dataclass
 from datetime import datetime
-from decimal import Decimal
-import json
 from collections import deque
-
-import aiohttp
-from websockets.client import connect as ws_connect
 import numpy as np
-
-from .base import BaseCollector
-from .exceptions import CollectorError, ValidationError
-from .utils import RateLimiter
 
 logger = logging.getLogger(__name__)
 
+@dataclass
 class Transaction:
-    """Represents a single market transaction."""
-    
-    def __init__(
-        self,
-        price: Decimal,
-        quantity: Decimal,
-        timestamp: datetime,
-        is_buyer_maker: bool,
-        trade_id: int
-    ):
-        """Initialize transaction.
-        
-        Args:
-            price: Transaction price
-            quantity: Transaction quantity
-            timestamp: Transaction timestamp
-            is_buyer_maker: Whether buyer was the maker
-            trade_id: Unique trade identifier
-        """
-        self.price = price
-        self.quantity = quantity
-        self.timestamp = timestamp
-        self.is_buyer_maker = is_buyer_maker
-        self.trade_id = trade_id
-        
-    @property
-    def side(self) -> str:
-        """Get the transaction side (buy/sell)."""
-        return "sell" if self.is_buyer_maker else "buy"
-        
-    @property
-    def volume(self) -> Decimal:
-        """Get transaction volume (price * quantity)."""
-        return self.price * self.quantity
+    """Container for a single market transaction."""
+    symbol: str
+    timestamp: float
+    price: float
+    quantity: float
+    is_buyer_maker: bool
+    trade_id: int
 
+@dataclass
 class TransactionMetrics:
-    """Class for computing transaction flow metrics."""
-    
-    @staticmethod
-    def compute_vwap(transactions: List[Transaction]) -> Decimal:
-        """Compute volume-weighted average price."""
-        if not transactions:
-            return Decimal('0')
-            
-        total_volume = sum(tx.volume for tx in transactions)
-        if total_volume == 0:
-            return Decimal('0')
-            
-        weighted_sum = sum(tx.price * tx.volume for tx in transactions)
-        return weighted_sum / total_volume
-        
-    @staticmethod
-    def compute_buy_sell_ratio(transactions: List[Transaction]) -> Decimal:
-        """Compute buy/sell volume ratio."""
-        buy_volume = sum(tx.volume for tx in transactions if not tx.is_buyer_maker)
-        sell_volume = sum(tx.volume for tx in transactions if tx.is_buyer_maker)
-        total_volume = buy_volume + sell_volume
-        
-        if total_volume == 0:
-            return Decimal('1')
-            
-        return buy_volume / sell_volume if sell_volume > 0 else Decimal('inf')
-        
-    @staticmethod
-    def compute_trade_stats(
-        transactions: List[Transaction]
-    ) -> Tuple[Decimal, Decimal, int]:
-        """Compute basic trade statistics.
-        
-        Returns:
-            Tuple of (avg_trade_size, total_volume, trade_count)
-        """
-        if not transactions:
-            return Decimal('0'), Decimal('0'), 0
-            
-        trade_count = len(transactions)
-        total_volume = sum(tx.volume for tx in transactions)
-        avg_trade_size = total_volume / trade_count if trade_count > 0 else Decimal('0')
-        
-        return avg_trade_size, total_volume, trade_count
+    """Container for transaction flow metrics."""
+    vwap: float  # Volume-weighted average price
+    buy_volume: float
+    sell_volume: float
+    buy_sell_ratio: float
+    trade_count: int
+    volume: float
+    price_impact: float
+    volatility: float
 
-class TransactionCollector(BaseCollector):
-    """Collector for real-time transaction data."""
+class TransactionCollector:
+    """Collector for real-time transaction flows with metrics computation."""
     
     def __init__(
         self,
         symbols: List[str],
         window_size: int = 1000,
         update_interval: float = 0.1,
-        rate_limit: int = 20,
-        metrics_callback: Optional[Callable[[str, Dict[str, Any]], None]] = None
+        callback_interval: float = 1.0
     ):
-        """Initialize transaction collector.
+        """Initialize the transaction collector.
         
         Args:
-            symbols: List of trading pairs to collect
+            symbols: List of trading pairs to monitor
             window_size: Number of transactions to keep in memory
-            update_interval: Update frequency in seconds
-            rate_limit: Maximum requests per second
-            metrics_callback: Optional callback for transaction metrics updates
+            update_interval: Interval between updates in seconds
+            callback_interval: Interval between callback executions
         """
-        super().__init__()
         self.symbols = symbols
         self.window_size = window_size
         self.update_interval = update_interval
-        self.rate_limiter = RateLimiter(rate_limit)
-        self.metrics_callback = metrics_callback
+        self.callback_interval = callback_interval
         
-        self._transactions: Dict[str, deque[Transaction]] = {}
+        # Transaction history per symbol
+        self.transactions: Dict[str, deque[Transaction]] = {
+            symbol: deque(maxlen=window_size)
+            for symbol in symbols
+        }
+        
+        # Callbacks for updates
+        self.callbacks: Dict[str, List[Callable[[List[Transaction], TransactionMetrics], None]]] = {
+            symbol: []
+            for symbol in symbols
+        }
+        
+        # WebSocket connections and tasks
         self._ws_connections: Dict[str, asyncio.Task] = {}
-        self._metrics_tasks: Dict[str, asyncio.Task] = {}
-        self._metrics = TransactionMetrics()
+        self._callback_tasks: Dict[str, asyncio.Task] = {}
+        self._running = False
         
-    async def start(self) -> None:
-        """Start transaction data collection."""
+    async def start(self):
+        """Start collecting transaction data."""
+        if self._running:
+            return
+            
+        self._running = True
+        
         try:
-            # Initialize transaction queues
-            for symbol in self.symbols:
-                self._transactions[symbol] = deque(maxlen=self.window_size)
-                
-            # Start WebSocket connections and metrics tasks
+            # Start WebSocket connections for each symbol
             for symbol in self.symbols:
                 self._ws_connections[symbol] = asyncio.create_task(
-                    self._maintain_ws_connection(symbol)
+                    self._maintain_transaction_stream(symbol)
                 )
-                if self.metrics_callback:
-                    self._metrics_tasks[symbol] = asyncio.create_task(
-                        self._compute_metrics_loop(symbol)
-                    )
+                self._callback_tasks[symbol] = asyncio.create_task(
+                    self._run_callbacks(symbol)
+                )
                 
-            logger.info(f"Started transaction collection for {len(self.symbols)} symbols")
-            
         except Exception as e:
-            raise CollectorError(f"Failed to start transaction collector: {str(e)}")
+            logger.error(f"Error starting transaction collector: {str(e)}")
+            await self.stop()
+            raise
             
-    async def stop(self) -> None:
-        """Stop transaction data collection."""
+    async def stop(self):
+        """Stop collecting transaction data."""
+        self._running = False
+        
+        # Cancel all tasks
+        for task in self._ws_connections.values():
+            task.cancel()
+        for task in self._callback_tasks.values():
+            task.cancel()
+            
         try:
-            # Cancel all tasks
-            for task in self._ws_connections.values():
-                task.cancel()
-            for task in self._metrics_tasks.values():
-                task.cancel()
-                
-            # Wait for tasks to complete
             await asyncio.gather(
                 *self._ws_connections.values(),
-                *self._metrics_tasks.values(),
+                *self._callback_tasks.values(),
                 return_exceptions=True
             )
-            
-            self._ws_connections.clear()
-            self._metrics_tasks.clear()
-            self._transactions.clear()
-            
-            logger.info("Stopped transaction collection")
-            
         except Exception as e:
-            raise CollectorError(f"Failed to stop transaction collector: {str(e)}")
+            logger.error(f"Error stopping transaction collector: {str(e)}")
             
-    async def get_transactions(
+    def register_callback(
+        self,
+        callback: Callable[[List[Transaction], TransactionMetrics], None],
+        symbol: str
+    ):
+        """Register a callback for transaction updates.
+        
+        Args:
+            callback: Function to call with updates
+            symbol: Trading pair symbol
+        """
+        if symbol not in self.symbols:
+            raise ValueError(f"Unknown symbol: {symbol}")
+        self.callbacks[symbol].append(callback)
+        
+    def unregister_callback(
+        self,
+        callback: Callable[[List[Transaction], TransactionMetrics], None],
+        symbol: str
+    ):
+        """Unregister a callback.
+        
+        Args:
+            callback: Function to unregister
+            symbol: Trading pair symbol
+        """
+        if symbol in self.callbacks and callback in self.callbacks[symbol]:
+            self.callbacks[symbol].remove(callback)
+            
+    async def get_recent_transactions(
         self,
         symbol: str,
         limit: Optional[int] = None
     ) -> List[Transaction]:
-        """Get recent transactions.
+        """Get recent transactions for a symbol.
         
         Args:
-            symbol: Trading pair
-            limit: Maximum number of transactions to return
+            symbol: Trading pair symbol
+            limit: Optional limit on number of transactions
             
         Returns:
             List of recent transactions
         """
-        if symbol not in self._transactions:
-            raise CollectorError(f"Transactions not available for {symbol}")
+        if symbol not in self.transactions:
+            raise ValueError(f"Unknown symbol: {symbol}")
             
-        transactions = list(self._transactions[symbol])
+        transactions = list(self.transactions[symbol])
         if limit:
             transactions = transactions[-limit:]
             
         return transactions
         
-    async def get_metrics(
+    def compute_metrics(
         self,
-        symbol: str,
-        window: Optional[int] = None
-    ) -> Dict[str, Any]:
-        """Get current transaction metrics.
+        transactions: List[Transaction]
+    ) -> TransactionMetrics:
+        """Compute metrics from a list of transactions.
         
         Args:
-            symbol: Trading pair
-            window: Number of recent transactions to consider
+            transactions: List of transactions to analyze
             
         Returns:
-            Dictionary of transaction metrics
+            TransactionMetrics containing computed metrics
         """
-        if symbol not in self._transactions:
-            raise CollectorError(f"Transactions not available for {symbol}")
-            
-        transactions = await self.get_transactions(symbol, window)
-        
-        avg_size, volume, count = self._metrics.compute_trade_stats(transactions)
-        
-        return {
-            'vwap': self._metrics.compute_vwap(transactions),
-            'buy_sell_ratio': self._metrics.compute_buy_sell_ratio(transactions),
-            'avg_trade_size': avg_size,
-            'total_volume': volume,
-            'trade_count': count,
-            'timestamp': datetime.utcnow()
-        }
-        
-    async def _maintain_ws_connection(self, symbol: str) -> None:
-        """Maintain WebSocket connection for transaction updates."""
-        while True:
-            try:
-                uri = f"wss://stream.binance.com:9443/ws/{symbol.lower()}@trade"
-                async with ws_connect(uri) as ws:
-                    logger.info(f"Connected to trade stream for {symbol}")
-                    
-                    async for message in ws:
-                        await self._handle_ws_message(symbol, message)
-                        
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.error(f"WebSocket error for {symbol}: {str(e)}")
-                await asyncio.sleep(5)  # Wait before reconnecting
-                
-    async def _handle_ws_message(self, symbol: str, message: str) -> None:
-        """Handle trade message."""
-        try:
-            data = json.loads(message)
-            
-            # Create transaction object
-            transaction = Transaction(
-                price=Decimal(str(data['p'])),
-                quantity=Decimal(str(data['q'])),
-                timestamp=datetime.fromtimestamp(data['T'] / 1000),
-                is_buyer_maker=data['m'],
-                trade_id=data['t']
+        if not transactions:
+            return TransactionMetrics(
+                vwap=0.0,
+                buy_volume=0.0,
+                sell_volume=0.0,
+                buy_sell_ratio=1.0,
+                trade_count=0,
+                volume=0.0,
+                price_impact=0.0,
+                volatility=0.0
             )
             
-            # Add to queue
-            self._transactions[symbol].append(transaction)
-            
-        except Exception as e:
-            logger.error(f"Failed to process message for {symbol}: {str(e)}")
-            
-    async def _compute_metrics_loop(self, symbol: str) -> None:
-        """Compute and publish transaction metrics periodically."""
-        while True:
+        # Basic metrics
+        volume = sum(t.quantity for t in transactions)
+        vwap = sum(t.price * t.quantity for t in transactions) / volume if volume > 0 else 0
+        
+        # Buy/Sell volumes
+        buy_volume = sum(t.quantity for t in transactions if not t.is_buyer_maker)
+        sell_volume = sum(t.quantity for t in transactions if t.is_buyer_maker)
+        buy_sell_ratio = buy_volume / sell_volume if sell_volume > 0 else float('inf')
+        
+        # Price impact and volatility
+        prices = np.array([t.price for t in transactions])
+        price_impact = (prices[-1] - prices[0]) / prices[0] if len(prices) > 1 else 0
+        volatility = np.std(np.diff(np.log(prices))) if len(prices) > 1 else 0
+        
+        return TransactionMetrics(
+            vwap=vwap,
+            buy_volume=buy_volume,
+            sell_volume=sell_volume,
+            buy_sell_ratio=buy_sell_ratio,
+            trade_count=len(transactions),
+            volume=volume,
+            price_impact=price_impact,
+            volatility=volatility
+        )
+        
+    async def _maintain_transaction_stream(self, symbol: str):
+        """Maintain WebSocket connection for transaction stream."""
+        while self._running:
             try:
-                metrics = await self.get_metrics(symbol)
-                if self.metrics_callback:
-                    self.metrics_callback(symbol, metrics)
-                await asyncio.sleep(self.update_interval)
-            except asyncio.CancelledError:
-                break
+                async with self._connect_websocket(symbol) as ws:
+                    async for message in ws:
+                        if not self._running:
+                            break
+                            
+                        transaction = self._parse_transaction(symbol, message)
+                        if transaction:
+                            self.transactions[symbol].append(transaction)
+                            
             except Exception as e:
-                logger.error(f"Failed to compute metrics for {symbol}: {str(e)}")
-                await asyncio.sleep(1)  # Wait before retrying 
+                logger.error(f"Error in transaction stream for {symbol}: {str(e)}")
+                if self._running:
+                    await asyncio.sleep(1)  # Wait before reconnecting
+                    
+    async def _run_callbacks(self, symbol: str):
+        """Run callbacks for a symbol at regular intervals."""
+        while self._running:
+            try:
+                if self.callbacks[symbol]:
+                    transactions = await self.get_recent_transactions(symbol)
+                    metrics = self.compute_metrics(transactions)
+                    
+                    for callback in self.callbacks[symbol]:
+                        try:
+                            callback(transactions, metrics)
+                        except Exception as e:
+                            logger.error(f"Error in callback for {symbol}: {str(e)}")
+                            
+            except Exception as e:
+                logger.error(f"Error processing callbacks for {symbol}: {str(e)}")
+                
+            await asyncio.sleep(self.callback_interval)
+            
+    async def _connect_websocket(self, symbol: str):
+        """Create WebSocket connection for a symbol."""
+        # Implementation will depend on the exchange API
+        # This is a placeholder for the actual WebSocket connection
+        raise NotImplementedError("WebSocket connection not implemented")
+        
+    def _parse_transaction(self, symbol: str, message: str) -> Optional[Transaction]:
+        """Parse transaction from WebSocket message."""
+        # Implementation will depend on the exchange message format
+        # This is a placeholder for the actual message parsing
+        raise NotImplementedError("Message parsing not implemented") 
