@@ -8,11 +8,12 @@
 - ✅ Chart : Composant React pour l'intégration du renderer
 - ✅ ChartContainer : Conteneur principal avec gestion de la mise en page
 - ✅ AppLayout : Structure globale de l'application
-- ✅ TopToolbar : Barre d'outils supérieure
-- ✅ DrawingToolbar : Barre d'outils de dessin
-- ✅ MarketInfoPanel : Panneau d'informations de marché
-- ✅ TickerList : Liste des tickers
-- ✅ TopTickers : Liste des top tickers
+- ✅ TopToolbar : Barre d'outils supérieure avec intervalles et symboles
+- ✅ VerticalToolbar : Barre d'outils de dessin verticale
+- ✅ RightPanel : Panneau droit avec exchanges et détails
+- ✅ TopCryptos : Liste compacte des cryptomonnaies principales
+- ✅ ExchangeList : Liste des exchanges avec leurs paires
+- ✅ SymbolDetails : Détails du symbole sélectionné
 
 ### Fonctionnalités Implémentées
 - ✅ Affichage des chandeliers avec couleurs différentes pour hausse/baisse
@@ -27,16 +28,22 @@
 - ✅ Barre d'outils pour les indicateurs
 - ✅ Mode sombre par défaut
 - ✅ Layout responsive
+- ✅ Affichage des prix sur l'axe Y
+- ✅ Affichage des dates sur l'axe X
+- ✅ Liste des exchanges avec leurs paires
+- ✅ Panneau de détails du symbole
 
 ## Prochaines Étapes
 
 ### 1. Améliorations UI/UX Prioritaires
-- [ ] Corriger l'alignement du graphique principal
-- [ ] Optimiser l'affichage des tickers dans le panneau droit
-- [ ] Améliorer la visibilité des indicateurs techniques
+- [x] Corriger l'alignement du graphique principal
+- [x] Optimiser l'affichage des tickers dans le panneau droit
+- [x] Améliorer la visibilité des indicateurs techniques
 - [ ] Ajouter des transitions fluides entre les états
 - [ ] Implémenter le mode plein écran
 - [ ] Ajouter des tooltips d'aide
+- [ ] Implémenter la recherche de symboles
+- [ ] Ajouter un système de favoris
 
 ### 2. Fonctionnalités Techniques
 - [ ] Compléter l'implémentation des indicateurs :
@@ -49,11 +56,15 @@
 - [ ] Ajouter le support des études personnalisées
 
 ### 3. Outils de Trading
-- [ ] Implémenter les outils de dessin :
-  - [ ] Lignes de tendance
-  - [ ] Rectangles
+- [x] Implémenter les outils de dessin de base :
+  - [x] Lignes
+  - [x] Rectangles
+  - [x] Cercles
+  - [x] Texte
+- [ ] Ajouter des outils avancés :
   - [ ] Fibonacci
-  - [ ] Texte et annotations
+  - [ ] Pitchfork
+  - [ ] Vagues d'Elliott
 - [ ] Ajouter la gestion des alertes
 - [ ] Intégrer un système de sauvegarde des configurations
 - [ ] Ajouter le mode replay
@@ -84,7 +95,7 @@
 ### Conventions de Code
 - TypeScript strict mode
 - Composants React fonctionnels avec hooks
-- Styled-components pour le styling
+- Styled-components pour le styling (avec préfixe $ pour les props transient)
 - Tests avec Jest et React Testing Library
 
 ### Git
@@ -94,10 +105,10 @@
 - Code review avant merge
 
 ## Bugs Connus
-- Problème d'alignement du graphique principal
-- Décalage possible des indicateurs techniques
-- Problèmes de performance avec de grandes quantités de données
-- Certains éléments UI ne respectent pas exactement le design TradingView
+- Certains indicateurs techniques à restaurer
+- Besoin d'optimisation des performances avec de grandes quantités de données
+- Manque de gestion d'erreurs robuste
+- Besoin d'améliorer la gestion des états de chargement
 
 ## Idées d'Amélioration
 - Support du multi-touch pour mobile
@@ -106,4 +117,6 @@
 - Intégration avec différentes sources de données
 - Mode de trading en papier pour les tests
 - Support des crypto-monnaies alternatives
-- Intégration de news et analyses fondamentales 
+- Intégration de news et analyses fondamentales
+- Système de notifications personnalisables
+- Mode collaboratif pour le partage d'analyses 
