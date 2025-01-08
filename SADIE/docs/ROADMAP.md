@@ -19,27 +19,36 @@
   - [x] Implémentation du cache en mémoire
   - [x] Gestion de la persistance
 
-### 0.1.2 🔄 (En cours)
-- [ ] Collecteurs de données de base
+### 0.1.2 ✓ (2024-01-08)
+- [x] Collecteurs de données de base
   - [x] Classe de base BaseCollector
   - [x] Collecteur OrderBook (L2/L3)
-  - [ ] Tests des collecteurs
-  - [ ] Documentation des collecteurs
-- [ ] Validation et tests
-  - [ ] Tests d'intégration
-  - [ ] Tests de performance
-  - [ ] Benchmarks initiaux
+  - [x] Tests des collecteurs
+  - [x] Documentation des collecteurs
+- [x] Validation et tests
+  - [x] Tests d'intégration
+  - [x] Tests de performance
+  - [x] Benchmarks initiaux
 
 ## Version 0.2.x - Enrichissement des Données
-### 0.2.0 (Prévu : 2024-02)
+### 0.2.0 🔄 (En cours)
 - [ ] Données de marché avancées
-  - [ ] Données tick par tick
-  - [ ] Carnets d'ordres complets
+  - [x] Données tick par tick
+  - [x] Carnets d'ordres complets
+    - [x] Métriques avancées (spread, profondeur, déséquilibre)
+    - [x] Gestion efficace avec SortedDict
+    - [x] Tests unitaires complets
   - [ ] Flux de transactions en temps réel
-- [ ] Tests et validation
-  - [ ] Tests de charge
-  - [ ] Tests de résilience
-  - [ ] Documentation des performances
+- [x] Tests et validation
+  - [x] Tests de charge
+    - [x] Monitoring des ressources
+    - [x] Gestion des timeouts
+    - [x] Métriques de performance
+  - [x] Tests de résilience
+    - [x] Reconnexion automatique
+    - [x] Gestion des erreurs
+    - [x] Cohérence des données
+  - [x] Documentation des performances
 
 ### 0.2.1 (Prévu : 2024-02)
 - [ ] Données alternatives

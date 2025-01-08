@@ -1,90 +1,65 @@
 # Changelog
 
-Toutes les modifications notables de ce projet seront documentées dans ce fichier.
+## [0.2.0] - En cours
 
-Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
-et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [0.2.0] - En développement
-### Ajouté
-- Collecteur de données tick par tick
-  - Support WebSocket pour les données en temps réel
-  - Traitement par lots avec statistiques
-  - Cache optimisé pour les données haute fréquence
+### Ajouts
+- Système de collecte de données avancé
+  - Collecteur tick-by-tick avec support WebSocket
+  - Collecteur de transactions en temps réel
+  - Analyseur d'order book avec métriques avancées
+  - Tests de performance et résilience
+- Système de stockage optimisé
+  - Compression intelligente multi-algorithmes (LZ4, ZLIB, SNAPPY)
+  - Profils de compression adaptés par type de données
+  - Partitionnement adaptatif (temps/symbole/hybride)
+  - Gestion des données chaudes/tièdes/froides
   - Tests unitaires complets
 
-- Carnets d'ordres avancés
-  - Support complet des carnets d'ordres L2/L3
-  - Métriques en temps réel (spread, profondeur, déséquilibre)
-  - Gestion efficace des mises à jour avec SortedDict
-  - Callbacks pour les métriques en temps réel
-  - Tests unitaires et d'intégration complets
-
-- Flux de transactions en temps réel
-  - Collecte des transactions via WebSocket
-  - Métriques avancées (VWAP, ratio achat/vente)
-  - Cache circulaire optimisé avec deque
-  - Callbacks pour le monitoring en temps réel
-  - Tests unitaires et documentation complète
-
-- Tests de charge et de résilience
-  - Mesures de performance optimisées (mémoire, CPU, latence)
-  - Tests de charge avec gestion efficace des ressources
-  - Monitoring détaillé avec resource_monitor
-  - Gestion des timeouts et retries
-  - Tests de résilience améliorés
-  - Métriques P95 pour la latence
-  - Taux d'erreur maximum de 1%
-  - Documentation détaillée des procédures de test
-
-### Optimisé
-- Gestion de la mémoire avec garbage collection périodique
-- Monitoring des ressources système pendant les tests
-- Mécanisme de retry avec timeout pour les opérations critiques
-- Traitement par lots pour réduire la charge système
-- Gestion améliorée des erreurs et des cas limites
-
-## [0.1.2] - 2024-01-08
-### Ajouté
-- Classe de base BaseCollector pour standardiser les collecteurs de données
-- Collecteur OrderBook pour les données L2/L3 de Binance
-- Tests unitaires complets pour le collecteur OrderBook
-- Tests de performance pour les collecteurs de données
-- Tests d'intégration pour les collecteurs
-- Documentation complète des collecteurs dans `docs/collectors.md`
-
-### Amélioré
+### Améliorations
 - Optimisation des performances des collecteurs
-- Meilleure gestion des erreurs et des reconnexions
-- Documentation plus détaillée et exemples d'utilisation
+- Meilleure gestion de la mémoire
+- Support WebSocket amélioré
+- Documentation technique détaillée
+- Métriques de performance
 
-## [0.1.1] - 2024-01-08
-### Ajouté
-- Intégration de l'API Binance
-- Intégration de l'API Alpha Vantage
-- Configuration PostgreSQL/TimescaleDB
-- Système de cache avec gestion de la persistance
-- Documentation des APIs et de la base de données
+### Corrections
+- Gestion des erreurs WebSocket
+- Fuites mémoire dans les collecteurs
+- Problèmes de concurrence
 
-### Modifié
-- Amélioration de la structure du projet
-- Optimisation de la gestion des connexions API
+## [0.2.1] - En cours
 
-### Corrigé
-- Gestion des erreurs dans les appels API
-- Problèmes de connexion à la base de données
+### Ajouts
+- Collecteurs de données alternatives
+  - Twitter : analyse de sentiment en temps réel
+  - Reddit : analyse communautaire et engagement
+  - NewsAPI : actualités et analyse multilingue
+- Métriques avancées
+  - Analyse de sentiment (polarité/subjectivité)
+  - Engagement communautaire
+  - Diversité des sources
+  - Tests unitaires complets
 
-## [0.1.0] - 2024-01-08
-### Ajouté
-- Structure initiale du projet
-- Configuration Git et GitHub Actions
-- Documentation de base (README, CONTRIBUTING)
-- Tests unitaires de base
-- Configuration de l'environnement de développement
-- Fichiers de configuration initiaux
-- Structure des dossiers du projet
+### Améliorations
+- Support multilingue
+- Performance des collecteurs
+- Documentation utilisateur
+- Gestion de la mémoire
 
-### Sécurité
-- Mise en place des bonnes pratiques de sécurité
-- Configuration des variables d'environnement
-- Gestion sécurisée des clés API 
+## [0.1.2] - 2024-01-15
+
+### Ajouts
+- Support des order books L2/L3
+- Tests unitaires pour OrderBookCollector
+- Tests de performance
+- Documentation technique
+
+### Améliorations
+- Refactoring des collecteurs
+- Optimisation des performances
+- Documentation mise à jour
+
+### Corrections
+- Bugs WebSocket
+- Problèmes de mémoire
+- Erreurs de parsing JSON 

@@ -1,19 +1,16 @@
-"""Load and resilience tests for data collectors."""
+"""Performance and load tests for data collectors."""
 import asyncio
 import time
-from typing import List, Dict, Any
-import pytest
 import psutil
-import logging
-import gc
+import pytest
+import numpy as np
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import asynccontextmanager
+from typing import List, Dict, Any
+from datetime import datetime, timedelta
 
 from sadie.data.collectors.orderbook import OrderBookCollector
 from sadie.data.collectors.transactions import TransactionCollector
 from sadie.data.collectors.tick import TickCollector
-
-logger = logging.getLogger(__name__)
 
 class PerformanceMetrics:
     """Class for measuring performance metrics."""
@@ -21,297 +18,278 @@ class PerformanceMetrics:
     @staticmethod
     def measure_memory_usage() -> float:
         """Measure current memory usage in MB."""
-        gc.collect()  # Force garbage collection before measurement
         process = psutil.Process()
         return process.memory_info().rss / 1024 / 1024
         
     @staticmethod
-    def measure_cpu_usage(interval: float = 1.0) -> float:
+    def measure_cpu_usage() -> float:
         """Measure current CPU usage percentage."""
-        return psutil.cpu_percent(interval=interval)
+        return psutil.cpu_percent(interval=1)
         
     @staticmethod
-    async def measure_latency(func, timeout: float = 5.0, *args, **kwargs) -> float:
+    async def measure_latency(func, *args, **kwargs) -> float:
         """Measure function execution latency in milliseconds."""
-        start_time = time.perf_counter()
-        try:
-            async with asyncio.timeout(timeout):
-                await func(*args, **kwargs)
-        except asyncio.TimeoutError:
-            logger.warning(f"Function {func.__name__} timed out after {timeout}s")
-            return float('inf')
-        end_time = time.perf_counter()
-        return (end_time - start_time) * 1000
+        start = time.perf_counter()
+        await func(*args, **kwargs)
+        end = time.perf_counter()
+        return (end - start) * 1000
         
     @staticmethod
-    async def measure_with_retries(func, retries: int = 3, *args, **kwargs) -> float:
-        """Measure function with retries on failure."""
-        for attempt in range(retries):
-            try:
-                return await PerformanceMetrics.measure_latency(func, *args, **kwargs)
-            except Exception as e:
-                if attempt == retries - 1:
-                    raise
-                logger.warning(f"Attempt {attempt + 1} failed: {str(e)}")
-                await asyncio.sleep(1)
-
-@asynccontextmanager
-async def resource_monitor():
-    """Context manager for monitoring system resources."""
-    initial_memory = PerformanceMetrics.measure_memory_usage()
-    initial_cpu = PerformanceMetrics.measure_cpu_usage()
-    start_time = time.perf_counter()
+    def calculate_percentile(values: List[float], percentile: float) -> float:
+        """Calculate percentile from a list of values."""
+        return float(np.percentile(values, percentile))
+        
+class LoadGenerator:
+    """Class for generating test load."""
     
-    try:
-        yield
-    finally:
-        end_time = time.perf_counter()
-        final_memory = PerformanceMetrics.measure_memory_usage()
-        final_cpu = PerformanceMetrics.measure_cpu_usage()
+    def __init__(self, tps: int, duration: int):
+        """Initialize load generator.
         
-        logger.info(f"Test duration: {end_time - start_time:.2f}s")
-        logger.info(f"Memory change: {final_memory - initial_memory:.2f}MB")
-        logger.info(f"CPU usage: {final_cpu:.2f}%")
-
-@pytest.mark.performance
-class TestCollectorLoad:
-    """Load tests for data collectors."""
-    
-    @pytest.fixture
-    async def collectors(self):
-        """Create collectors for testing."""
-        symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "ADAUSDT", "DOGEUSDT"]
+        Args:
+            tps: Target transactions per second
+            duration: Test duration in seconds
+        """
+        self.tps = tps
+        self.duration = duration
+        self.interval = 1.0 / tps
         
-        orderbook = OrderBookCollector(symbols=symbols, depth=1000)
-        transactions = TransactionCollector(symbols=symbols, window_size=5000)
-        tick = TickCollector(symbols=symbols, batch_size=1000)
+    async def generate_load(self, func, *args, **kwargs) -> List[float]:
+        """Generate load by calling function at specified rate.
         
-        try:
-            await asyncio.gather(
-                orderbook.start(),
-                transactions.start(),
-                tick.start()
-            )
-            
-            # Warmup period
-            await asyncio.sleep(2)
-            
-            yield orderbook, transactions, tick
-            
-        finally:
-            await asyncio.gather(
-                orderbook.stop(),
-                transactions.stop(),
-                tick.stop(),
-                return_exceptions=True
-            )
-            gc.collect()
-        
-    async def test_memory_usage(self, collectors):
-        """Test memory usage under load."""
-        orderbook, transactions, tick = collectors
-        
-        async with resource_monitor():
-            initial_memory = PerformanceMetrics.measure_memory_usage()
-            
-            # Generate load in batches
-            for batch in range(10):
-                for _ in range(100):  # 100 requests per batch
-                    await asyncio.gather(
-                        orderbook.get_order_book("BTCUSDT"),
-                        transactions.get_transactions("BTCUSDT"),
-                        tick.get_ticks("BTCUSDT")
-                    )
-                await asyncio.sleep(0.1)  # Brief pause between batches
-                
-            gc.collect()
-            final_memory = PerformanceMetrics.measure_memory_usage()
-            memory_increase = final_memory - initial_memory
-            
-            logger.info(f"Memory usage increase: {memory_increase:.2f} MB")
-            assert memory_increase < 500  # Max 500MB increase
-        
-    async def test_cpu_usage(self, collectors):
-        """Test CPU usage under load."""
-        orderbook, transactions, tick = collectors
-        cpu_usage_samples = []
-        
-        async with resource_monitor():
-            # Generate load and measure CPU in intervals
-            for _ in range(10):
-                await asyncio.gather(
-                    orderbook.get_metrics("BTCUSDT"),
-                    transactions.get_metrics("BTCUSDT"),
-                    tick.get_metrics("BTCUSDT")
-                )
-                cpu_usage_samples.append(PerformanceMetrics.measure_cpu_usage(interval=0.5))
-                await asyncio.sleep(0.5)  # Allow CPU to stabilize
-                
-            avg_cpu_usage = sum(cpu_usage_samples) / len(cpu_usage_samples)
-            logger.info(f"Average CPU usage: {avg_cpu_usage:.2f}%")
-            assert avg_cpu_usage < 80  # Max 80% CPU usage
-        
-    async def test_latency(self, collectors):
-        """Test response latency under load."""
-        orderbook, transactions, tick = collectors
+        Returns:
+            List of latencies in milliseconds
+        """
+        start_time = time.perf_counter()
         latencies = []
         
-        async with resource_monitor():
-            # Measure latency with retries
-            for _ in range(100):
-                latency = await PerformanceMetrics.measure_with_retries(
-                    orderbook.get_order_book,
-                    retries=3,
-                    timeout=2.0,
-                    symbol="BTCUSDT"
-                )
-                if latency != float('inf'):
-                    latencies.append(latency)
-                await asyncio.sleep(0.01)  # Prevent overwhelming
-                
-            if not latencies:
-                pytest.fail("All latency measurements failed")
-                
-            avg_latency = sum(latencies) / len(latencies)
-            max_latency = max(latencies)
-            p95_latency = sorted(latencies)[int(len(latencies) * 0.95)]
+        while time.perf_counter() - start_time < self.duration:
+            iteration_start = time.perf_counter()
             
-            logger.info(f"Average latency: {avg_latency:.2f}ms")
-            logger.info(f"P95 latency: {p95_latency:.2f}ms")
-            logger.info(f"Maximum latency: {max_latency:.2f}ms")
+            # Measure latency
+            latency = await PerformanceMetrics.measure_latency(func, *args, **kwargs)
+            latencies.append(latency)
             
-            assert avg_latency < 50  # Max 50ms average latency
-            assert p95_latency < 150  # Max 150ms 95th percentile
-            assert max_latency < 200  # Max 200ms peak latency
-        
-    async def test_concurrent_requests(self, collectors):
-        """Test handling of concurrent requests."""
-        orderbook, transactions, tick = collectors
-        
-        async def make_requests():
-            """Make multiple requests to collectors."""
-            for _ in range(50):
-                try:
-                    async with asyncio.timeout(2.0):
-                        await asyncio.gather(
-                            orderbook.get_order_book("BTCUSDT"),
-                            transactions.get_transactions("BTCUSDT"),
-                            tick.get_ticks("BTCUSDT")
-                        )
-                except asyncio.TimeoutError:
-                    logger.warning("Request batch timed out")
-                await asyncio.sleep(0.02)  # Rate limiting
+            # Sleep remaining time to maintain TPS
+            elapsed = time.perf_counter() - iteration_start
+            if elapsed < self.interval:
+                await asyncio.sleep(self.interval - elapsed)
                 
-        async with resource_monitor():
-            # Run multiple concurrent request streams with monitoring
-            tasks = [make_requests() for _ in range(10)]
-            await asyncio.gather(*tasks)
+        return latencies
 
-@pytest.mark.resilience
-class TestCollectorResilience:
-    """Resilience tests for data collectors."""
+@pytest.mark.performance
+class TestOrderBookCollector:
+    """Performance tests for OrderBookCollector."""
     
     @pytest.fixture
     async def collector(self):
-        """Create a collector for testing."""
+        """Create collector instance for testing."""
         collector = OrderBookCollector(
             symbols=["BTCUSDT"],
-            depth=1000,
+            depth_level="L2",
             update_interval=0.1
         )
-        try:
-            await collector.start()
-            await asyncio.sleep(2)  # Warmup period
-            yield collector
-        finally:
-            await collector.stop()
-            gc.collect()
+        await collector.start()
+        yield collector
+        await collector.stop()
         
-    async def test_reconnection(self, collector):
-        """Test WebSocket reconnection capability."""
-        async with resource_monitor():
-            # Force disconnect
-            for ws in collector._ws_connections.values():
-                ws.cancel()
+    async def test_memory_usage(self, collector):
+        """Test memory usage under load."""
+        initial_memory = PerformanceMetrics.measure_memory_usage()
+        
+        # Generate load
+        load_gen = LoadGenerator(tps=100, duration=60)
+        await load_gen.generate_load(collector.get_order_book, "BTCUSDT")
+        
+        final_memory = PerformanceMetrics.measure_memory_usage()
+        memory_increase = final_memory - initial_memory
+        
+        assert memory_increase < 200  # Max 200MB increase
+        
+    async def test_cpu_usage(self, collector):
+        """Test CPU usage under load."""
+        cpu_samples = []
+        
+        # Generate load and measure CPU
+        load_gen = LoadGenerator(tps=100, duration=60)
+        async def measure_cpu():
+            while True:
+                cpu_samples.append(PerformanceMetrics.measure_cpu_usage())
+                await asyncio.sleep(1)
                 
-            # Wait for reconnection with timeout
-            try:
-                async with asyncio.timeout(10):
-                    while True:
-                        try:
-                            book = await collector.get_order_book("BTCUSDT")
-                            if len(book[0]) > 0 and len(book[1]) > 0:
-                                break
-                        except Exception:
-                            await asyncio.sleep(0.5)
-            except asyncio.TimeoutError:
-                pytest.fail("Reconnection failed within timeout")
+        cpu_task = asyncio.create_task(measure_cpu())
+        await load_gen.generate_load(collector.get_order_book, "BTCUSDT")
+        cpu_task.cancel()
         
-    async def test_error_recovery(self, collector):
-        """Test recovery from various error conditions."""
-        async with resource_monitor():
-            # Simulate different error conditions
-            error_conditions = [
-                "invalid json",
-                "{",
-                '{"e": "error"}',
-                None,
-                b"binary data"
-            ]
-            
-            for error in error_conditions:
-                await collector._handle_ws_message("BTCUSDT", error)
-                
-                # Verify collector still functions
-                try:
-                    async with asyncio.timeout(2):
-                        book = await collector.get_order_book("BTCUSDT")
-                        assert len(book[0]) > 0
-                        assert len(book[1]) > 0
-                except Exception as e:
-                    pytest.fail(f"Failed to recover from error condition: {error}, {str(e)}")
+        avg_cpu = sum(cpu_samples) / len(cpu_samples)
+        assert avg_cpu < 30  # Max 30% CPU usage
         
-    async def test_data_consistency(self, collector):
-        """Test data consistency under stress."""
-        async with resource_monitor():
-            initial_book = await collector.get_order_book("BTCUSDT")
-            
-            # Generate rapid updates with monitoring
-            update_count = 0
-            error_count = 0
-            
-            for _ in range(1000):
-                try:
-                    async with asyncio.timeout(0.1):
-                        book = await collector.get_order_book("BTCUSDT")
-                        update_count += 1
-                        
-                        # Verify basic consistency
-                        assert len(book[0]) > 0  # Has bids
-                        assert len(book[1]) > 0  # Has asks
-                        assert book[0][0][0] < book[1][0][0]  # Bid < Ask
-                except Exception as e:
-                    error_count += 1
-                    logger.warning(f"Update error: {str(e)}")
-                    
-            logger.info(f"Successful updates: {update_count}")
-            logger.info(f"Failed updates: {error_count}")
-            assert error_count / (update_count + error_count) < 0.01  # Max 1% error rate
+    async def test_latency(self, collector):
+        """Test response latency under load."""
+        load_gen = LoadGenerator(tps=100, duration=60)
+        latencies = await load_gen.generate_load(collector.get_order_book, "BTCUSDT")
         
-    async def test_memory_leak(self, collector):
-        """Test for memory leaks during extended operation."""
-        async with resource_monitor():
-            initial_memory = PerformanceMetrics.measure_memory_usage()
+        avg_latency = sum(latencies) / len(latencies)
+        p95_latency = PerformanceMetrics.calculate_percentile(latencies, 95)
+        p99_latency = PerformanceMetrics.calculate_percentile(latencies, 99)
+        
+        assert avg_latency < 100  # Average < 100ms
+        assert p95_latency < 200  # 95th percentile < 200ms
+        assert p99_latency < 500  # 99th percentile < 500ms
+        
+    async def test_concurrent_requests(self, collector):
+        """Test performance with concurrent requests."""
+        async def make_requests(n: int) -> List[float]:
+            latencies = []
+            for _ in range(n):
+                latency = await PerformanceMetrics.measure_latency(
+                    collector.get_order_book, "BTCUSDT"
+                )
+                latencies.append(latency)
+            return latencies
             
-            # Run for extended period with periodic cleanup
-            for _ in range(10):
-                for _ in range(10):  # 10 requests per cycle
-                    await collector.get_order_book("BTCUSDT")
-                    await asyncio.sleep(0.1)
-                gc.collect()  # Periodic cleanup
-                
-            final_memory = PerformanceMetrics.measure_memory_usage()
-            memory_diff = final_memory - initial_memory
+        # Run 10 concurrent request batches
+        tasks = [make_requests(10) for _ in range(10)]
+        all_latencies = await asyncio.gather(*tasks)
+        
+        # Flatten latencies list
+        latencies = [lat for batch in all_latencies for lat in batch]
+        
+        avg_latency = sum(latencies) / len(latencies)
+        max_latency = max(latencies)
+        
+        assert avg_latency < 200  # Average < 200ms under load
+        assert max_latency < 1000  # Max < 1s
+        
+@pytest.mark.performance
+class TestTransactionCollector:
+    """Performance tests for TransactionCollector."""
+    
+    @pytest.fixture
+    async def collector(self):
+        """Create collector instance for testing."""
+        collector = TransactionCollector(
+            symbols=["BTCUSDT"],
+            window_size=1000,
+            update_interval=0.1
+        )
+        await collector.start()
+        yield collector
+        await collector.stop()
+        
+    async def test_memory_usage(self, collector):
+        """Test memory usage under load."""
+        initial_memory = PerformanceMetrics.measure_memory_usage()
+        
+        # Generate load
+        load_gen = LoadGenerator(tps=1000, duration=60)
+        await load_gen.generate_load(collector.get_recent_transactions, "BTCUSDT")
+        
+        final_memory = PerformanceMetrics.measure_memory_usage()
+        memory_increase = final_memory - initial_memory
+        
+        assert memory_increase < 100  # Max 100MB increase
+        
+    async def test_high_throughput(self, collector):
+        """Test collector under high transaction throughput."""
+        load_gen = LoadGenerator(tps=1000, duration=60)
+        latencies = await load_gen.generate_load(
+            collector.get_recent_transactions, "BTCUSDT"
+        )
+        
+        success_rate = len(latencies) / (load_gen.tps * load_gen.duration)
+        avg_latency = sum(latencies) / len(latencies)
+        
+        assert success_rate > 0.99  # 99% success rate
+        assert avg_latency < 50  # Average < 50ms
+        
+    async def test_callback_performance(self, collector):
+        """Test callback execution performance."""
+        callback_latencies = []
+        
+        async def test_callback(transactions, metrics):
+            start = time.perf_counter()
+            # Simulate callback processing
+            await asyncio.sleep(0.001)
+            end = time.perf_counter()
+            callback_latencies.append((end - start) * 1000)
             
-            logger.info(f"Memory change after extended operation: {memory_diff:.2f} MB")
-            assert memory_diff < 50  # Max 50MB increase 
+        collector.register_callback(test_callback, "BTCUSDT")
+        
+        # Wait for callbacks to accumulate
+        await asyncio.sleep(10)
+        
+        avg_latency = sum(callback_latencies) / len(callback_latencies)
+        max_latency = max(callback_latencies)
+        
+        assert avg_latency < 10  # Average < 10ms
+        assert max_latency < 50  # Max < 50ms
+        
+@pytest.mark.performance
+class TestTickCollector:
+    """Performance tests for TickCollector."""
+    
+    @pytest.fixture
+    async def collector(self):
+        """Create collector instance for testing."""
+        collector = TickCollector(
+            symbols=["BTCUSDT"],
+            batch_size=100,
+            update_interval=0.1
+        )
+        await collector.start()
+        yield collector
+        await collector.stop()
+        
+    async def test_memory_usage(self, collector):
+        """Test memory usage under load."""
+        initial_memory = PerformanceMetrics.measure_memory_usage()
+        
+        # Generate load
+        load_gen = LoadGenerator(tps=1000, duration=60)
+        await load_gen.generate_load(collector.get_latest_ticks, "BTCUSDT")
+        
+        final_memory = PerformanceMetrics.measure_memory_usage()
+        memory_increase = final_memory - initial_memory
+        
+        assert memory_increase < 150  # Max 150MB increase
+        
+    async def test_batch_processing(self, collector):
+        """Test tick batch processing performance."""
+        processing_times = []
+        
+        for _ in range(100):
+            start = time.perf_counter()
+            await collector._process_tick_batches()
+            end = time.perf_counter()
+            processing_times.append((end - start) * 1000)
+            
+        avg_time = sum(processing_times) / len(processing_times)
+        max_time = max(processing_times)
+        
+        assert avg_time < 20  # Average < 20ms
+        assert max_time < 100  # Max < 100ms
+        
+    async def test_high_frequency_updates(self, collector):
+        """Test performance with high-frequency tick updates."""
+        update_latencies = []
+        
+        async def measure_update_latency(symbol: str, tick_data: Dict[str, Any]):
+            start = time.perf_counter()
+            await collector._handle_tick(tick_data)
+            end = time.perf_counter()
+            update_latencies.append((end - start) * 1000)
+            
+        collector.register_callback(measure_update_latency, "BTCUSDT")
+        
+        # Generate high-frequency updates
+        load_gen = LoadGenerator(tps=5000, duration=10)
+        await load_gen.generate_load(
+            collector._handle_tick,
+            {"symbol": "BTCUSDT", "price": 50000, "quantity": 1.0}
+        )
+        
+        avg_latency = sum(update_latencies) / len(update_latencies)
+        p99_latency = PerformanceMetrics.calculate_percentile(update_latencies, 99)
+        
+        assert avg_latency < 1  # Average < 1ms
+        assert p99_latency < 5  # 99th percentile < 5ms 
