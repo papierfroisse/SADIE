@@ -13,8 +13,14 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Cache optimisé pour les données haute fréquence
   - Tests unitaires complets
 
+- Carnets d'ordres avancés
+  - Support complet des carnets d'ordres L2/L3
+  - Métriques en temps réel (spread, profondeur, déséquilibre)
+  - Gestion efficace des mises à jour avec SortedDict
+  - Callbacks pour les métriques en temps réel
+  - Tests unitaires et d'intégration complets
+
 ### En cours
-- Carnets d'ordres complets
 - Flux de transactions en temps réel
 - Tests de charge et de résilience
 
