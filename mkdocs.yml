@@ -1,0 +1,62 @@
+site_name: SADIE Documentation
+site_description: Documentation for SADIE (Smart AI-Driven Investment Engine)
+site_author: SADIE Team
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: deep purple
+    accent: purple
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_source: true
+            show_root_heading: true
+
+nav:
+  - Accueil: index.md
+  - Guide Utilisateur:
+    - Installation: user-guide/installation.md
+    - Configuration: user-guide/configuration.md
+    - Utilisation: user-guide/usage.md
+  - Guide Développeur:
+    - Architecture: dev-guide/architecture.md
+    - Contribution: dev-guide/contributing.md
+    - API Reference: dev-guide/api-reference.md
+  - Modèles:
+    - LSTM: models/lstm.md
+    - Transformers: models/transformers.md
+    - Hybride: models/hybrid.md
+  - À propos:
+    - Roadmap: about/roadmap.md
+    - Licence: about/license.md
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.details
+  - pymdownx.emoji
+  - pymdownx.magiclink
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true 
