@@ -1,118 +1,139 @@
-# SADIE (Smart AI-Driven Investment Engine)
+# SADIE (Système Avancé D'Intelligence et d'Exécution)
 
 ## Description
-SADIE est un système avancé d'intelligence artificielle conçu pour l'optimisation de portefeuille et la prédiction des marchés financiers. Le projet combine des modèles LSTM (Long Short-Term Memory) avec des techniques d'apprentissage avancées pour fournir des prédictions fiables et une gestion de portefeuille optimisée.
+SADIE est un système avancé d'intelligence artificielle conçu pour l'analyse des marchés financiers et l'optimisation de portefeuille. Il combine des collecteurs de données haute performance, des analyses en temps réel et des stratégies d'exécution optimisées.
 
-## Fonctionnalités principales
-- Collecte et prétraitement de données de marché en temps réel
-- Analyse technique avec plus de 100 indicateurs
-- Modèles d'apprentissage automatique avancés (LSTM, Transformers, Hybrides)
-- Analyse de sentiment et données alternatives
-- Backtesting et optimisation de stratégies
-- Interface web interactive pour le suivi des performances
-- Notifications en temps réel
-- Documentation complète et tests automatisés
+## Fonctionnalités Principales
+
+### 1. Collecte de Données Avancée
+- **Données de Marché**
+  - Order Books L2/L3 en temps réel
+  - Données tick-by-tick avec WebSocket
+  - Transactions et flux d'ordres
+  - Métriques de marché avancées
+
+- **Données Alternatives**
+  - Analyse de sentiment Twitter
+  - Analyse communautaire Reddit
+  - Actualités financières en temps réel
+  - Métriques de sentiment multilingues
+
+### 2. Système de Stockage Optimisé
+- **Compression Intelligente**
+  - Multi-algorithmes (LZ4, ZLIB, SNAPPY)
+  - Profils adaptés par type de données
+  - Optimisation automatique des ratios
+
+- **Partitionnement Adaptatif**
+  - Stratégies temps/symbole/hybride
+  - Gestion hot/warm/cold data
+  - Optimisation des accès
+
+### 3. Analyse en Temps Réel
+- **Métriques de Marché**
+  - Profondeur et liquidité
+  - Déséquilibres order book
+  - Indicateurs techniques avancés
+
+- **Analyse de Sentiment**
+  - Polarité et subjectivité
+  - Engagement communautaire
+  - Diversité des sources
+
+## Architecture
+```
+SADIE/
+├── src/
+│   └── sadie/
+│       ├── data/
+│       │   └── collectors/     # Collecteurs de données
+│       ├── analysis/          # Modules d'analyse
+│       ├── storage/           # Gestion du stockage
+│       └── execution/         # Stratégies d'exécution
+├── tests/
+│   ├── unit/                 # Tests unitaires
+│   ├── integration/          # Tests d'intégration
+│   └── performance/          # Tests de performance
+└── docs/                     # Documentation
+```
 
 ## Installation
 
-1. Cloner le dépôt :
+### Prérequis
+- Python 3.8+
+- TimescaleDB
+- Redis (optionnel)
+
+### Installation rapide
 ```bash
-git clone https://github.com/papierfroisse/SADIE.git
+git clone https://github.com/votre-repo/SADIE.git
 cd SADIE
-```
-
-2. Créer un environnement virtuel :
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-```
-
-3. Installer les dépendances :
-```bash
 pip install -r requirements.txt
 ```
 
-4. Pour le développement, installer les dépendances supplémentaires :
-```bash
-pip install -r requirements-dev.txt
-```
-
-5. Configurer les variables d'environnement :
-```bash
-cp .env.example .env
-# Éditer .env avec vos clés API et configurations
-```
-
-## Structure du Projet
-
-```
-SADIE/
-├── .github/            # Configuration GitHub Actions
-├── config/            # Configuration du projet
-├── data/              # Données
-│   ├── raw/          # Données brutes
-│   └── processed/    # Données prétraitées
-├── docs/              # Documentation
-├── examples/          # Exemples d'utilisation
-├── models/            # Modèles entraînés
-├── notebooks/         # Notebooks Jupyter
-├── scripts/           # Scripts utilitaires
-├── src/              # Code source
-│   └── sadie/        # Package principal
-├── tests/            # Tests
-│   ├── unit/        # Tests unitaires
-│   ├── integration/ # Tests d'intégration
-│   └── performance/ # Tests de performance
-├── .env.example      # Template de configuration
-├── .gitignore        # Fichiers ignorés par Git
-├── .pre-commit-config.yaml # Configuration pre-commit
-├── LICENSE           # Licence MIT
-├── README.md         # Ce fichier
-├── requirements.txt  # Dépendances principales
-├── requirements-dev.txt # Dépendances de développement
-└── setup.py         # Configuration du package
-```
+### Configuration
+1. Copier `.env.example` vers `.env`
+2. Configurer les variables d'environnement
+3. Initialiser la base de données : `python setup.py init_db`
 
 ## Utilisation
 
-1. Démarrer la collecte de données :
-```bash
-python -m sadie.data_collection
+### Collecte de Données
+```python
+from sadie.data.collectors import OrderBookCollector, TickCollector
+
+# Initialiser les collecteurs
+orderbook = OrderBookCollector()
+tick = TickCollector()
+
+# Démarrer la collecte
+orderbook.start()
+tick.start()
 ```
 
-2. Entraîner un modèle :
-```bash
-python -m sadie.train
-```
+### Analyse en Temps Réel
+```python
+from sadie.analysis import MarketAnalyzer, SentimentAnalyzer
 
-3. Lancer le backtesting :
-```bash
-python -m sadie.backtest
-```
+# Analyser les données
+market = MarketAnalyzer()
+sentiment = SentimentAnalyzer()
 
-4. Démarrer l'interface web :
-```bash
-python -m sadie.web
+# Obtenir les métriques
+metrics = market.get_metrics()
+sentiment_scores = sentiment.analyze()
 ```
 
 ## Tests
-
-Exécuter les tests :
 ```bash
-pytest
-```
+# Tests unitaires
+pytest tests/unit
 
-Avec la couverture de code :
-```bash
-pytest --cov=sadie tests/
+# Tests de performance
+pytest tests/performance
+
+# Tests d'intégration
+pytest tests/integration
 ```
 
 ## Documentation
-La documentation complète est disponible dans le dossier `docs/` et peut être consultée en ligne à [URL_A_DEFINIR].
+- [Guide Développeur](docs/DEVBOOK.md)
+- [Documentation API](docs/API.md)
+- [Guide Performance](docs/PERFORMANCE.md)
+
+## Roadmap
+Voir [ROADMAP.md](docs/ROADMAP.md) pour les détails sur les développements futurs.
+
+## Changelog
+Voir [CHANGELOG.md](CHANGELOG.md) pour l'historique des versions.
 
 ## Contribution
-Voir [CONTRIBUTING.md](CONTRIBUTING.md) pour les guidelines de contribution.
+Les contributions sont les bienvenues ! Voir [CONTRIBUTING.md](docs/CONTRIBUTING.md) pour les guidelines.
 
 ## Licence
-Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails. 
+Ce projet est sous licence MIT. Voir [LICENSE](LICENSE) pour plus de détails.
+
+## Contact
+- Email : contact@sadie.ai
+- Twitter : @SADIE_AI
+- Discord : [Serveur SADIE](https://discord.gg/sadie) 
