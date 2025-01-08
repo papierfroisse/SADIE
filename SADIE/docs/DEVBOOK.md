@@ -1,142 +1,228 @@
-# DEVBOOK - SADIE (Sentiment Analysis and Deep Intelligence Engine)
+# Guide du Développeur SADIE
 
-## État Actuel
+## Architecture du Projet
 
-### Infrastructure
-- ✅ Structure du projet
-- ✅ Configuration Git
-- ✅ GitHub Actions pour CI/CD
-- ✅ Documentation avec MkDocs
-- ✅ Tests unitaires et d'intégration
-- ✅ Gestion des dépendances
+### Vue d'Ensemble
+SADIE est construit autour d'une architecture modulaire orientée performance. Les composants principaux sont :
 
-### Composants Principaux
-- ✅ Module de données (`data/`)
-  - ✅ Collecte de données de marché
-  - ✅ Analyse technique
-  - ✅ Gestion du cache
-  - ✅ Base de données
-- ✅ Module de modèles (`models/`)
-  - ✅ LSTM pour prédiction de prix
-  - ✅ Analyse de sentiment
-  - ✅ Modèle hybride
-  - ✅ Gestionnaire de modèles
-- ✅ Documentation
-  - ✅ Guide d'installation
-  - ✅ Guide de configuration
-  - ✅ Guide d'utilisation
-  - ✅ Documentation API
+1. **Collecteurs de Données** (`sadie.data.collectors`)
+   - Collecteurs de marché (order books, ticks, transactions)
+   - Collecteurs alternatifs (Twitter, Reddit, News)
+   - Gestion des WebSockets et connexions temps réel
 
-## Prochaines Étapes
+2. **Système de Stockage** (`sadie.storage`)
+   - Compression intelligente multi-algorithmes
+   - Partitionnement adaptatif des données
+   - Gestion des données chaudes/tièdes/froides
 
-### 1. Amélioration des Modèles
-- [ ] Optimisation des hyperparamètres
-- [ ] Validation croisée temporelle
-- [ ] Gestion des outliers
-- [ ] Métriques avancées
-- [ ] Visualisation des résultats
+3. **Analyse** (`sadie.analysis`)
+   - Métriques de marché en temps réel
+   - Analyse de sentiment et engagement
+   - Indicateurs techniques avancés
 
-### 2. Infrastructure
-- [ ] Monitoring des modèles
-- [ ] Gestion des versions de modèles
-- [ ] Optimisation des performances
-- [ ] Scalabilité horizontale
-- [ ] Sécurité renforcée
+4. **Exécution** (`sadie.execution`)
+   - Stratégies d'exécution optimisées
+   - Gestion des ordres et du portefeuille
+   - Backtesting et simulation
 
-### 3. Fonctionnalités
-- [ ] Interface web
-- [ ] API REST
-- [ ] Backtesting
-- [ ] Alertes personnalisables
-- [ ] Rapports automatiques
+### Bonnes Pratiques
 
-### 4. Tests et Qualité
-- [ ] Tests de performance
-- [ ] Tests de charge
-- [ ] Benchmarking
-- [ ] Profiling
-- [ ] Documentation des tests
+#### 1. Style de Code
+- Suivre PEP 8
+- Docstrings pour toutes les classes et méthodes publiques
+- Type hints pour améliorer la lisibilité
+- Maximum 88 caractères par ligne
 
-## Architecture
+```python
+from typing import List, Dict, Optional
 
-### Structure du Projet
-```
-SADIE/
-├── .github/
-│   └── workflows/         # CI/CD pipelines
-├── config/               # Configuration
-├── data/                # Données
-│   ├── raw/             # Données brutes
-│   └── processed/       # Données traitées
-├── docs/                # Documentation
-│   └── user-guide/      # Guide utilisateur
-├── models/              # Modèles
-│   └── saved/          # Modèles entraînés
-├── notebooks/          # Notebooks Jupyter
-├── scripts/            # Scripts utilitaires
-├── src/                # Code source
-│   └── sadie/         # Package principal
-└── tests/              # Tests
-    ├── unit/          # Tests unitaires
-    ├── integration/   # Tests d'intégration
-    └── performance/   # Tests de performance
+class DataCollector:
+    """Base class for all data collectors.
+    
+    Attributes:
+        name: Collector identifier
+        is_running: Current running state
+    """
+    
+    def __init__(self, name: str) -> None:
+        self.name = name
+        self.is_running = False
+        
+    def start(self) -> bool:
+        """Start the data collection.
+        
+        Returns:
+            bool: True if successfully started
+        """
+        if self.is_running:
+            return False
+        self.is_running = True
+        return True
 ```
 
-### Conventions de Code
-- Python 3.8+
-- Type hints
-- Docstrings Google style
-- Black pour le formatage
-- Flake8 pour le linting
-- Tests avec pytest
+#### 2. Tests
+- Tests unitaires pour chaque module
+- Tests de performance avec métriques
+- Tests d'intégration pour les workflows complets
+- Coverage minimum de 80%
 
-### Git
-- Une branche par fonctionnalité
-- Pull requests pour les changements majeurs
-- Code review obligatoire
-- Tests automatisés avant merge
+```python
+def test_collector_initialization():
+    """Test collector initialization and basic properties."""
+    collector = DataCollector("test")
+    assert collector.name == "test"
+    assert not collector.is_running
+```
 
-## Notes Techniques
+#### 3. Performance
+- Utiliser des structures de données optimisées
+- Éviter les copies inutiles
+- Profiler le code régulièrement
+- Optimiser les requêtes et les accès disque
 
-### Modèles
-- LSTM : Prédiction de prix
-  - Séquences de 24h
-  - Features techniques et fondamentales
-  - Normalisation adaptative
-- Sentiment : Analyse des news
-  - FinBERT pré-entraîné
-  - VADER pour l'analyse rapide
-  - TextBlob pour la subjectivité
-- Hybride : Combinaison technique/sentiment
-  - Pondération adaptative
-  - Calibration dynamique
-  - Backtesting intégré
+```python
+from collections import deque
+from typing import Deque
 
-### Performance
-- Optimisation des calculs numpy/pandas
-- Mise en cache des données fréquentes
-- Parallélisation des tâches lourdes
-- Gestion efficace de la mémoire
+class TickBuffer:
+    """Efficient tick data buffer using deque."""
+    
+    def __init__(self, maxlen: int = 1000):
+        self.buffer: Deque = deque(maxlen=maxlen)
+        
+    def add(self, tick: dict) -> None:
+        """Add tick to buffer efficiently."""
+        self.buffer.append(tick)
+```
 
-### Sécurité
-- Variables d'environnement
-- Rate limiting
-- Validation des entrées
-- Logs sécurisés
-- Chiffrement des données sensibles
+#### 4. Gestion des Erreurs
+- Exceptions personnalisées pour chaque type d'erreur
+- Logging détaillé avec niveaux appropriés
+- Retry patterns pour les opérations réseau
+- Circuit breakers pour les services externes
 
-## Bugs Connus
-- Gestion des données manquantes à améliorer
-- Optimisation mémoire pour grands datasets
-- Parallélisation à optimiser
-- Documentation API à compléter
+```python
+import logging
+from typing import Optional
 
-## Idées d'Amélioration
-- Support multi-devises
-- Analyse on-chain
-- Intégration de données alternatives
-- API streaming
-- Interface web interactive
-- Rapports PDF automatiques
-- Notifications temps réel
-- Mode simulation/paper trading 
+logger = logging.getLogger(__name__)
+
+class CollectorError(Exception):
+    """Base exception for collector errors."""
+    pass
+
+class ConnectionError(CollectorError):
+    """Raised when connection fails."""
+    pass
+
+def connect_with_retry(
+    max_retries: int = 3,
+    delay: float = 1.0
+) -> Optional[Connection]:
+    """Connect with retry pattern."""
+    for attempt in range(max_retries):
+        try:
+            return establish_connection()
+        except ConnectionError as e:
+            logger.warning(f"Connection attempt {attempt + 1} failed: {e}")
+            time.sleep(delay * (attempt + 1))
+    return None
+```
+
+### Workflow de Développement
+
+1. **Création de Feature**
+   ```bash
+   git checkout -b feature/nom-feature
+   ```
+
+2. **Tests**
+   ```bash
+   # Tests unitaires
+   pytest tests/unit
+   
+   # Tests de performance
+   pytest tests/performance
+   
+   # Coverage
+   pytest --cov=sadie tests/
+   ```
+
+3. **Documentation**
+   - Mettre à jour la documentation technique
+   - Ajouter des exemples d'utilisation
+   - Documenter les changements dans CHANGELOG.md
+
+4. **Review**
+   - Créer une Pull Request
+   - Attendre la review et les tests CI
+   - Corriger les retours si nécessaire
+
+### Outils de Développement
+
+1. **Environnement**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   pip install -r requirements-dev.txt
+   ```
+
+2. **Linting & Formatting**
+   ```bash
+   # Vérifier le style
+   flake8 src/sadie
+   
+   # Formatter le code
+   black src/sadie
+   
+   # Vérifier les types
+   mypy src/sadie
+   ```
+
+3. **Profiling**
+   ```python
+   import cProfile
+   import pstats
+   
+   def profile_code():
+       profiler = cProfile.Profile()
+       profiler.enable()
+       # Code à profiler
+       profiler.disable()
+       stats = pstats.Stats(profiler).sort_stats('cumtime')
+       stats.print_stats()
+   ```
+
+### Déploiement
+
+1. **Préparation**
+   - Mettre à jour la version dans `setup.py`
+   - Mettre à jour CHANGELOG.md
+   - Créer un tag de version
+
+2. **Tests de Production**
+   ```bash
+   # Tests complets
+   pytest
+   
+   # Tests de charge
+   python -m sadie.tests.load
+   ```
+
+3. **Documentation**
+   ```bash
+   # Générer la doc
+   mkdocs build
+   
+   # Déployer la doc
+   mkdocs gh-deploy
+   ```
+
+4. **Release**
+   ```bash
+   # Build
+   python setup.py sdist bdist_wheel
+   
+   # Upload
+   twine upload dist/*
+   ``` 

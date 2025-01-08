@@ -1,141 +1,142 @@
-# SADIE - Roadmap de Développement
+# Roadmap SADIE
 
-## Version 0.1.x - Infrastructure de Base
-### 0.1.0 ✓ (2024-01-08)
-- [x] Structure initiale du projet
-  - [x] Configuration Git et GitHub Actions
-  - [x] Documentation de base (README, CONTRIBUTING)
-  - [x] Tests unitaires de base
-  - [x] Configuration de l'environnement de développement
+## Version Actuelle : 0.2.0
 
-### 0.1.1 ✓ (2024-01-08)
-- [x] Intégration des APIs de base
-  - [x] Binance API
-  - [x] Alpha Vantage API
-- [x] Configuration de la base de données
-  - [x] Setup PostgreSQL/TimescaleDB
-  - [x] Schéma de base de données
-- [x] Système de cache
-  - [x] Implémentation du cache en mémoire
-  - [x] Gestion de la persistance
+### Fonctionnalités Implémentées
 
-### 0.1.2 ✓ (2024-01-08)
-- [x] Collecteurs de données de base
-  - [x] Classe de base BaseCollector
-  - [x] Collecteur OrderBook (L2/L3)
-  - [x] Tests des collecteurs
-  - [x] Documentation des collecteurs
-- [x] Validation et tests
-  - [x] Tests d'intégration
-  - [x] Tests de performance
-  - [x] Benchmarks initiaux
+#### 1. Collecte de Données
+- ✅ Order Books L2/L3
+- ✅ Données tick-by-tick
+- ✅ Transactions en temps réel
+- ✅ WebSocket optimisé
+- ✅ Tests de performance
 
-## Version 0.2.x - Enrichissement des Données
-### 0.2.0 🔄 (En cours)
-- [ ] Données de marché avancées
-  - [x] Données tick par tick
-  - [x] Carnets d'ordres complets
-    - [x] Métriques avancées (spread, profondeur, déséquilibre)
-    - [x] Gestion efficace avec SortedDict
-    - [x] Tests unitaires complets
-  - [ ] Flux de transactions en temps réel
-- [x] Tests et validation
-  - [x] Tests de charge
-    - [x] Monitoring des ressources
-    - [x] Gestion des timeouts
-    - [x] Métriques de performance
-  - [x] Tests de résilience
-    - [x] Reconnexion automatique
-    - [x] Gestion des erreurs
-    - [x] Cohérence des données
-  - [x] Documentation des performances
+#### 2. Stockage Optimisé
+- ✅ Compression multi-algorithmes
+- ✅ Profils de compression adaptés
+- ✅ Partitionnement adaptatif
+- ✅ Gestion hot/warm/cold data
+- ✅ Tests unitaires
 
-### 0.2.1 (Prévu : 2024-02)
-- [ ] Données alternatives
-  - [ ] API Twitter pour sentiment
-  - [ ] API Reddit pour analyse communautaire
-  - [ ] Flux d'actualités en temps réel
-- [ ] Système de stockage optimisé
-  - [ ] Compression intelligente
-  - [ ] Partitionnement adaptatif
-  - [ ] Cache prédictif
+#### 3. Analyse en Temps Réel
+- ✅ Métriques de marché
+- ✅ Indicateurs techniques
+- ✅ Analyse de liquidité
+- ✅ Tests de performance
 
-### 0.2.2 (Prévu : 2024-03)
-- [ ] Données on-chain
-  - [ ] Connexion aux nodes ETH/BTC
-  - [ ] Métriques DeFi
-  - [ ] Analyse on-chain
-- [ ] Infrastructure de traitement
-  - [ ] Pipeline de traitement distribué
-  - [ ] Système de backup automatique
-  - [ ] Monitoring avancé
+## Prochaines Versions
 
-## Version 0.3.x - Modèles Prédictifs
-### 0.3.0 (Prévu : 2024-04)
-- [ ] Architecture LSTM avancée
-  - [ ] LSTM pour tendances
-  - [ ] LSTM pour volatilité
-  - [ ] LSTM pour volumes
-- [ ] Optimisation des modèles
-  - [ ] Optimisation bayésienne
-  - [ ] Validation croisée temporelle
-  - [ ] Métriques de performance
+### Version 0.2.1 (En cours)
 
-### 0.3.1 (Prévu : 2024-05)
-- [ ] Modèles hybrides
-  - [ ] LSTM + Attention
-  - [ ] LSTM + GAN
-  - [ ] Ensemble models
-- [ ] Pipeline d'entraînement
-  - [ ] Distribution des calculs
-  - [ ] Gestion des checkpoints
-  - [ ] Logging des expériences
+#### Collecte Alternative
+- 🔄 Twitter Sentiment Analysis
+  - ✅ Streaming API v2
+  - ✅ Analyse de sentiment
+  - 🔄 Métriques d'engagement
+  - ⏳ Tests de performance
 
-## Version 0.4.x - Optimisation et Production
-### 0.4.0 (Prévu : 2024-06)
-- [ ] Optimisation de portefeuille
-  - [ ] Allocation dynamique
-  - [ ] Gestion des risques avancée
-  - [ ] Backtesting sophistiqué
-- [ ] Infrastructure production
-  - [ ] Déploiement automatisé
-  - [ ] Monitoring en temps réel
-  - [ ] Alertes intelligentes
+- 🔄 Reddit Analysis
+  - ✅ PRAW Integration
+  - 🔄 Analyse communautaire
+  - ⏳ Métriques d'influence
+  - ⏳ Tests unitaires
 
-### 0.4.1 (Prévu : 2024-07)
-- [ ] Interface utilisateur
-  - [ ] Dashboard de trading
-  - [ ] Visualisations avancées
-  - [ ] Contrôles en temps réel
-- [ ] Documentation complète
-  - [ ] Guide utilisateur
-  - [ ] Documentation API
-  - [ ] Exemples d'utilisation
+- 🔄 News Analysis
+  - ✅ NewsAPI Integration
+  - 🔄 Analyse multilingue
+  - ⏳ Classification
+  - ⏳ Tests
 
-## Conventions de Versionnage
-- **x.y.z** format:
-  - **x**: Changements majeurs/incompatibles
-  - **y**: Nouvelles fonctionnalités
-  - **z**: Corrections de bugs et améliorations mineures
+#### Métriques Avancées
+- 🔄 Sentiment global
+- 🔄 Engagement social
+- ⏳ Impact des news
+- ⏳ Tests
 
-## Processus de Validation
-Pour chaque version :
-1. **Tests**
-   - Tests unitaires (coverage > 80%)
-   - Tests d'intégration
-   - Tests de performance
+### Version 0.2.2 (Planifiée)
 
-2. **Documentation**
-   - Mise à jour du CHANGELOG
-   - Documentation technique
-   - Exemples de code
+#### Cache Prédictif
+- ⏳ Modèle de prédiction d'accès
+- ⏳ Préchargement intelligent
+- ⏳ Cache multi-niveaux
+- ⏳ Métriques de performance
 
-3. **Review**
-   - Code review
-   - Tests de non-régression
-   - Validation des performances
+#### Optimisation Mémoire
+- ⏳ Compression en mémoire
+- ⏳ Structures optimisées
+- ⏳ Gestion des fuites
+- ⏳ Monitoring avancé
 
-4. **Déploiement**
-   - Tests en environnement de staging
-   - Déploiement progressif
-   - Monitoring post-déploiement 
+### Version 0.3.0 (Planifiée)
+
+#### Machine Learning
+- ⏳ Prédiction de prix
+- ⏳ Détection d'anomalies
+- ⏳ Classification des patterns
+- ⏳ Backtesting
+
+#### API REST
+- ⏳ Endpoints publics
+- ⏳ Documentation OpenAPI
+- ⏳ Rate limiting
+- ⏳ Tests d'intégration
+
+### Version 0.4.0 (Planifiée)
+
+#### Interface Web
+- ⏳ Dashboard en temps réel
+- ⏳ Visualisations avancées
+- ⏳ Configuration interactive
+- ⏳ Tests E2E
+
+#### Exécution Automatisée
+- ⏳ Stratégies de trading
+- ⏳ Gestion des risques
+- ⏳ Reporting automatique
+- ⏳ Tests de simulation
+
+## Objectifs Long Terme
+
+### 1. Performance
+- Latence < 10ms pour les données temps réel
+- Compression > 80% pour les données historiques
+- Cache hit ratio > 95%
+- Disponibilité 99.99%
+
+### 2. Scalabilité
+- Support multi-exchange
+- Clustering distribué
+- Réplication automatique
+- Load balancing
+
+### 3. Intelligence
+- Modèles hybrides ML/DL
+- Apprentissage en continu
+- Adaptation automatique
+- Validation croisée
+
+### 4. Sécurité
+- Authentification forte
+- Encryption bout en bout
+- Audit logging
+- Conformité GDPR
+
+## Notes de Développement
+
+### Priorités
+1. Stabilité et performance
+2. Tests et documentation
+3. Nouvelles fonctionnalités
+4. Optimisations
+
+### Standards
+- Coverage > 80%
+- Documentation complète
+- Tests de performance
+- Code review systématique
+
+### Maintenance
+- Revue mensuelle des dépendances
+- Mise à jour trimestrielle des API
+- Optimisation continue
+- Monitoring 24/7 

@@ -1,179 +1,229 @@
-# Tests de Performance SADIE
+# Guide de Performance SADIE
 
-Ce document décrit le framework de tests de performance et de résilience pour le projet SADIE.
+## Architecture Optimisée
 
-## Objectifs
+### 1. Système de Stockage
 
-Les tests de performance visent à :
+#### Compression Intelligente
+- **Multi-algorithmes**
+  - LZ4 : Compression rapide pour données temps réel
+  - ZLIB : Compression équilibrée pour données historiques
+  - SNAPPY : Compression optimisée pour métriques
 
-1. Mesurer et valider les performances des collecteurs de données
-2. Vérifier la résilience du système sous charge
-3. Identifier les goulots d'étranglement potentiels
-4. Établir des références de performance
+- **Profils par Type**
+  ```python
+  COMPRESSION_PROFILES = {
+      DataType.ORDERBOOK: {
+          'algorithm': 'lz4',
+          'level': 1,
+          'chunk_size': 512 * 1024  # 512KB
+      },
+      DataType.NEWS: {
+          'algorithm': 'zlib',
+          'level': 9,
+          'chunk_size': 2 * 1024 * 1024  # 2MB
+      }
+  }
+  ```
 
-## Métriques Mesurées
+#### Partitionnement Adaptatif
+- **Stratégies**
+  - Temps : Intervalles configurables
+  - Symbole : Partitionnement par paire
+  - Hybride : Combinaison temps/symbole
+  - Adaptatif : Basé sur les patterns d'accès
 
-### Utilisation des Ressources
+- **Gestion Hot/Warm/Cold**
+  ```python
+  class AccessPattern(Enum):
+      HOT = "hot"     # Accès fréquent
+      WARM = "warm"   # Accès modéré
+      COLD = "cold"   # Accès rare
+  ```
 
-- **Mémoire**
-  - Utilisation moyenne
-  - Pics d'utilisation
-  - Fuites mémoire potentielles
+### 2. Collecte de Données
 
-- **CPU**
-  - Utilisation moyenne
-  - Pics d'utilisation
-  - Distribution de la charge
-
-- **Réseau**
-  - Bande passante utilisée
-  - Latence des requêtes
-  - Taux d'erreur
-
-### Métriques Spécifiques
-
-- **Latence des Collecteurs**
-  - Temps de réponse moyen
-  - 95e percentile
-  - 99e percentile
-  - Latence maximale
-
-- **Débit**
-  - Transactions par seconde
-  - Messages WebSocket par seconde
-  - Taux de mise à jour des order books
-
-- **Fiabilité**
-  - Taux de succès des requêtes
-  - Taux de reconnexion
-  - Temps moyen entre les erreurs
-
-## Scénarios de Test
-
-### 1. Tests de Charge Normale
+#### WebSocket Optimisé
+- Connection pooling
+- Heartbeat monitoring
+- Reconnexion automatique
+- Buffer circulaire pour les données
 
 ```python
-# Exemple de test de charge normale
-async def test_normal_load():
-    collector = OrderBookCollector(symbols=["BTCUSDT"])
-    await collector.start()
-    
-    # Collecter les métriques pendant 1 heure
-    metrics = await collect_metrics(duration=3600)
-    assert metrics.avg_response_time < 0.1  # 100ms max
+class WebSocketManager:
+    def __init__(self):
+        self.connections = ConnectionPool(max_size=10)
+        self.buffer = CircularBuffer(max_size=1000)
+        self.heartbeat = HeartbeatMonitor(interval=30)
 ```
 
-### 2. Tests de Charge Élevée
+#### Batch Processing
+- Traitement par lots pour réduire la charge
+- Agrégation intelligente des données
+- Métriques en temps réel
 
 ```python
-# Exemple de test de charge élevée
-async def test_high_load():
-    collector = OrderBookCollector(symbols=["BTCUSDT", "ETHUSDT", "BNBUSDT"])
-    await collector.start()
-    
-    # Simuler une charge élevée
-    await generate_high_load(tps=1000, duration=300)
-    
-    metrics = await collect_metrics()
-    assert metrics.error_rate < 0.01  # Max 1% d'erreurs
+class BatchProcessor:
+    def process_batch(self, data: List[Dict]) -> None:
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [
+                executor.submit(self._process_item, item)
+                for item in data
+            ]
+            concurrent.futures.wait(futures)
 ```
 
-### 3. Tests de Résilience
+### 3. Optimisations Mémoire
+
+#### Structures de Données
+- Utilisation de `numpy` pour les calculs
+- `deque` pour les buffers circulaires
+- Weak references pour le cache
+- Compression en mémoire pour les données volumineuses
 
 ```python
-# Exemple de test de résilience
-async def test_network_issues():
-    collector = TransactionCollector(symbols=["BTCUSDT"])
-    await collector.start()
+class DataBuffer:
+    def __init__(self, max_size: int = 1000):
+        self.data = deque(maxlen=max_size)
+        self.stats = weakref.WeakKeyDictionary()
+        
+    def add(self, item: np.ndarray) -> None:
+        self.data.append(item)
+        self.stats[item] = self._compute_stats(item)
+```
+
+#### Gestion du Cache
+- Cache à plusieurs niveaux
+- Politique d'éviction LRU
+- Préchargement intelligent
+- Métriques de hit/miss
+
+```python
+class CacheManager:
+    def __init__(self):
+        self.l1_cache = LRUCache(max_size=1000)
+        self.l2_cache = TTLCache(max_size=10000, ttl=3600)
+        self.metrics = CacheMetrics()
+```
+
+### 4. Tests de Performance
+
+#### Métriques Clés
+- Latence des requêtes
+- Débit de données
+- Utilisation mémoire
+- Taux de compression
+- Hit ratio du cache
+
+```python
+@pytest.mark.performance
+def test_orderbook_collector_performance():
+    collector = OrderBookCollector()
     
-    # Simuler des problèmes réseau
-    await simulate_network_issues(duration=60)
+    # Mesurer la latence
+    with timer() as t:
+        data = collector.get_orderbook("BTC/USD")
+    assert t.elapsed < 0.1  # Max 100ms
     
-    # Vérifier la récupération
-    metrics = await collect_metrics()
-    assert metrics.recovery_time < 5.0  # Récupération en moins de 5s
+    # Mesurer l'utilisation mémoire
+    mem_usage = memory_usage()
+    assert mem_usage < 100 * 1024 * 1024  # Max 100MB
 ```
 
-## Seuils de Performance
+#### Load Testing
+- Tests de charge continue
+- Tests de pics de charge
+- Tests de récupération
+- Tests de concurrence
 
-### Collecteur OrderBook
-
-- Temps de réponse moyen < 100ms
-- Utilisation CPU < 30%
-- Utilisation mémoire < 200MB
-- Taux d'erreur < 0.1%
-
-### Collecteur de Transactions
-
-- Latence de traitement < 50ms
-- Capacité > 1000 TPS
-- Perte de messages < 0.01%
-- Temps de récupération < 5s
-
-### WebSocket
-
-- Temps de reconnexion < 1s
-- Taux de perte de connexion < 0.1%
-- Latence moyenne < 50ms
-
-## Exécution des Tests
-
-### Prérequis
-
-```bash
-pip install pytest-benchmark pytest-asyncio
+```python
+class LoadTest:
+    def __init__(self, duration: int = 3600):
+        self.duration = duration
+        self.metrics = MetricsCollector()
+        
+    def run(self):
+        start_time = time.time()
+        while time.time() - start_time < self.duration:
+            self._generate_load()
+            self._collect_metrics()
+            self._check_health()
 ```
 
-### Commandes
+### 5. Monitoring
 
-```bash
-# Tests de performance complets
-pytest tests/performance/
+#### Métriques Temps Réel
+- Latence des collecteurs
+- Taux de compression
+- Utilisation des ressources
+- Santé des connexions
+- Performance du cache
 
-# Tests spécifiques
-pytest tests/performance/test_orderbook_perf.py
-pytest tests/performance/test_transaction_perf.py
-
-# Tests avec métriques détaillées
-pytest tests/performance/ --benchmark-only
+```python
+class PerformanceMonitor:
+    def __init__(self):
+        self.metrics = PrometheusMetrics()
+        self.alerts = AlertManager()
+        
+    def collect_metrics(self):
+        self.metrics.gauge('collector_latency').set(
+            self._measure_latency()
+        )
+        self.metrics.counter('processed_messages').inc()
 ```
 
-### Environnement de Test
+#### Alerting
+- Seuils configurables
+- Agrégation d'alertes
+- Notification multi-canaux
+- Auto-recovery
 
-- Utiliser un environnement isolé
-- Monitorer les ressources système
-- Exécuter les tests à différents moments
-- Documenter les conditions de test
-
-## Analyse des Résultats
-
-### Génération de Rapports
-
-```bash
-# Générer un rapport HTML
-pytest tests/performance/ --benchmark-only --benchmark-json output.json
-pytest-benchmark compare output.json --csv output.csv
+```python
+class AlertManager:
+    def check_thresholds(self, metrics: Dict[str, float]):
+        if metrics['latency'] > LATENCY_THRESHOLD:
+            self.trigger_alert(
+                level='warning',
+                message='Latence élevée détectée'
+            )
 ```
 
-### Interprétation
+### 6. Optimisation Continue
 
-- Comparer avec les seuils définis
-- Analyser les tendances
-- Identifier les anomalies
-- Documenter les résultats
+#### Profiling
+- CPU profiling
+- Memory profiling
+- I/O profiling
+- Network profiling
 
-## Maintenance
+```python
+def profile_collector():
+    profiler = cProfile.Profile()
+    profiler.enable()
+    
+    # Code à profiler
+    collector.process_batch(data)
+    
+    profiler.disable()
+    stats = pstats.Stats(profiler)
+    stats.sort_stats('cumtime').print_stats(20)
+```
 
-### Mise à Jour des Tests
+#### Benchmarking
+- Comparaison des algorithmes
+- Tests de régression
+- Optimisation des paramètres
+- Documentation des résultats
 
-- Réviser régulièrement les seuils
-- Ajouter de nouveaux scénarios
-- Mettre à jour les métriques
-- Optimiser les tests
-
-### Intégration Continue
-
-- Exécuter les tests de performance dans CI
-- Alerter sur les régressions
-- Archiver les résultats
-- Générer des rapports de tendance 
+```python
+class Benchmark:
+    def compare_compression_algorithms(
+        self,
+        data: bytes,
+        algorithms: List[str]
+    ) -> Dict[str, Dict[str, float]]:
+        results = {}
+        for algo in algorithms:
+            results[algo] = self._benchmark_algorithm(data, algo)
+        return results
+``` 
