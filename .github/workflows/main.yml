@@ -1,0 +1,5 @@
+name: SADIE CI/CD
+
+on:
+  push:
+    branches: [ main ]
