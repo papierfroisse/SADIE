@@ -1,75 +1,116 @@
 # SADIE - Documentation
 
-Bienvenue dans la documentation de SADIE (Système d'Analyse et de Décision pour l'Investissement en cryptomonnaies).
+Bienvenue dans la documentation de SADIE (Système Avancé D'Intelligence et d'Exécution).
 
 ## Vue d'ensemble
 
-SADIE est un système avancé d'analyse et de trading de cryptomonnaies qui combine :
-- L'apprentissage automatique pour la prédiction des prix
-- L'analyse technique pour l'identification des opportunités
-- L'automatisation des décisions de trading
-- Le backtesting et l'optimisation des stratégies
+SADIE est une plateforme sophistiquée d'analyse de marché et d'optimisation de portefeuille qui combine :
+- Des collecteurs de données haute performance
+- Des systèmes de stockage optimisés
+- Des capacités d'analyse en temps réel
+- Des stratégies d'exécution avancées
+
+## Version Actuelle : 0.2.0
+
+### Fonctionnalités Principales
+
+#### 1. Collecte de Données
+- Order Books L2/L3 complets avec WebSocket optimisé
+- Données tick-by-tick en temps réel
+- Transactions en temps réel avec analyse de flux
+- Tests de performance et métriques de latence
+
+#### 2. Stockage Optimisé
+- Compression multi-algorithmes (LZ4, ZLIB, SNAPPY)
+- Partitionnement adaptatif des données
+- Gestion hot/warm/cold data
+- Cache prédictif en développement
+
+#### 3. Analyse en Temps Réel
+- Métriques de marché avancées
+- Indicateurs techniques personnalisés
+- Analyse de liquidité et profondeur
+- Intégration avec OrderBookAnalyzer
 
 ## Démarrage rapide
 
-1. Installation :
+### Prérequis
 ```bash
-git clone https://github.com/papierfroisse/SADIE.git
+# Dépendances système
+sudo apt-get update
+sudo apt-get install -y python3.9 python3.9-dev python3-pip postgresql postgresql-contrib build-essential git
+```
+
+### Installation avec Docker
+```bash
+# Cloner le repository
+git clone https://github.com/votre-repo/SADIE.git
 cd SADIE
-python -m venv venv
+
+# Construire et démarrer
+docker-compose up -d
+```
+
+### Installation Manuelle
+```bash
+# Environnement virtuel
+python3.9 -m venv venv
 source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
+
+# Dépendances
 pip install -r requirements.txt
-```
 
-2. Configuration :
-```bash
+# Configuration
 cp .env.example .env
-# Éditer .env avec vos clés API et configurations
+# Éditer .env avec vos paramètres
 ```
 
-3. Utilisation :
-```bash
-python -m sadie.data_collection  # Collecter les données
-python -m sadie.train           # Entraîner un modèle
-python -m sadie.backtest        # Tester une stratégie
-python -m sadie.web             # Lancer l'interface web
-```
-
-## Structure du projet
+## Structure du Projet
 
 ```
 SADIE/
-├── .github/            # Configuration GitHub Actions
-├── config/            # Configuration du projet
-├── data/              # Données
-│   ├── raw/          # Données brutes
-│   └── processed/    # Données prétraitées
-├── docs/              # Documentation
-├── models/            # Modèles entraînés
-├── notebooks/         # Notebooks Jupyter
-├── scripts/           # Scripts utilitaires
-├── src/              # Code source
-│   └── sadie/        # Package principal
-└── tests/            # Tests
-    ├── unit/
-    ├── integration/
-    └── performance/
+├── src/
+│   └── sadie/
+│       ├── data/
+│       │   └── collectors/     # Collecteurs de données
+│       ├── analysis/          # Analyse et métriques
+│       ├── storage/           # Gestion du stockage
+│       └── execution/         # Stratégies d'exécution
+├── tests/
+│   ├── unit/                 # Tests unitaires
+│   ├── integration/          # Tests d'intégration
+│   └── performance/          # Tests de performance
+├── docs/                     # Documentation
+└── config/                   # Configuration
 ```
 
-## Fonctionnalités principales
+## Documentation Détaillée
 
-- **Collecte de données** : Intégration avec plusieurs sources (Binance, Alpha Vantage)
-- **Prétraitement** : Nettoyage, normalisation et calcul d'indicateurs techniques
-- **Modélisation** : LSTM, analyse de sentiments et indicateurs techniques avancés
-- **Backtesting** : Framework complet pour tester et optimiser les stratégies
-- **Interface web** : Dashboard en temps réel et configuration des stratégies
-- **Notifications** : Alertes Telegram et rapports de performance
+- [Guide Développeur](DEVBOOK.md) - Guide technique détaillé
+- [Guide Performance](performance.md) - Optimisations et métriques
+- [Roadmap](ROADMAP.md) - Planning et objectifs
+- [Contexte du Projet](PROJECT_CONTEXT.md) - Vue d'ensemble complète
 
-## État du projet
+## Monitoring et Métriques
 
-Consultez notre [feuille de route](ROADMAP.md) pour voir l'état d'avancement du projet et les fonctionnalités à venir.
+### Dashboard
+- Grafana : http://localhost:3000
+- Prometheus : http://localhost:9090
 
-## Contribution
+### Métriques Clés
+- Latence des collecteurs (p95, p99)
+- Utilisation des ressources système
+- Performance du cache
+- Santé des connexions WebSocket
 
-Les contributions sont les bienvenues ! Consultez notre [guide de contribution](CONTRIBUTING.md) pour commencer.
+## Support et Contact
+
+- Documentation : /docs/
+- Issues : GitHub Issues
+- Discussion : GitHub Discussions
+- Wiki : GitHub Wiki
+
+---
+Dernière mise à jour : 2024-01-08
+Version actuelle : 0.2.0
