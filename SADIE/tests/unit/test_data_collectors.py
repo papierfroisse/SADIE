@@ -10,6 +10,7 @@ from sadie.data.collectors import DataCollector
 from sadie.data.collectors.binance import BinanceDataCollector
 from sadie.data.collectors.alpha_vantage import AlphaVantageDataCollector
 from sadie.data.collectors.factory import DataCollectorFactory
+from sadie.data.collectors.orderbook import OrderBookCollector
 
 class TestDataCollector:
     """Tests pour la classe de base DataCollector."""
@@ -218,3 +219,89 @@ class TestDataCollectorFactory:
         
         with pytest.raises(TypeError):
             DataCollectorFactory.register_collector("invalid", InvalidCollector) 
+
+class TestOrderBookCollector:
+    """Tests pour le collecteur de données OrderBook L2/L3."""
+    
+    @pytest.fixture
+    def collector(self):
+        """Fixture pour créer un collecteur OrderBook avec un client mocké."""
+        with patch("binance.client.Client") as mock_client:
+            collector = OrderBookCollector("dummy_key", "dummy_secret")
+            collector.client = mock_client
+            return collector
+    
+    def test_initialization(self, collector):
+        """Vérifie l'initialisation du collecteur."""
+        assert collector.api_key == "dummy_key"
+        assert collector.api_secret == "dummy_secret"
+        assert collector.depth_levels == ["L2", "L3"]
+    
+    def test_get_l2_order_book(self, collector):
+        """Vérifie la récupération du carnet d'ordres L2."""
+        mock_depth = {
+            "lastUpdateId": 1027024,
+            "bids": [
+                ["4.00000000", "431.00000000"],
+                ["3.99000000", "200.00000000"]
+            ],
+            "asks": [
+                ["4.00000200", "12.00000000"],
+                ["4.00000300", "1.00000000"]
+            ]
+        }
+        collector.client.get_order_book.return_value = mock_depth
+        
+        book = collector.get_order_book("BTC/USDT", level="L2", limit=5)
+        
+        assert book["timestamp"] == 1027024
+        assert len(book["bids"]) == 2
+        assert len(book["asks"]) == 2
+        assert book["bids"][0] == [4.0, 431.0]
+        assert book["asks"][0] == [4.000002, 12.0]
+        assert "level" in book and book["level"] == "L2"
+    
+    def test_get_l3_order_book(self, collector):
+        """Vérifie la récupération du carnet d'ordres L3."""
+        mock_depth = {
+            "lastUpdateId": 1027024,
+            "bids": [
+                ["4.00000000", "431.00000000", "order1"],
+                ["3.99000000", "200.00000000", "order2"]
+            ],
+            "asks": [
+                ["4.00000200", "12.00000000", "order3"],
+                ["4.00000300", "1.00000000", "order4"]
+            ]
+        }
+        collector.client.get_order_book.return_value = mock_depth
+        
+        book = collector.get_order_book("BTC/USDT", level="L3", limit=5)
+        
+        assert book["timestamp"] == 1027024
+        assert len(book["bids"]) == 2
+        assert len(book["asks"]) == 2
+        assert len(book["bids"][0]) == 3  # Prix, quantité, order_id
+        assert "level" in book and book["level"] == "L3"
+    
+    def test_invalid_depth_level(self, collector):
+        """Vérifie que l'utilisation d'un niveau de profondeur invalide lève une exception."""
+        with pytest.raises(ValueError):
+            collector.get_order_book("BTC/USDT", level="L4")
+    
+    def test_order_book_update_stream(self, collector):
+        """Vérifie le flux de mise à jour du carnet d'ordres."""
+        mock_update = {
+            "u": 1027025,
+            "s": "BTCUSDT",
+            "b": [["3.98000000", "150.00000000"]],
+            "a": []
+        }
+        collector.client.get_order_book_ticker.return_value = mock_update
+        
+        updates = collector.get_order_book_updates("BTC/USDT")
+        assert isinstance(updates, dict)
+        assert "lastUpdateId" in updates
+        assert "symbol" in updates
+        assert "bids" in updates
+        assert "asks" in updates 

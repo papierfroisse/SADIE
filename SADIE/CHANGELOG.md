@@ -1,85 +1,51 @@
 # Changelog
 
-## [0.3.0] - À venir
-### Modèles Prédictifs Ultra-Avancés
-- Architecture LSTM optimisée
-  - LSTM spécialisés (tendances, volatilité, volumes)
-  - Optimisation bayésienne des hyperparamètres
-  - Architecture search automatique
-- Modèles hybrides nouvelle génération
-  - LSTM + Attention (self, cross, temporelle)
-  - LSTM + GAN pour scénarios
-  - Ensemble models avec spécialisation
+Toutes les modifications notables de ce projet seront documentées dans ce fichier.
 
-## [0.2.0] - En développement 🔄
-### Maximisation de la Qualité des Données
-- [ ] Données de marché avancées
-  - [ ] Order books L2/L3
-  - [ ] Données tick par tick
-  - [ ] Carnets d'ordres complets
-- [ ] Données alternatives
-  - [ ] Sentiment des réseaux sociaux
-  - [ ] Actualités en temps réel
-  - [ ] Positions institutionnelles
-- [ ] Données on-chain
-  - [ ] Flux de transactions
-  - [ ] Métriques DeFi
-  - [ ] Activité des wallets
+Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
+et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-### Prétraitement Ultra-Intelligent
-- [ ] Correction avancée des biais
-  - [ ] Détection d'événements exceptionnels
-  - [ ] Gestion des outliers contextuels
-- [ ] Génération synthétique
-  - [ ] GANs pour scénarios rares
-  - [ ] Simulation de crises
-- [ ] Annotations intelligentes
-  - [ ] Classification des périodes
-  - [ ] Détection des régimes
+## [0.1.2] - 2024-01-08
+### Ajouté
+- Classe de base BaseCollector pour standardiser les collecteurs de données
+- Collecteur OrderBook pour les données L2/L3 de Binance
+- Tests unitaires complets pour le collecteur OrderBook
+- Tests de performance pour les collecteurs de données
+- Tests d'intégration pour les collecteurs
+- Documentation complète des collecteurs dans `docs/collectors.md`
 
-### Multi-Temporalité
-- [ ] Granularité fine (tick à 1min)
-- [ ] Granularité moyenne (5min à 1h)
-- [ ] Granularité large (4h à 1sem)
-- [ ] Agrégation intelligente
+### Amélioré
+- Optimisation des performances des collecteurs
+- Meilleure gestion des erreurs et des reconnexions
+- Documentation plus détaillée et exemples d'utilisation
 
-### Infrastructure
-- [x] TimescaleDB optimisé
-- [x] Pipeline asyncpg
-- [x] Logging avancé
-- [x] Configuration complète
+## [0.1.1] - 2024-01-08
+### Ajouté
+- Intégration de l'API Binance
+- Intégration de l'API Alpha Vantage
+- Configuration PostgreSQL/TimescaleDB
+- Système de cache avec gestion de la persistance
+- Documentation des APIs et de la base de données
 
-## [0.1.0] - 2024-01-08 ✅
-### Infrastructure initiale
-- [x] Structure du projet
-- [x] Configuration Git et GitHub Actions
-- [x] Documentation de base
-- [x] Tests unitaires
+### Modifié
+- Amélioration de la structure du projet
+- Optimisation de la gestion des connexions API
 
-### Collecte de données
-- [x] Intégration Binance API
-- [x] Intégration Alpha Vantage
-- [x] Gestion du cache
-- [x] Configuration PostgreSQL/TimescaleDB
+### Corrigé
+- Gestion des erreurs dans les appels API
+- Problèmes de connexion à la base de données
 
-## Prochaines versions majeures
+## [0.1.0] - 2024-01-08
+### Ajouté
+- Structure initiale du projet
+- Configuration Git et GitHub Actions
+- Documentation de base (README, CONTRIBUTING)
+- Tests unitaires de base
+- Configuration de l'environnement de développement
+- Fichiers de configuration initiaux
+- Structure des dossiers du projet
 
-### Version 0.4.0
-- Optimisation de portefeuille ultra-sophistiquée
-  - Allocation dynamique multi-objectifs
-  - VaR conditionnelle dynamique
-  - Hedging automatique
-- Validation ultra-robuste
-  - Walk-forward analysis
-  - Monte Carlo simulations
-  - Tests de robustesse avancés
-
-### Version 0.5.0
-- Infrastructure production-ready
-  - Microservices spécialisés
-  - Pipeline temps réel
-  - Monitoring avancé des modèles
-- R&D continue
-  - Nouveaux modèles hybrides
-  - Auto-adaptation
-  - Optimisation continue 
+### Sécurité
+- Mise en place des bonnes pratiques de sécurité
+- Configuration des variables d'environnement
+- Gestion sécurisée des clés API 
