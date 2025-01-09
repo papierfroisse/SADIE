@@ -1,157 +1,64 @@
 # SADIE - Système d'Analyse de Données et d'Intelligence Économique
 
-SADIE est un système d'analyse de données et d'intelligence économique développé par Radio France. Il permet de collecter, stocker et analyser des données financières et économiques en temps réel.
+## Description
+SADIE est un système d'analyse de données financières et économiques qui collecte, traite et analyse des données en temps réel à partir de diverses sources.
 
-## Fonctionnalités
+## Prérequis
+- Python 3.9+
+- PostgreSQL 14+
+- TimescaleDB 2.10+
 
-- Collecte de données en temps réel via REST API et WebSocket
-- Stockage efficace des données en mémoire ou sur disque
-- Analyse statistique et temporelle des données
-- Visualisation des résultats
-- Configuration flexible via fichiers YAML
-- Logging complet des opérations
+## Installation de PostgreSQL et TimescaleDB
 
-## Installation
+### Windows
+1. Téléchargez et installez PostgreSQL depuis [le site officiel](https://www.postgresql.org/download/windows/)
+2. Téléchargez et installez TimescaleDB depuis [le site officiel](https://docs.timescale.com/install/latest/self-hosted/installation-windows/)
 
-### Depuis PyPI
-
+### Linux (Ubuntu/Debian)
 ```bash
-pip install sadie
+# Ajout du dépôt TimescaleDB
+sudo sh -c 'echo "deb https://packagecloud.io/timescale/timescaledb/ubuntu/ $(lsb_release -c -s) main" > /etc/apt/sources.list.d/timescaledb.list'
+wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo apt-key add -
+sudo apt update
+
+# Installation de PostgreSQL et TimescaleDB
+sudo apt install -y postgresql-14 timescaledb-2-postgresql-14
+
+# Configuration de TimescaleDB
+sudo timescaledb-tune
+sudo systemctl restart postgresql
 ```
 
-### Depuis les sources
-
+### macOS
 ```bash
-git clone https://github.com/radiofrance/sadie.git
-cd sadie
-pip install -e ".[dev]"  # Installation en mode développement
+# Installation via Homebrew
+brew tap timescale/tap
+brew install timescaledb
+timescaledb-tune
+brew services restart postgresql
 ```
 
-## Structure du projet
-
-```
-sadie/
-├── .github/            # Configuration GitHub (CI/CD, etc.)
-├── config/            # Fichiers de configuration
-├── data/             # Données (ignorées par Git)
-├── docs/             # Documentation
-├── examples/         # Exemples d'utilisation
-├── models/           # Modèles entraînés
-├── notebooks/        # Notebooks Jupyter
-├── requirements/     # Fichiers de dépendances
-├── scripts/          # Scripts utilitaires
-├── src/             # Code source
-│   └── sadie/
-│       ├── analysis/    # Analyse des données
-│       ├── data/        # Collecte des données
-│       ├── storage/     # Stockage des données
-│       └── utils/       # Utilitaires
-└── tests/           # Tests
-    ├── integration/  # Tests d'intégration
-    ├── performance/  # Tests de performance
-    └── unit/        # Tests unitaires
-```
-
-## Utilisation
-
-### Configuration
-
-Créez un fichier de configuration `config.yml` :
-
-```yaml
-logging:
-  level: INFO
-  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-  file: 'logs/sadie.log'
-
-collectors:
-  rest:
-    base_url: 'https://api.example.com'
-    timeout: 30
-    symbols: ['AAPL', 'GOOGL', 'MSFT']
-  websocket:
-    url: 'wss://stream.example.com'
-    symbols: ['BTC-USD', 'ETH-USD']
-
-storage:
-  type: 'memory'
-  max_size: 1000000
-
-analysis:
-  window_size: 60
-  metrics: ['mean', 'std', 'min', 'max']
-```
-
-### Exemple de code
-
-```python
-from sadie.data import RESTCollector, WebSocketCollector
-from sadie.storage import MemoryStorage
-from sadie.analysis import TimeSeriesAnalyzer
-from sadie.utils import setup_logging
-
-# Configuration du logging
-setup_logging()
-
-# Initialisation du stockage
-storage = MemoryStorage()
-
-# Création des collecteurs
-rest_collector = RESTCollector(storage=storage)
-ws_collector = WebSocketCollector(storage=storage)
-
-# Démarrage de la collecte
-rest_collector.start()
-ws_collector.start()
-
-# Analyse des données
-analyzer = TimeSeriesAnalyzer(storage=storage)
-results = analyzer.analyze()
-
-# Arrêt des collecteurs
-rest_collector.stop()
-ws_collector.stop()
-```
-
-## Développement
-
-### Installation des dépendances de développement
-
+## Configuration de la base de données
+1. Créez un fichier `.env` à partir du modèle `.env.example`
+2. Exécutez le script de création de la base de données :
 ```bash
-pip install -e ".[dev]"
+psql -U postgres -f scripts/create_database.sql
 ```
 
-### Exécution des tests
-
+## Installation des dépendances Python
 ```bash
-pytest                 # Tous les tests
-pytest tests/unit      # Tests unitaires uniquement
-pytest tests/integration  # Tests d'intégration uniquement
-pytest tests/performance  # Tests de performance uniquement
+pip install -r requirements.txt
 ```
 
-### Vérification du style de code
-
+## Initialisation de la base de données
 ```bash
-black .               # Formatage du code
-isort .              # Tri des imports
-mypy src tests       # Vérification des types
+alembic upgrade head
+```
+
+## Tests
+```bash
+pytest
 ```
 
 ## Documentation
-
-La documentation complète est disponible sur [Read the Docs](https://sadie.readthedocs.io/).
-
-## Contribution
-
-Les contributions sont les bienvenues ! Consultez le fichier [CONTRIBUTING.md](CONTRIBUTING.md) pour plus d'informations.
-
-## Licence
-
-Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
-## Contact
-
-Pour toute question ou suggestion, n'hésitez pas à :
-- Ouvrir une issue sur GitHub
-- Nous contacter à opensource@radiofrance.com 
+La documentation complète est disponible dans le dossier `docs/`. 
