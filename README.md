@@ -1,61 +1,157 @@
-# SADIE (Smart AI-Driven Investment Engine)
+# SADIE - Système d'Analyse de Données et d'Intelligence Économique
 
-## Description
-SADIE est un système avancé d'intelligence artificielle conçu pour l'optimisation de portefeuille et la prédiction des marchés financiers. Le projet combine des modèles LSTM (Long Short-Term Memory) avec des techniques d'apprentissage avancées pour fournir des prédictions fiables et une gestion de portefeuille optimisée.
+SADIE est un système d'analyse de données et d'intelligence économique développé par Radio France. Il permet de collecter, stocker et analyser des données financières et économiques en temps réel.
 
-## Architecture du Projet
+## Fonctionnalités
 
-```
-SADIE/
-├── src/                      # Code source principal
-│   ├── data/                 # Gestion des données
-│   ├── models/               # Modèles IA (LSTM, etc.)
-│   ├── analysis/            # Analyses techniques et fondamentales
-│   └── api/                 # API REST
-├── notebooks/               # Jupyter notebooks pour l'analyse
-├── tests/                  # Tests unitaires et d'intégration
-├── config/                 # Fichiers de configuration
-└── docs/                   # Documentation
-```
-
-## Roadmap
-
-### Phase 1 : Infrastructure et Données
-- [ ] Mise en place de l'infrastructure de base
-- [ ] Système de collecte de données multi-sources
-- [ ] Pipeline ETL pour le nettoyage et la préparation des données
-- [ ] Stockage optimisé pour les séries temporelles
-
-### Phase 2 : Modèles Prédictifs
-- [ ] Implémentation du modèle LSTM de base
-- [ ] Intégration des mécanismes d'attention
-- [ ] Système d'analyse comportementale
-- [ ] Modèles hybrides (LSTM + Transformers)
-
-### Phase 3 : Optimisation de Portefeuille
-- [ ] Algorithmes d'allocation d'actifs
-- [ ] Gestion dynamique des risques
-- [ ] Backtesting et validation
-- [ ] Optimisation des coûts de transaction
-
-### Phase 4 : Interface et Déploiement
-- [ ] API REST pour l'accès aux prédictions
-- [ ] Dashboard de visualisation
-- [ ] Système d'alertes en temps réel
-- [ ] Documentation complète
-
-## Technologies Utilisées
-- Python 3.10+
-- TensorFlow/PyTorch pour les modèles LSTM
-- FastAPI pour l'API REST
-- PostgreSQL/TimescaleDB pour le stockage
-- Docker pour la conteneurisation
+- Collecte de données en temps réel via REST API et WebSocket
+- Stockage efficace des données en mémoire ou sur disque
+- Analyse statistique et temporelle des données
+- Visualisation des résultats
+- Configuration flexible via fichiers YAML
+- Logging complet des opérations
 
 ## Installation
-[Instructions d'installation à venir]
+
+### Depuis PyPI
+
+```bash
+pip install sadie
+```
+
+### Depuis les sources
+
+```bash
+git clone https://github.com/radiofrance/sadie.git
+cd sadie
+pip install -e ".[dev]"  # Installation en mode développement
+```
+
+## Structure du projet
+
+```
+sadie/
+├── .github/            # Configuration GitHub (CI/CD, etc.)
+├── config/            # Fichiers de configuration
+├── data/             # Données (ignorées par Git)
+├── docs/             # Documentation
+├── examples/         # Exemples d'utilisation
+├── models/           # Modèles entraînés
+├── notebooks/        # Notebooks Jupyter
+├── requirements/     # Fichiers de dépendances
+├── scripts/          # Scripts utilitaires
+├── src/             # Code source
+│   └── sadie/
+│       ├── analysis/    # Analyse des données
+│       ├── data/        # Collecte des données
+│       ├── storage/     # Stockage des données
+│       └── utils/       # Utilitaires
+└── tests/           # Tests
+    ├── integration/  # Tests d'intégration
+    ├── performance/  # Tests de performance
+    └── unit/        # Tests unitaires
+```
+
+## Utilisation
+
+### Configuration
+
+Créez un fichier de configuration `config.yml` :
+
+```yaml
+logging:
+  level: INFO
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  file: 'logs/sadie.log'
+
+collectors:
+  rest:
+    base_url: 'https://api.example.com'
+    timeout: 30
+    symbols: ['AAPL', 'GOOGL', 'MSFT']
+  websocket:
+    url: 'wss://stream.example.com'
+    symbols: ['BTC-USD', 'ETH-USD']
+
+storage:
+  type: 'memory'
+  max_size: 1000000
+
+analysis:
+  window_size: 60
+  metrics: ['mean', 'std', 'min', 'max']
+```
+
+### Exemple de code
+
+```python
+from sadie.data import RESTCollector, WebSocketCollector
+from sadie.storage import MemoryStorage
+from sadie.analysis import TimeSeriesAnalyzer
+from sadie.utils import setup_logging
+
+# Configuration du logging
+setup_logging()
+
+# Initialisation du stockage
+storage = MemoryStorage()
+
+# Création des collecteurs
+rest_collector = RESTCollector(storage=storage)
+ws_collector = WebSocketCollector(storage=storage)
+
+# Démarrage de la collecte
+rest_collector.start()
+ws_collector.start()
+
+# Analyse des données
+analyzer = TimeSeriesAnalyzer(storage=storage)
+results = analyzer.analyze()
+
+# Arrêt des collecteurs
+rest_collector.stop()
+ws_collector.stop()
+```
+
+## Développement
+
+### Installation des dépendances de développement
+
+```bash
+pip install -e ".[dev]"
+```
+
+### Exécution des tests
+
+```bash
+pytest                 # Tous les tests
+pytest tests/unit      # Tests unitaires uniquement
+pytest tests/integration  # Tests d'intégration uniquement
+pytest tests/performance  # Tests de performance uniquement
+```
+
+### Vérification du style de code
+
+```bash
+black .               # Formatage du code
+isort .              # Tri des imports
+mypy src tests       # Vérification des types
+```
+
+## Documentation
+
+La documentation complète est disponible sur [Read the Docs](https://sadie.readthedocs.io/).
 
 ## Contribution
-[Guidelines de contribution à venir]
+
+Les contributions sont les bienvenues ! Consultez le fichier [CONTRIBUTING.md](CONTRIBUTING.md) pour plus d'informations.
 
 ## Licence
-[À définir] 
+
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+## Contact
+
+Pour toute question ou suggestion, n'hésitez pas à :
+- Ouvrir une issue sur GitHub
+- Nous contacter à opensource@radiofrance.com 
