@@ -1,134 +1,73 @@
-# Work In Progress
+# Work in Progress - SADIE
 
-## Tâches en cours 🔄
+## État Actuel (Version 0.1.1)
 
-### Enrichissement des Données
-- [ ] Intégration des sources de marché
-  - [ ] Order books L2/L3
-  - [ ] Données tick par tick
-  - [ ] Carnets d'ordres complets
-- [ ] Sources alternatives
-  - [ ] API Twitter (sentiment)
-  - [ ] API Reddit (analyse communautaire)
-  - [ ] Flux d'actualités temps réel
-  - [ ] Données institutionnelles
-- [ ] Données blockchain
-  - [ ] Connexion nodes ETH/BTC
-  - [ ] Métriques DeFi
-  - [ ] Analyse on-chain
+### ✅ Complété
+1. Structure initiale du projet
+   - Configuration Git et GitHub Actions
+   - Documentation de base
+   - Tests unitaires de base
+   - Configuration de l'environnement
 
-### Prétraitement Ultra-Avancé
-- [ ] Système de correction des biais
-  - [ ] Détecteur d'événements exceptionnels
-  - [ ] Analyseur de contexte
-  - [ ] Correcteur d'outliers intelligent
-- [ ] Pipeline GAN
-  - [ ] Architecture génératrice
-  - [ ] Discriminateur spécialisé
-  - [ ] Générateur de scénarios
-- [ ] Système d'annotation
-  - [ ] Classifieur de régimes
-  - [ ] Détecteur de patterns
-  - [ ] Marqueur d'événements
+2. Collecteurs de données
+   - Classe de base `BaseCollector`
+   - Implémentation `AsyncRESTCollector`
+   - Implémentation `AsyncWebSocketCollector`
+   - Tests unitaires des collecteurs
 
-### Infrastructure Data
-- [x] TimescaleDB setup
-- [x] Migration asyncpg
-- [ ] Optimisation stockage
-  - [ ] Compression intelligente
-  - [ ] Partitionnement adaptatif
-  - [ ] Cache prédictif
+### 🔄 En Cours
+1. Configuration de la base de données
+   - [ ] Setup PostgreSQL/TimescaleDB
+   - [ ] Schéma de base de données
+   - [ ] Migration des données
 
-## Prochaines tâches prioritaires 📋
+2. Système de cache
+   - [ ] Implémentation du cache en mémoire
+   - [ ] Gestion de la persistance
+   - [ ] Tests de performance
 
-### Pour la version 0.2.0
-1. Pipeline de données ultra-enrichi
-   - [ ] Intégration multi-source
-   - [ ] Synchronisation temporelle
-   - [ ] Validation croisée des sources
-   - [ ] Tests de cohérence
+### 📅 Prochaines Étapes
+1. Collecteurs de données spécifiques
+   - [ ] Collecteur de données de marché
+   - [ ] Collecteur de données économiques
+   - [ ] Tests d'intégration
 
-2. Prétraitement nouvelle génération
-   - [ ] Setup GAN
-     - [ ] Architecture de base
-     - [ ] Tests initiaux
-     - [ ] Validation des données générées
-   - [ ] Système d'annotation
-     - [ ] Règles de base
-     - [ ] Apprentissage supervisé
-     - [ ] Validation humaine
+2. Documentation
+   - [ ] Documentation API complète
+   - [ ] Guides d'utilisation
+   - [ ] Exemples détaillés
 
-3. Infrastructure scalable
-   - [ ] Optimisation stockage
-   - [ ] Distribution des calculs
-   - [ ] Monitoring avancé
+## Problèmes Connus
+- Aucun problème majeur identifié pour le moment
 
-### Pour la version 0.3.0
-1. Architecture LSTM avancée
-   - [ ] LSTM spécialisés
-     - [ ] Module tendances
-     - [ ] Module volatilité
-     - [ ] Module volumes
-   - [ ] Optimisation bayésienne
-     - [ ] Framework de base
-     - [ ] Tests initiaux
-     - [ ] Validation des résultats
+## Notes de Développement
+1. Architecture
+   - Les collecteurs de base sont en place avec une bonne couverture de tests
+   - L'architecture asynchrone fonctionne bien
+   - La gestion des erreurs et des reconnexions est robuste
 
-2. Modèles hybrides
-   - [ ] LSTM + Attention
-     - [ ] Self-attention
-     - [ ] Cross-attention
-     - [ ] Attention temporelle
-   - [ ] LSTM + GAN
-     - [ ] Architecture de base
-     - [ ] Tests de génération
-     - [ ] Validation adversariale
+2. Tests
+   - Les tests unitaires sont en place pour les collecteurs
+   - Besoin d'ajouter plus de tests d'intégration
+   - Besoin de tests de performance
 
-## Notes techniques 📝
+3. Documentation
+   - La documentation de base est en place
+   - Besoin de plus d'exemples d'utilisation
+   - Besoin de documentation API détaillée
 
-### Architecture LSTM Avancée
-- Modules spécialisés:
-  ```python
-  class TrendLSTM:
-    - input_size: historical_data + indicators
-    - lstm_layers: [128, 64, 32]
-    - attention_mechanism: self_attention
-    - output: trend_prediction
+## Tâches Prioritaires
+1. Base de données
+   - Implémenter le schéma de base
+   - Configurer TimescaleDB
+   - Mettre en place les migrations
 
-  class VolatilityLSTM:
-    - input_size: price_changes + volumes
-    - lstm_layers: [64, 32, 16]
-    - attention_mechanism: temporal_attention
-    - output: volatility_forecast
+2. Cache
+   - Implémenter le système de cache
+   - Optimiser les performances
+   - Ajouter les tests
 
-  class VolumeLSTM:
-    - input_size: volume_profile + order_book
-    - lstm_layers: [96, 48, 24]
-    - attention_mechanism: cross_attention
-    - output: volume_prediction
-  ```
-
-### Prétraitement GAN
-- Architecture:
-  ```python
-  class MarketGAN:
-    - generator:
-      - input: noise + market_conditions
-      - layers: [256, 512, 256, 128]
-      - output: synthetic_data
-    
-    - discriminator:
-      - input: real_or_synthetic_data
-      - layers: [128, 256, 128, 1]
-      - output: authenticity_score
-  ```
-
-### Infrastructure
-- TimescaleDB:
-  - Compression: après 7 jours
-  - Rétention: 5 ans
-  - Chunks: adaptatifs selon volatilité
-- Cache:
-  - L1: mémoire (1h)
-  - L2: Redis (24h)
-  - L3: disque (7j) 
+3. Documentation
+   - Documenter les APIs
+   - Ajouter des exemples
+   - Mettre à jour les guides 
