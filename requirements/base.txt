@@ -1,0 +1,19 @@
+# Dépendances de base pour SADIE
+
+# HTTP et WebSocket
+aiohttp>=3.9.1
+websockets>=12.0
+
+# Traitement des données
+numpy>=1.24.0
+pandas>=2.1.0
+scipy>=1.11.0
+
+# Configuration et logging
+pyyaml>=6.0.1
+python-dotenv>=1.0.0
+
+# Utilitaires
+psutil>=5.9.0
+python-dateutil>=2.8.2
+pytz>=2023.3 

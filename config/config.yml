@@ -1,0 +1,36 @@
+# Configuration par défaut pour SADIE
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: logs/sadie.log
+
+data:
+  collectors:
+    websocket:
+      reconnect_delay: 5
+      max_retries: 3
+      ping_interval: 30
+    rest:
+      timeout: 10
+      rate_limit: 60
+      retry_delay: 1
+  storage:
+    type: memory
+    path: data
+    max_size: 1000000
+    cleanup_interval: 3600
+
+analysis:
+  window_size: 20
+  confidence_level: 0.95
+  batch_size: 1000
+  max_workers: 4
+
+metrics:
+  enabled: true
+  interval: 60
+  retention_days: 7
+  tags:
+    environment: development
+    version: "0.1.0" 
