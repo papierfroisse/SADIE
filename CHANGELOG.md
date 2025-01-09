@@ -5,6 +5,21 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2024-01-22
+
+### Ajouté
+- Implémentation des collecteurs de données :
+  - Classe de base `BaseCollector`
+  - Collecteur REST avec `AsyncRESTCollector`
+  - Collecteur WebSocket avec `AsyncWebSocketCollector`
+  - Tests unitaires complets pour les collecteurs
+  - Documentation des APIs et des classes
+
+### Modifié
+- Mise à jour de la structure des tests
+- Amélioration de la gestion des erreurs
+- Optimisation des reconnexions WebSocket
+
 ## [0.1.0] - 2024-01-15
 
 ### Ajouté
