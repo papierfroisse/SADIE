@@ -1,0 +1,153 @@
+name: Debug & Diagnostics
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug_level:
+        description: 'Niveau de debug'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - quick
+          - full
+          - deep
+
+jobs:
+  system-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: System Info
+        run: |
+          echo "🔍 Diagnostic système"
+          uname -a
+          df -h
+          free -h
+          python3 -V
+          pip -V
+          
+  dependencies-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          
+      - name: Verify Dependencies
+        run: |
+          echo "📦 Vérification des dépendances"
+          pip install pipdeptree
+          pip install -r requirements.txt
+          pipdeptree
+          
+      - name: Check Conflicts
+        run: |
+          pip check
+          
+  database-check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: timescale/timescaledb:latest-pg14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: sadie_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Database Diagnostics
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          
+          echo "🗄️ Test de connexion PostgreSQL"
+          PGPASSWORD=postgres psql -h localhost -U postgres -d sadie_test -c "\dt;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -d sadie_test -c "SELECT version();"
+          
+  code-analysis:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.debug_level == 'deep'
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          
+      - name: Install Analysis Tools
+        run: |
+          pip install radon xenon vulture
+          
+      - name: Code Complexity Analysis
+        run: |
+          echo "🔍 Analyse de complexité cyclomatique"
+          radon cc SADIE/ -a -s
+          
+      - name: Code Maintainability Analysis
+        run: |
+          echo "📊 Analyse de maintenabilité"
+          radon mi SADIE/ -s
+          
+      - name: Dead Code Detection
+        run: |
+          echo "🔍 Détection de code mort"
+          vulture SADIE/
+          
+  performance-check:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.debug_level == 'full' || github.event.inputs.debug_level == 'deep'
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          
+      - name: Install Performance Tools
+        run: |
+          pip install -r requirements.txt
+          pip install py-spy memory_profiler
+          
+      - name: Memory Usage Analysis
+        run: |
+          echo "💾 Analyse de l'utilisation mémoire"
+          python -m memory_profiler -o memory_profile.log tests/performance/test_memory.py || true
+          
+      - name: Upload Performance Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: |
+            memory_profile.log
+            
+  report:
+    needs: [system-check, dependencies-check, database-check, code-analysis, performance-check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Report
+        run: |
+          echo "📋 Rapport de Debug Complet" > debug_report.md
+          echo "Date: $(date)" >> debug_report.md
+          echo "Niveau: ${{ github.event.inputs.debug_level }}" >> debug_report.md
+          
+      - name: Upload Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: debug-report
+          path: debug_report.md 
