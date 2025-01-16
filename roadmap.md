@@ -42,17 +42,17 @@
   - [x] Benchmarks initiaux
 
 ## Version 0.2.x - Enrichissement des Données
-### 0.2.0 (En cours : 2024-02-12)
-- [ ] Données de marché avancées
+### 0.2.0 ✓ (2024-02-12)
+- [x] Données de marché avancées
   - [x] Données tick par tick
   - [x] Carnets d'ordres complets
   - [x] Flux de transactions en temps réel
-- [ ] Tests et validation
+- [x] Tests et validation
   - [x] Tests de charge
   - [x] Tests de résilience
-  - [ ] Documentation des performances
+  - [x] Documentation des performances
 
-### 0.2.1 (Prévu : 2024-02-26)
+### 0.2.1 (En cours : 2024-02-26)
 - [ ] Données alternatives
   - [ ] API pour sentiment de marché
   - [ ] Analyse des tendances
