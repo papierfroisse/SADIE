@@ -1,26 +1,80 @@
-# Base dependencies
+# =============================================================================
+# Dépendances principales
+# =============================================================================
+# Client HTTP asynchrone pour les collecteurs de données
 aiohttp>=3.9.1
+# Bibliothèques de calcul numérique et d'analyse de données
 numpy>=1.24.0
 pandas>=2.1.0
+# Gestion de la configuration et des variables d'environnement
 pyyaml>=6.0.1
 python-dotenv>=1.0.0
+# Support WebSocket pour les flux de données en temps réel
 websockets>=12.0
+# Cache distribué
+aioredis>=2.0.1
+redis>=5.0.1
 
-# Database
+# =============================================================================
+# Base de données et ORM
+# =============================================================================
+# SQLAlchemy avec support asynchrone pour l'interaction avec la base de données
 sqlalchemy[asyncio]>=2.0.0
+# Gestion des migrations de base de données
 alembic>=1.14.0
+# Drivers PostgreSQL asynchrones et synchrones
 asyncpg>=0.29.0
 psycopg2-binary>=2.9.9
 
-# Testing
+# =============================================================================
+# Tests et Qualité de Code
+# =============================================================================
+# Framework de test avec support asynchrone
 pytest>=7.4.0
 pytest-asyncio>=0.21.0
+# Couverture de code et mocking
 pytest-cov>=4.1.0
 pytest-mock>=3.11.1
+# Tests de performance
+pytest-benchmark>=4.0.0
+locust>=2.15.1
 
-# Development
+# =============================================================================
+# Outils de Développement
+# =============================================================================
+# Formatage de code et tri des imports
 black>=23.7.0
 isort>=5.12.0
+# Vérification de types statique
 mypy>=1.5.0
+# Analyse statique de code
 pylint>=2.17.5
-pre-commit>=3.3.3 
+# Gestion des hooks pre-commit
+pre-commit>=3.3.3
+
+# =============================================================================
+# Debug et Profilage
+# =============================================================================
+# Profilage mémoire et CPU
+memory-profiler>=0.61.0
+py-spy>=0.3.14
+psutil>=5.9.0
+# Analyse de code
+radon>=6.0.1
+xenon>=0.9.0
+vulture>=2.7
+# Visualisation de données de debug
+rich>=13.3.3
+ipython>=8.12.0
+jupyter>=1.0.0
+
+# =============================================================================
+# Documentation
+# =============================================================================
+# Génération de documentation
+mkdocs>=1.4.2
+mkdocs-material>=9.1.15
+mkdocstrings>=0.22.0
+# Diagrammes et visualisations
+graphviz>=0.20.1
+mermaid-cli>=0.5.1 

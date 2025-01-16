@@ -25,40 +25,42 @@ with open(os.path.join(HERE, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="sadie",
+    name="SADIE",
     version="0.1.0",
-    description="Système d'Analyse de Données et d'Intelligence Économique",
+    packages=find_packages(),
+    install_requires=[
+        "sqlalchemy",
+        "asyncpg",
+        "python-dotenv",
+        "aiohttp",
+        "pandas",
+        "numpy",
+        "pytest",
+        "pytest-asyncio",
+        "pytest-cov"
+    ],
+    extras_require={
+        "dev": [
+            "black",
+            "flake8",
+            "mypy",
+            "isort"
+        ]
+    },
+    python_requires=">=3.8",
+    author="Your Name",
+    author_email="your.email@example.com",
+    description="SADIE - Système Avancé de Distribution d'Information et d'Événements",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Radio France",
-    author_email="opensource@radiofrance.com",
-    license="MIT",
+    url="https://github.com/yourusername/SADIE",
     classifiers=[
         "Development Status :: 3 - Alpha",
-        "Intended Audience :: Financial and Insurance Industry",
+        "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Topic :: Office/Business :: Financial",
-        "Topic :: Scientific/Engineering :: Information Analysis",
-    ],
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
-    python_requires=">=3.9",
-    install_requires=install_requires,
-    extras_require=extras_require,
-    entry_points={
-        "console_scripts": [
-            "sadie=sadie.cli:main",
-        ],
-    },
-    project_urls={
-        "Homepage": "https://github.com/radiofrance/sadie",
-        "Documentation": "https://sadie.readthedocs.io/",
-        "Source": "https://github.com/radiofrance/sadie",
-        "Tracker": "https://github.com/radiofrance/sadie/issues",
-    },
+        "Programming Language :: Python :: 3.10"
+    ]
 )

@@ -1,64 +1,131 @@
-# SADIE - Système d'Analyse de Données et d'Intelligence Économique
+# SADIE - Système Avancé de Distribution d'Information et d'Événements
 
 ## Description
-SADIE est un système d'analyse de données financières et économiques qui collecte, traite et analyse des données en temps réel à partir de diverses sources.
+SADIE est une plateforme avancée de distribution d'événements et d'informations en temps réel, conçue pour collecter, traiter et distribuer des données de manière efficace et fiable.
+
+## Architecture
+```
+SADIE/
+├── core/
+│   ├── models/         # Modèles de données
+│   ├── cache/          # Système de cache distribué
+│   ├── streaming/      # Gestion des flux de données
+│   └── monitoring/     # Surveillance et métriques
+├── collectors/         # Collecteurs de données
+├── api/               # API REST et WebSocket
+└── utils/            # Utilitaires communs
+```
+
+## Fonctionnalités Principales
+- Streaming de données en temps réel
+- Cache distribué avec Redis
+- Monitoring et logging avancés
+- Tests automatisés
+- Documentation complète
 
 ## Prérequis
-- Python 3.9+
+- Python 3.8+
 - PostgreSQL 14+
-- TimescaleDB 2.10+
+- Redis 6+
 
-## Installation de PostgreSQL et TimescaleDB
+## Installation
 
-### Windows
-1. Téléchargez et installez PostgreSQL depuis [le site officiel](https://www.postgresql.org/download/windows/)
-2. Téléchargez et installez TimescaleDB depuis [le site officiel](https://docs.timescale.com/install/latest/self-hosted/installation-windows/)
+### Base de données
+1. Installer PostgreSQL :
+   ```bash
+   # Windows : Télécharger depuis postgresql.org
+   # Linux :
+   sudo apt install postgresql-14
+   # macOS :
+   brew install postgresql@14
+   ```
 
-### Linux (Ubuntu/Debian)
-```bash
-# Ajout du dépôt TimescaleDB
-sudo sh -c 'echo "deb https://packagecloud.io/timescale/timescaledb/ubuntu/ $(lsb_release -c -s) main" > /etc/apt/sources.list.d/timescaledb.list'
-wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo apt-key add -
-sudo apt update
+2. Configurer la base de données :
+   ```bash
+   createdb sadie
+   ```
 
-# Installation de PostgreSQL et TimescaleDB
-sudo apt install -y postgresql-14 timescaledb-2-postgresql-14
+### Redis
+1. Installation :
+   ```bash
+   # Windows : Télécharger depuis redis.io
+   # Linux :
+   sudo apt install redis-server
+   # macOS :
+   brew install redis
+   ```
 
-# Configuration de TimescaleDB
-sudo timescaledb-tune
-sudo systemctl restart postgresql
-```
+### Application
+1. Cloner le dépôt :
+   ```bash
+   git clone https://github.com/yourusername/SADIE.git
+   cd SADIE
+   ```
 
-### macOS
-```bash
-# Installation via Homebrew
-brew tap timescale/tap
-brew install timescaledb
-timescaledb-tune
-brew services restart postgresql
-```
+2. Créer un environnement virtuel :
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/macOS
+   .\venv\Scripts\activate   # Windows
+   ```
 
-## Configuration de la base de données
-1. Créez un fichier `.env` à partir du modèle `.env.example`
-2. Exécutez le script de création de la base de données :
-```bash
-psql -U postgres -f scripts/create_database.sql
-```
+3. Installer les dépendances :
+   ```bash
+   pip install -e .
+   ```
 
-## Installation des dépendances Python
-```bash
-pip install -r requirements.txt
-```
-
-## Initialisation de la base de données
-```bash
-alembic upgrade head
-```
+4. Configurer l'environnement :
+   ```bash
+   cp .env.example .env
+   # Éditer .env avec vos paramètres
+   ```
 
 ## Tests
 ```bash
-pytest
+pytest tests/
+```
+
+## Utilisation
+
+### Streaming de Données
+```python
+from SADIE.core.streaming import StreamManager
+from SADIE.core.streaming.handlers import LoggingHandler
+
+async def main():
+    manager = StreamManager()
+    manager.subscribe("test_topic", LoggingHandler())
+    
+    async with manager:
+        # Votre code ici
+        pass
+```
+
+### Cache Distribué
+```python
+from SADIE.core.cache import Cache, RedisCache
+
+async def main():
+    cache = Cache(RedisCache(url="redis://localhost"))
+    await cache.set("key", "value")
+    value = await cache.get("key")
+```
+
+### Base de Données
+```python
+from SADIE.core.models.events import MarketEvent
+from sqlalchemy.ext.asyncio import AsyncSession
+
+async def save_event(session: AsyncSession, event: MarketEvent):
+    session.add(event)
+    await session.commit()
 ```
 
 ## Documentation
-La documentation complète est disponible dans le dossier `docs/`. 
+La documentation complète est disponible dans le dossier `docs/`.
+
+## Contribution
+Voir [CONTRIBUTING.md](CONTRIBUTING.md) pour les détails.
+
+## Licence
+Ce projet est sous licence MIT. Voir [LICENSE](LICENSE) pour plus de détails. 
