@@ -1,131 +1,129 @@
-# SADIE - Système Avancé de Distribution d'Information et d'Événements
+# SADIE - Système d'Analyse de Données et d'Intelligence Économique
 
 ## Description
-SADIE est une plateforme avancée de distribution d'événements et d'informations en temps réel, conçue pour collecter, traiter et distribuer des données de manière efficace et fiable.
-
-## Architecture
-```
-SADIE/
-├── core/
-│   ├── models/         # Modèles de données
-│   ├── cache/          # Système de cache distribué
-│   ├── streaming/      # Gestion des flux de données
-│   └── monitoring/     # Surveillance et métriques
-├── collectors/         # Collecteurs de données
-├── api/               # API REST et WebSocket
-└── utils/            # Utilitaires communs
-```
+SADIE est une plateforme avancée d'analyse de données financières qui combine des données de marché en temps réel avec des analyses de sentiment et des indicateurs techniques.
 
 ## Fonctionnalités Principales
-- Streaming de données en temps réel
-- Cache distribué avec Redis
-- Monitoring et logging avancés
-- Tests automatisés
-- Documentation complète
 
-## Prérequis
-- Python 3.8+
-- PostgreSQL 14+
-- Redis 6+
+### Données de Marché
+- Collecte en temps réel des carnets d'ordres
+- Suivi des transactions tick par tick
+- Agrégation et normalisation des données
+
+### Analyse de Sentiment
+- Collecte multi-source (Twitter, Reddit, News)
+- Détection d'anomalies en temps réel
+- Pondération intelligente des sources
+- Gestion optimisée de la mémoire
+- Filtrage par pertinence
+
+### Infrastructure
+- Cache distribué haute performance
+- Tests de charge et de résilience
+- Monitoring et logging avancés
 
 ## Installation
 
-### Base de données
-1. Installer PostgreSQL :
-   ```bash
-   # Windows : Télécharger depuis postgresql.org
-   # Linux :
-   sudo apt install postgresql-14
-   # macOS :
-   brew install postgresql@14
-   ```
-
-2. Configurer la base de données :
-   ```bash
-   createdb sadie
-   ```
-
-### Redis
-1. Installation :
-   ```bash
-   # Windows : Télécharger depuis redis.io
-   # Linux :
-   sudo apt install redis-server
-   # macOS :
-   brew install redis
-   ```
-
-### Application
-1. Cloner le dépôt :
-   ```bash
-   git clone https://github.com/yourusername/SADIE.git
-   cd SADIE
-   ```
-
-2. Créer un environnement virtuel :
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/macOS
-   .\venv\Scripts\activate   # Windows
-   ```
-
-3. Installer les dépendances :
-   ```bash
-   pip install -e .
-   ```
-
-4. Configurer l'environnement :
-   ```bash
-   cp .env.example .env
-   # Éditer .env avec vos paramètres
-   ```
-
-## Tests
 ```bash
-pytest tests/
+# Cloner le repository
+git clone https://github.com/votre-username/SADIE.git
+cd SADIE
+
+# Créer un environnement virtuel
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou
+.\venv\Scripts\activate  # Windows
+
+# Installer les dépendances
+pip install -r requirements.txt
+```
+
+## Configuration
+
+### Configuration des APIs
+Créez un fichier `.env` à la racine du projet :
+```env
+# Twitter API
+TWITTER_API_KEY=votre_clé
+TWITTER_API_SECRET=votre_secret
+TWITTER_BEARER_TOKEN=votre_token
+
+# Reddit API
+REDDIT_CLIENT_ID=votre_client_id
+REDDIT_CLIENT_SECRET=votre_client_secret
+REDDIT_USERNAME=votre_username
+
+# NewsAPI
+NEWSAPI_KEY=votre_clé
+```
+
+### Configuration du Cache
+```python
+from SADIE.core.cache import Cache, RedisBackend
+
+cache = Cache(
+    backend=RedisBackend(
+        host="localhost",
+        port=6379
+    )
+)
 ```
 
 ## Utilisation
 
-### Streaming de Données
+### Collecte de Données de Marché
 ```python
-from SADIE.core.streaming import StreamManager
-from SADIE.core.streaming.handlers import LoggingHandler
+from SADIE.data.collectors import OrderBookCollector
 
-async def main():
-    manager = StreamManager()
-    manager.subscribe("test_topic", LoggingHandler())
-    
-    async with manager:
-        # Votre code ici
-        pass
+collector = OrderBookCollector(
+    symbols=["BTC-USD", "ETH-USD"],
+    update_interval=1.0
+)
+
+async with collector:
+    data = await collector.collect()
 ```
 
-### Cache Distribué
+### Analyse de Sentiment
 ```python
-from SADIE.core.cache import Cache, RedisCache
+from SADIE.data.sentiment import SentimentCollector, SentimentSource
 
-async def main():
-    cache = Cache(RedisCache(url="redis://localhost"))
-    await cache.set("key", "value")
-    value = await cache.get("key")
+collector = SentimentCollector(
+    name="crypto_sentiment",
+    symbols=["BTC", "ETH"],
+    sources=[
+        SentimentSource.TWITTER,
+        SentimentSource.REDDIT,
+        SentimentSource.NEWS
+    ],
+    api_keys=api_keys
+)
+
+async with collector:
+    sentiment_data = await collector.collect()
 ```
 
-### Base de Données
-```python
-from SADIE.core.models.events import MarketEvent
-from sqlalchemy.ext.asyncio import AsyncSession
+## Tests
+```bash
+# Exécuter tous les tests
+pytest
 
-async def save_event(session: AsyncSession, event: MarketEvent):
-    session.add(event)
-    await session.commit()
+# Tests spécifiques
+pytest tests/unit/
+pytest tests/integration/
+pytest tests/performance/
 ```
 
 ## Documentation
-La documentation complète est disponible dans le dossier `docs/`.
+La documentation complète est disponible dans le dossier `docs/` et inclut :
+- Guide d'utilisation détaillé
+- Documentation technique
+- Exemples d'intégration
+- Guide de contribution
 
 ## Contribution
-Voir [CONTRIBUTING.md](CONTRIBUTING.md) pour les détails.
+Les contributions sont les bienvenues ! Consultez `CONTRIBUTING.md` pour les directives.
 
 ## Licence
-Ce projet est sous licence MIT. Voir [LICENSE](LICENSE) pour plus de détails. 
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails. 
