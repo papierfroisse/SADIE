@@ -1,179 +1,97 @@
-"""Décorateurs utilitaires pour SADIE."""
+"""Décorateurs utilitaires."""
 
 import asyncio
 import functools
 import time
-import warnings
-from typing import Any, Callable, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Optional, TypeVar, Union, cast
 
-from ..monitoring import get_logger
+from ..core.monitoring import get_logger
 
 logger = get_logger(__name__)
 
 F = TypeVar('F', bound=Callable[..., Any])
 
-def deprecated(reason: str) -> Callable[[F], F]:
-    """Marque une fonction comme dépréciée."""
-    def decorator(func: F) -> F:
-        @functools.wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            warnings.warn(
-                f"{func.__name__} est déprécié: {reason}",
-                category=DeprecationWarning,
-                stacklevel=2
-            )
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
-
-def singleton(cls: Type[Any]) -> Type[Any]:
-    """Décore une classe pour en faire un singleton."""
-    instances = {}
+def log_execution(func: Optional[F] = None) -> Union[F, Callable[[F], F]]:
+    """Décore une fonction pour logger son exécution.
     
-    @functools.wraps(cls)
-    def get_instance(*args: Any, **kwargs: Any) -> Any:
-        if cls not in instances:
-            instances[cls] = cls(*args, **kwargs)
-        return instances[cls]
+    Args:
+        func: Fonction à décorer (optionnel)
         
-    return get_instance
+    Returns:
+        Fonction décorée ou décorateur
+    """
+    def decorator(f: F) -> F:
+        @functools.wraps(f)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            start_time = time.time()
+            try:
+                result = f(*args, **kwargs)
+                duration = time.time() - start_time
+                logger.debug(
+                    f"{f.__name__} exécuté en {duration:.3f}s"
+                )
+                return result
+            except Exception as e:
+                duration = time.time() - start_time
+                logger.error(
+                    f"Erreur dans {f.__name__} après {duration:.3f}s: {e}"
+                )
+                raise
+        return cast(F, wrapper)
+        
+    if func is None:
+        return decorator
+    return decorator(func)
 
 def retry(
     max_attempts: int = 3,
     delay: float = 1.0,
-    exceptions: tuple = (Exception,),
-    logger: Optional[Any] = None
+    backoff: float = 2.0,
+    exceptions: tuple = (Exception,)
 ) -> Callable[[F], F]:
-    """Réessaie une fonction en cas d'échec."""
-    if logger is None:
-        logger = get_logger(__name__)
+    """Décore une fonction pour réessayer en cas d'erreur.
     
+    Args:
+        max_attempts: Nombre maximum de tentatives
+        delay: Délai initial entre les tentatives
+        backoff: Facteur multiplicatif du délai
+        exceptions: Exceptions à intercepter
+        
+    Returns:
+        Décorateur de fonction
+    """
     def decorator(func: F) -> F:
         @functools.wraps(func)
         async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-            last_exception = None
+            current_delay = delay
             for attempt in range(max_attempts):
                 try:
-                    if asyncio.iscoroutinefunction(func):
-                        return await func(*args, **kwargs)
-                    return func(*args, **kwargs)
+                    return await func(*args, **kwargs)
                 except exceptions as e:
-                    last_exception = e
-                    if attempt < max_attempts - 1:
-                        logger.warning(
-                            f"Tentative {attempt + 1}/{max_attempts} échouée: {e}"
-                        )
-                        await asyncio.sleep(delay * (attempt + 1))
-                    else:
-                        logger.error(
-                            f"Toutes les tentatives ont échoué: {e}"
-                        )
-            raise last_exception
-            
+                    if attempt == max_attempts - 1:
+                        raise
+                    logger.warning(
+                        f"Tentative {attempt + 1}/{max_attempts} "
+                        f"échouée pour {func.__name__}: {e}"
+                    )
+                    await asyncio.sleep(current_delay)
+                    current_delay *= backoff
+                    
         @functools.wraps(func)
         def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
-            last_exception = None
+            current_delay = delay
             for attempt in range(max_attempts):
                 try:
                     return func(*args, **kwargs)
                 except exceptions as e:
-                    last_exception = e
-                    if attempt < max_attempts - 1:
-                        logger.warning(
-                            f"Tentative {attempt + 1}/{max_attempts} échouée: {e}"
-                        )
-                        time.sleep(delay * (attempt + 1))
-                    else:
-                        logger.error(
-                            f"Toutes les tentatives ont échoué: {e}"
-                        )
-            raise last_exception
-            
-        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
-    return decorator
-
-def log_execution(
-    level: str = "DEBUG",
-    show_args: bool = True,
-    show_result: bool = False
-) -> Callable[[F], F]:
-    """Log l'exécution d'une fonction."""
-    def decorator(func: F) -> F:
-        @functools.wraps(func)
-        async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-            logger = get_logger(func.__module__)
-            log = getattr(logger, level.lower())
-            
-            # Log avant l'exécution
-            if show_args:
-                log(
-                    f"Appel de {func.__name__} avec "
-                    f"args={args}, kwargs={kwargs}"
-                )
-            else:
-                log(f"Appel de {func.__name__}")
-            
-            # Exécution
-            start_time = time.time()
-            try:
-                result = await func(*args, **kwargs)
-                duration = time.time() - start_time
-                
-                # Log après l'exécution
-                if show_result:
-                    log(
-                        f"{func.__name__} terminé en {duration:.2f}s "
-                        f"avec résultat: {result}"
+                    if attempt == max_attempts - 1:
+                        raise
+                    logger.warning(
+                        f"Tentative {attempt + 1}/{max_attempts} "
+                        f"échouée pour {func.__name__}: {e}"
                     )
-                else:
-                    log(f"{func.__name__} terminé en {duration:.2f}s")
+                    time.sleep(current_delay)
+                    current_delay *= backoff
                     
-                return result
-                
-            except Exception as e:
-                duration = time.time() - start_time
-                logger.error(
-                    f"{func.__name__} échoué après {duration:.2f}s: {e}"
-                )
-                raise
-                
-        @functools.wraps(func)
-        def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
-            logger = get_logger(func.__module__)
-            log = getattr(logger, level.lower())
-            
-            # Log avant l'exécution
-            if show_args:
-                log(
-                    f"Appel de {func.__name__} avec "
-                    f"args={args}, kwargs={kwargs}"
-                )
-            else:
-                log(f"Appel de {func.__name__}")
-            
-            # Exécution
-            start_time = time.time()
-            try:
-                result = func(*args, **kwargs)
-                duration = time.time() - start_time
-                
-                # Log après l'exécution
-                if show_result:
-                    log(
-                        f"{func.__name__} terminé en {duration:.2f}s "
-                        f"avec résultat: {result}"
-                    )
-                else:
-                    log(f"{func.__name__} terminé en {duration:.2f}s")
-                    
-                return result
-                
-            except Exception as e:
-                duration = time.time() - start_time
-                logger.error(
-                    f"{func.__name__} échoué après {duration:.2f}s: {e}"
-                )
-                raise
-                
-        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
+        return cast(F, async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper)
     return decorator 

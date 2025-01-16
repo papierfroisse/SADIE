@@ -1,19 +1,26 @@
-"""Module d'utilitaires pour SADIE."""
+"""Module d'utilitaires."""
 
 import json
 import os
-import hashlib
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from ..monitoring import get_logger
+from ..core.monitoring import get_logger
 
 logger = get_logger(__name__)
 
 def ensure_dir(path: Union[str, Path]) -> Path:
-    """Crée un répertoire s'il n'existe pas."""
-    path = Path(path)
+    """Assure qu'un répertoire existe.
+    
+    Args:
+        path: Chemin du répertoire
+        
+    Returns:
+        Chemin du répertoire créé
+    """
+    if isinstance(path, str):
+        path = Path(path)
     path.mkdir(parents=True, exist_ok=True)
     return path
 

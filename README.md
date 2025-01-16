@@ -17,6 +17,16 @@ SADIE est une plateforme avancée d'analyse de données financières qui combine
 - Gestion optimisée de la mémoire
 - Filtrage par pertinence
 
+### Analyses Statistiques
+- Analyse complète de la distribution des prix
+- Calcul des rendements et volatilité
+- Détection des points aberrants
+- Métriques de risque (VaR, CVaR)
+- Ratios de performance (Sharpe, Sortino)
+- Analyse des cycles de marché
+- Visualisation des données
+- Tests de normalité et stationnarité
+
 ### Infrastructure
 - Cache distribué haute performance
 - Tests de charge et de résilience
