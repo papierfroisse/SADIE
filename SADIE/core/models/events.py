@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Dict, Optional
 
-from sqlalchemy import BigInteger, Column, DateTime, Integer, String, JSON
+from sqlalchemy import BigInteger, Column, DateTime, Integer, String, JSON, ForeignKey
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -28,8 +28,7 @@ class MarketEvent(Event):
     
     __tablename__ = "market_events"
     
-    id = Column(Integer, primary_key=True)
-    event_id = Column(Integer, nullable=False)
+    id = Column(Integer, ForeignKey('events.id'), primary_key=True)
     symbol = Column(String, nullable=False, index=True)
     price = Column(BigInteger, nullable=False)  # Prix en centimes
     volume = Column(BigInteger, nullable=False)  # Volume en centimes
