@@ -16,40 +16,40 @@
   - [x] Exemples d'utilisation (examples/)
 
 ### 0.1.1 (Prévu : 2024-01-22)
-- [ ] Intégration des APIs de base
-  - [ ] REST API Collector
-  - [ ] WebSocket Collector
-  - [ ] Tests des collecteurs
-  - [ ] Documentation des APIs
-- [ ] Configuration de la base de données
-  - [ ] Setup PostgreSQL/TimescaleDB
-  - [ ] Schéma de base de données
-  - [ ] Migration des données
-- [ ] Système de cache
-  - [ ] Implémentation du cache en mémoire
-  - [ ] Gestion de la persistance
-  - [ ] Tests de performance
+- [x] Intégration des APIs de base
+  - [x] REST API Collector
+  - [x] WebSocket Collector
+  - [x] Tests des collecteurs
+  - [x] Documentation des APIs
+- [x] Configuration de la base de données
+  - [x] Setup PostgreSQL/TimescaleDB
+  - [x] Schéma de base de données
+  - [x] Migration des données
+- [x] Système de cache
+  - [x] Implémentation du cache en mémoire
+  - [x] Gestion de la persistance
+  - [x] Tests de performance
 
-### 0.1.2 (Prévu : 2024-01-29)
-- [ ] Collecteurs de données de base
-  - [ ] Classe de base BaseCollector
-  - [ ] Collecteur OrderBook (L2/L3)
-  - [ ] Tests des collecteurs
-  - [ ] Documentation des collecteurs
-- [ ] Validation et tests
-  - [ ] Tests d'intégration
-  - [ ] Tests de performance
-  - [ ] Benchmarks initiaux
+### 0.1.2 (En cours : 2024-01-29)
+- [x] Collecteurs de données de base
+  - [x] Classe de base BaseCollector
+  - [x] Collecteur OrderBook (L2/L3)
+  - [x] Tests des collecteurs
+  - [x] Documentation des collecteurs
+- [x] Validation et tests
+  - [x] Tests d'intégration
+  - [x] Tests de performance
+  - [x] Benchmarks initiaux
 
 ## Version 0.2.x - Enrichissement des Données
-### 0.2.0 (Prévu : 2024-02-12)
+### 0.2.0 (En cours : 2024-02-12)
 - [ ] Données de marché avancées
-  - [ ] Données tick par tick
-  - [ ] Carnets d'ordres complets
-  - [ ] Flux de transactions en temps réel
+  - [x] Données tick par tick
+  - [x] Carnets d'ordres complets
+  - [x] Flux de transactions en temps réel
 - [ ] Tests et validation
-  - [ ] Tests de charge
-  - [ ] Tests de résilience
+  - [x] Tests de charge
+  - [x] Tests de résilience
   - [ ] Documentation des performances
 
 ### 0.2.1 (Prévu : 2024-02-26)
