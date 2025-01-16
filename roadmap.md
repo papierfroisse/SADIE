@@ -1,78 +1,102 @@
 # Roadmap SADIE
 
-## Version 0.1.0 (Complété ✓)
-- Infrastructure de base ✓
-- Tests unitaires ✓
-- Intégration continue ✓
-- Documentation de base ✓
+## Version Actuelle (0.2.0)
 
-## Version 0.1.1 (Complété ✓)
-- Données tick par tick ✓
-- Carnets d'ordres complets ✓
-- Flux de transactions en temps réel ✓
-- Tests de résilience ✓
+### Analyse Statistique ✓
+- Distribution des prix ✓
+- Calcul des rendements et volatilité ✓
+- Détection des valeurs aberrantes ✓
+- Métriques de risque (VaR, CVaR) ✓
+- Ratios de performance ✓
+- Tests de normalité et stationnarité ✓
 
-## Version 0.2.0 (Complété ✓)
-- Système de cache distribué ✓
-- Tests de charge ✓
-- Tests de résilience ✓
-- Documentation des performances ✓
+### Analyse des Cycles ✓
+- Décomposition des cycles ✓
+- Détection des points de retournement ✓
+- Analyse des caractéristiques ✓
+- Prévision des cycles ✓
 
-## Version 0.2.1 (En cours)
-- Analyse de sentiment du marché
-  - Collecte Twitter ✓
-  - Collecte Reddit ✓
-  - Collecte News ✓
-  - Détection d'anomalies ✓
-  - Gestion de la mémoire optimisée ✓
-  - Tests d'intégration ✓
-- Analyse statistique avancée
-  - Analyse de distribution ✓
-  - Calcul des rendements et volatilité ✓
-  - Détection des points aberrants ✓
-  - Métriques de risque (VaR, CVaR) ✓
-  - Ratios de performance ✓
-  - Analyse des cycles de marché
-  - Visualisation interactive des données
-  - Tests de normalité et stationnarité
-- Backtesting et optimisation
-  - Framework de backtesting ✓
-  - Optimisation des paramètres
-  - Validation croisée
-  - Analyse de robustesse
+### Détection de Patterns ✓
+- Patterns ABC et ABCD ✓
+- Formation Head & Shoulders ✓
+- Divergences prix-volume ✓
+- Clustering des cycles ✓
+- Analyse des corrélations ✓
 
-## Version 0.2.2 (Planifié)
-- Interface utilisateur
-  - Dashboard en temps réel
-  - Visualisation interactive des analyses
-  - Configuration des paramètres
-  - Export des rapports
-- API REST
-  - Documentation OpenAPI
-  - Authentification
-  - Rate limiting
-  - Endpoints d'analyse statistique
+### Visualisation ✓
+- Graphiques multi-panneaux ✓
+- Marquage des patterns ✓
+- Indicateurs de régime ✓
+- Métriques glissantes ✓
 
-## Version 0.3.0 (Planifié)
-- Machine Learning
-  - Prédiction de prix
-  - Détection de patterns
-  - Apprentissage en continu
-  - Intégration des analyses statistiques
-- Optimisation des stratégies
-  - Backtesting avancé
-  - Optimisation multi-objectif
-  - Validation temporelle
-  - Analyse de sensibilité
+## Prochaine Version (0.3.0)
 
-## Processus
-- Tests et validation
-  - Tests unitaires ✓
-  - Tests d'intégration ✓
-  - Tests de charge ✓
-  - Tests de résilience ✓
-  - Documentation des performances ✓
-- Déploiement
-  - Configuration Docker
-  - Scripts d'automatisation
-  - Monitoring en production 
+### Patterns Avancés
+- Patterns harmoniques (Gartley, Butterfly)
+- Formations en chandeliers japonais
+- Vagues d'Elliott
+- Niveaux de Fibonacci
+
+### Machine Learning
+- Classification des patterns par deep learning
+- Prédiction des points de retournement
+- Détection des anomalies
+- Clustering temporel avancé
+
+### Analyse Fractale
+- Dimension fractale des séries
+- Auto-similarité des patterns
+- Exposants de Hurst
+- Analyse multi-fractale
+
+### Optimisation
+- Paramètres optimaux des cycles
+- Seuils de détection adaptatifs
+- Fenêtres d'analyse dynamiques
+- Parallélisation des calculs
+
+## Version Future (0.4.0)
+
+### Intelligence Artificielle
+- Réseaux de neurones récurrents (LSTM, GRU)
+- Attention mechanisms
+- Apprentissage par renforcement
+- Modèles génératifs
+
+### Analyse Temps-Fréquence
+- Transformée en ondelettes
+- Décomposition modale empirique
+- Analyse spectrale adaptative
+- Filtrage non-linéaire
+
+### Intégration et API
+- API REST pour l'analyse
+- Streaming temps réel
+- Intégration avec d'autres outils
+- Export des résultats
+
+### Interface Utilisateur
+- Dashboard interactif
+- Personnalisation avancée
+- Rapports automatiques
+- Alertes configurables
+
+## Backlog
+
+### Améliorations Techniques
+- Tests de performance
+- Documentation complète
+- Exemples détaillés
+- Optimisation du code
+
+### Nouvelles Fonctionnalités
+- Analyse multi-actifs
+- Corrélations croisées
+- Analyse de sentiment
+- Indicateurs personnalisés
+
+### Infrastructure
+- CI/CD pipeline
+- Monitoring
+- Scalabilité
+- Sécurité 

@@ -1,139 +1,85 @@
-# SADIE - Système d'Analyse de Données et d'Intelligence Économique
+# SADIE - Système Avancé d'Intelligence et d'Exploration des Données
 
 ## Description
-SADIE est une plateforme avancée d'analyse de données financières qui combine des données de marché en temps réel avec des analyses de sentiment et des indicateurs techniques.
+SADIE est une bibliothèque Python pour l'analyse avancée des marchés financiers, combinant des techniques d'analyse statistique, de détection de patterns et d'apprentissage automatique.
 
 ## Fonctionnalités Principales
 
-### Données de Marché
-- Collecte en temps réel des carnets d'ordres
-- Suivi des transactions tick par tick
-- Agrégation et normalisation des données
-
-### Analyse de Sentiment
-- Collecte multi-source (Twitter, Reddit, News)
-- Détection d'anomalies en temps réel
-- Pondération intelligente des sources
-- Gestion optimisée de la mémoire
-- Filtrage par pertinence
-
-### Analyses Statistiques
+### Analyse Statistique
 - Analyse complète de la distribution des prix
-- Calcul des rendements et volatilité
-- Détection des points aberrants
+- Calcul des rendements et de la volatilité
+- Détection des valeurs aberrantes
 - Métriques de risque (VaR, CVaR)
 - Ratios de performance (Sharpe, Sortino)
 - Analyse des cycles de marché
-- Visualisation des données
 - Tests de normalité et stationnarité
 
-### Infrastructure
-- Cache distribué haute performance
-- Tests de charge et de résilience
-- Monitoring et logging avancés
+### Analyse des Cycles et Patterns
+- Décomposition des cycles de marché
+- Détection automatique des patterns (ABC, ABCD, Head & Shoulders)
+- Analyse des divergences prix-volume
+- Clustering des cycles similaires
+- Analyse des corrélations entre cycles
+- Prévision des caractéristiques du prochain cycle
+- Métriques de qualité des cycles
+
+### Visualisation Interactive
+- Graphiques multi-panneaux
+- Marquage des patterns et zones de cycle
+- Indicateurs de changement de régime
+- Métriques glissantes
+- Personnalisation des styles et couleurs
 
 ## Installation
 
 ```bash
-# Cloner le repository
-git clone https://github.com/votre-username/SADIE.git
-cd SADIE
-
-# Créer un environnement virtuel
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# ou
-.\venv\Scripts\activate  # Windows
-
-# Installer les dépendances
 pip install -r requirements.txt
-```
-
-## Configuration
-
-### Configuration des APIs
-Créez un fichier `.env` à la racine du projet :
-```env
-# Twitter API
-TWITTER_API_KEY=votre_clé
-TWITTER_API_SECRET=votre_secret
-TWITTER_BEARER_TOKEN=votre_token
-
-# Reddit API
-REDDIT_CLIENT_ID=votre_client_id
-REDDIT_CLIENT_SECRET=votre_client_secret
-REDDIT_USERNAME=votre_username
-
-# NewsAPI
-NEWSAPI_KEY=votre_clé
-```
-
-### Configuration du Cache
-```python
-from SADIE.core.cache import Cache, RedisBackend
-
-cache = Cache(
-    backend=RedisBackend(
-        host="localhost",
-        port=6379
-    )
-)
 ```
 
 ## Utilisation
 
-### Collecte de Données de Marché
+### Analyse Statistique
 ```python
-from SADIE.data.collectors import OrderBookCollector
+from SADIE.analysis.statistical import StatisticalAnalyzer
 
-collector = OrderBookCollector(
-    symbols=["BTC-USD", "ETH-USD"],
-    update_interval=1.0
-)
-
-async with collector:
-    data = await collector.collect()
+analyzer = StatisticalAnalyzer(data)
+stats = analyzer.analyze()
+print(stats.summary())
 ```
 
-### Analyse de Sentiment
+### Analyse des Cycles
 ```python
-from SADIE.data.sentiment import SentimentCollector, SentimentSource
+from SADIE.analysis.pattern_cycles import CyclePatternAnalyzer
 
-collector = SentimentCollector(
-    name="crypto_sentiment",
-    symbols=["BTC", "ETH"],
-    sources=[
-        SentimentSource.TWITTER,
-        SentimentSource.REDDIT,
-        SentimentSource.NEWS
-    ],
-    api_keys=api_keys
-)
-
-async with collector:
-    sentiment_data = await collector.collect()
+analyzer = CyclePatternAnalyzer(data)
+patterns = analyzer.identify_patterns()
+divergences = analyzer.detect_divergences()
+clusters = analyzer.cluster_cycles()
 ```
 
-## Tests
-```bash
-# Exécuter tous les tests
-pytest
+### Visualisation
+```python
+from SADIE.visualization import plot_patterns
 
-# Tests spécifiques
-pytest tests/unit/
-pytest tests/integration/
-pytest tests/performance/
+plot_patterns(data, analyzer)
 ```
 
-## Documentation
-La documentation complète est disponible dans le dossier `docs/` et inclut :
-- Guide d'utilisation détaillé
-- Documentation technique
-- Exemples d'intégration
-- Guide de contribution
+## Structure du Projet
+```
+SADIE/
+├── analysis/
+│   ├── statistical.py    # Analyse statistique
+│   ├── technical.py      # Indicateurs techniques
+│   ├── market_cycles.py  # Analyse des cycles
+│   └── pattern_cycles.py # Détection des patterns
+├── core/
+│   ├── models/          # Modèles de données
+│   └── utils/           # Utilitaires
+└── visualization/       # Outils de visualisation
+```
 
 ## Contribution
-Les contributions sont les bienvenues ! Consultez `CONTRIBUTING.md` pour les directives.
+Les contributions sont les bienvenues ! Consultez notre guide de contribution pour plus de détails.
 
 ## Licence
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails. 
+Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails. 
