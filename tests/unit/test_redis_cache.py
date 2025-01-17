@@ -4,7 +4,7 @@ import pytest
 import asyncio
 from datetime import timedelta
 
-from SADIE.core.cache.redis import RedisCache
+from sadie.core.cache.redis import RedisCache
 
 @pytest.fixture
 async def redis_cache():

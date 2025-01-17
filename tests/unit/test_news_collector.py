@@ -8,8 +8,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from aiohttp import ClientSession
 
-from SADIE.data.sentiment.news import NewsCollector
-from SADIE.data.sentiment.models import SentimentSource
+from sadie.data.sentiment.news import NewsCollector
+from sadie.data.sentiment.models import SentimentSource
 
 @pytest.fixture
 def mock_response():
