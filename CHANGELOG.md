@@ -1,64 +1,30 @@
 # Changelog
 
-Toutes les modifications notables de ce projet seront documentées dans ce fichier.
+Tous les changements notables de SADIE sont documentés dans ce fichier.
 
-Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
+Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.1] - 2024-01-22
+## [0.1.0] - 2024-01-17
 
 ### Ajouté
-- Implémentation des collecteurs de données :
-  - Classe de base `BaseCollector`
-  - Collecteur REST avec `AsyncRESTCollector`
-  - Collecteur WebSocket avec `AsyncWebSocketCollector`
-  - Tests unitaires complets pour les collecteurs
-  - Documentation des APIs et des classes
+- Collecteur de trades haute performance (4800+ trades/sec)
+- Interface web avec Tailwind CSS et Plotly
+- Support WebSocket pour données temps réel
+- Cache Redis pour optimisation
+- Monitoring avec Prometheus/Grafana
+- Documentation complète (API, modèles, monitoring)
 
-### Modifié
-- Mise à jour de la structure des tests
-- Amélioration de la gestion des erreurs
-- Optimisation des reconnexions WebSocket
+### Changé
+- Réorganisation complète du projet
+- Migration vers pyproject.toml pour la gestion des dépendances
+- Centralisation des configurations dans /config
+- Standardisation de la structure des tests
 
-## [0.1.0] - 2024-01-15
+### Supprimé
+- Ancien système de configuration dispersé
+- Fichiers de dépendances redondants (requirements.txt, setup.py)
 
-### Ajouté
-- Structure initiale du projet
-- Configuration de base avec `pyproject.toml` et `setup.py`
-- Système de logging configurable
-- Collecteurs de données REST et WebSocket
-- Stockage en mémoire des données
-- Analyseurs de séries temporelles et statistiques
-- Tests unitaires, d'intégration et de performance
-- Documentation de base
-- Exemples d'utilisation
-- Configuration CI/CD avec GitHub Actions
-- Mise en place des fichiers de configuration:
-  - `.env.example` pour la configuration d'environnement
-  - `requirements/` pour les dépendances
-  - `.gitignore` pour les exclusions Git
-  - `CODE_OF_CONDUCT.md` pour les règles de conduite
-  - `CONTRIBUTING.md` pour les guides de contribution
-  - `LICENSE` pour la licence MIT
-  - `README.md` pour la documentation principale
-
-### Modifié
-- Mise à jour de la structure du projet pour suivre les meilleures pratiques
-- Amélioration de la documentation
-- Standardisation des fichiers de configuration
-- Mise à jour des dépendances dans requirements
-- Optimisation de la configuration de développement
-
-### Corrigé
-- Correction des chemins d'importation
-- Correction des problèmes de typage
-- Harmonisation des versions de dépendances
-- Standardisation des formats de fichiers
-- Correction des configurations de tests
-
-## [0.0.1] - 2024-01-01
-
-### Ajouté
-- Initialisation du projet
-- Création du repository
-- Ajout des fichiers de base (README, LICENSE, etc.) 
+### Sécurité
+- Séparation des secrets dans .env
+- Configuration sécurisée de Prometheus 

@@ -1,0 +1,47 @@
+groups:
+  - name: sadie_alerts
+    rules:
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 1e9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage detected
+          description: SADIE is using more than 1GB of memory for 5 minutes
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU usage detected
+          description: SADIE is using more than 80% CPU for 5 minutes
+
+      - alert: SlowTradeProcessing
+        expr: rate(sadie_trades_processed_total[5m]) < 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Slow trade processing detected
+          description: Trade processing rate has dropped below 100 trades per second
+
+      - alert: HighErrorRate
+        expr: rate(sadie_errors_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate detected
+          description: Error rate has exceeded 10 errors per second
+
+      - alert: RedisConnectionIssue
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Redis connection lost
+          description: Connection to Redis has been lost for more than 1 minute 
