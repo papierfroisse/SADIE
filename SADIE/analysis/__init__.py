@@ -1,11 +1,8 @@
-"""Module d'analyse de données."""
+"""
+Module d'analyse des données.
+"""
 
 from .base import Analyzer
-from .market import MarketAnalyzer
-from .technical import TechnicalAnalyzer
+from .harmonic_patterns import HarmonicAnalyzer, PatternType
 
-__all__ = [
-    "Analyzer",
-    "MarketAnalyzer",
-    "TechnicalAnalyzer"
-] 
+__all__ = ["Analyzer", "HarmonicAnalyzer", "PatternType"] 

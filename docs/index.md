@@ -1,72 +1,82 @@
-# Documentation SADIE
+# SADIE - Système Avancé d'Intelligence et d'Exécution
 
 ## Vue d'ensemble
-SADIE (Système d'Analyse de Données et d'Intelligence Économique) est une plateforme complète pour la collecte, l'analyse et le traitement de données financières en temps réel.
 
-## Structure de la Documentation
+SADIE est une plateforme avancée de collecte et d'analyse de données financières en temps réel. Le système est conçu pour traiter efficacement de grands volumes de données de trading tout en maintenant une latence minimale.
 
-### 📚 Guides
-- [Guide de Démarrage Rapide](guides/quickstart.md)
-- [Guide d'Installation](guides/installation.md)
-- [Configuration](guides/configuration.md)
-- [Déploiement](guides/deployment.md)
+## Caractéristiques principales
 
-### 🔧 API Reference
-- [API REST](api/rest.md)
-- [API WebSocket](api/websocket.md)
-- [Authentification](api/auth.md)
+### Performance
+- Traitement de plus de 4800 trades par seconde
+- Cache intelligent avec Redis
+- Parallélisation des calculs
+- Optimisation de la mémoire
 
-### 📊 Collecteurs de Données
-- [Collecteurs de Marché](collectors.md)
-- [Analyse de Sentiment](sentiment.md)
-- [Collecteur de Sentiment](sentiment_collector.md)
+### Fiabilité
+- Tests complets (unitaires, intégration, stress)
+- Monitoring en temps réel
+- Gestion avancée des erreurs
+- Mécanismes de reprise automatique
+
+### Analyse
+- Calcul de métriques en temps réel
+- Détection de patterns
+- Analyse statistique avancée
+- Indicateurs techniques
+
+### Interface
+- Dashboard moderne et réactif
+- Graphiques interactifs
+- Statistiques en direct
+- WebSocket pour données temps réel
 
 ## Architecture
 
-### Composants Principaux
-1. **Collecteurs de Données**
-   - Collecte en temps réel des données de marché
-   - Analyse de sentiment des médias sociaux
-   - Agrégation de données économiques
+```mermaid
+graph TD
+    A[Exchanges] -->|WebSocket/REST| B[Collecteurs]
+    B -->|Trades| C[Processeur]
+    C -->|Données| D[Cache Redis]
+    C -->|Métriques| E[Prometheus]
+    C -->|Analyse| F[Analyseur]
+    F -->|Résultats| G[Interface Web]
+    D -->|Cache| G
+    E -->|Monitoring| G
+```
 
-2. **Traitement des Données**
-   - Pipeline de traitement asynchrone
-   - Système de cache intelligent
-   - Validation et nettoyage des données
+## Démarrage rapide
 
-3. **Stockage**
-   - PostgreSQL avec TimescaleDB
-   - Optimisation des séries temporelles
-   - Système de backup automatique
+1. Installation :
+```bash
+git clone https://github.com/yourusername/SADIE.git
+cd SADIE
+pip install -r requirements.txt
+```
 
-4. **API**
-   - Interface REST pour les requêtes ponctuelles
-   - WebSocket pour les flux en temps réel
-   - Système d'authentification sécurisé
+2. Configuration :
+```bash
+cp config.example.yml config.yml
+# Éditer config.yml avec vos paramètres
+```
 
-## Bonnes Pratiques
+3. Lancement :
+```bash
+python scripts/run_web.py
+```
 
-### Développement
-- Utilisation de types statiques (mypy)
-- Tests unitaires et d'intégration
-- Formatage de code (black, isort)
-- Analyse statique (pylint)
+4. Accès à l'interface : [http://localhost:8000](http://localhost:8000)
 
-### Déploiement
-- CI/CD via GitHub Actions
-- Conteneurisation avec Docker
-- Monitoring via Prometheus/Grafana
+## Documentation
+
+- [Guide d'installation](user-guide/installation.md)
+- [Configuration](user-guide/configuration.md)
+- [Documentation technique](technical/architecture.md)
+- [Guide de développement](development/contributing.md)
 
 ## Contribution
-- [Guide de Contribution](guides/contributing.md)
-- [Code de Conduite](guides/code_of_conduct.md)
-- [Style Guide](guides/style_guide.md)
 
-## Roadmap
-Consultez notre [Roadmap](../roadmap.md) pour voir les fonctionnalités prévues et l'évolution du projet.
+Les contributions sont les bienvenues ! Consultez notre [guide de contribution](development/contributing.md) pour plus d'informations.
 
-## Support
-Pour toute question ou problème :
-1. Consultez les [Issues GitHub](https://github.com/votre-repo/sadie/issues)
-2. Rejoignez notre [Canal Discord](https://discord.gg/votre-canal)
-3. Contactez l'équipe de support : support@sadie-project.com
+## Licence
+
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](https://github.com/yourusername/SADIE/blob/main/LICENSE) pour plus de détails.

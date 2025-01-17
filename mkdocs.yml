@@ -1,0 +1,82 @@
+site_name: SADIE Documentation
+site_description: Documentation for SADIE - Système Avancé d'Intelligence et d'Exécution
+site_author: Your Name
+repo_url: https://github.com/yourusername/SADIE
+repo_name: SADIE
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: deep purple
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            - sys.path.append(".")
+          selection:
+            docstring_style: google
+          rendering:
+            show_source: true
+            show_root_heading: true
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+nav:
+  - Accueil: index.md
+  - Guide Utilisateur:
+    - Installation: user-guide/installation.md
+    - Configuration: user-guide/configuration.md
+    - Utilisation: user-guide/usage.md
+    - Interface Web: user-guide/web-interface.md
+  - Documentation Technique:
+    - Architecture: technical/architecture.md
+    - Collecteurs: technical/collectors.md
+    - Analyse: technical/analysis.md
+    - Cache: technical/cache.md
+    - API: technical/api.md
+  - Développement:
+    - Contribution: development/contributing.md
+    - Tests: development/testing.md
+    - CI/CD: development/ci-cd.md
+    - Monitoring: development/monitoring.md
+  - Changelog: changelog.md 
