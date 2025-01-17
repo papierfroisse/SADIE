@@ -4,107 +4,158 @@ Système avancé de collecte et d'analyse de données de trading.
 
 ## Fonctionnalités
 
-- Collecte de données en temps réel via WebSocket
-- Support multi-exchanges (Binance, Kraken, Coinbase)
-- Agrégation de données de marché
-- Détection d'opportunités d'arbitrage
-- Interface web avec visualisation
-- Monitoring et métriques
+- Collecte en temps réel des trades sur plusieurs exchanges (Binance, Kraken, Coinbase)
+- Stockage hybride des données :
+  - Redis pour les données en temps réel
+  - TimescaleDB pour l'historique
+- Calcul de statistiques en temps réel (VWAP, volume, etc.)
+- API REST et WebSocket pour l'accès aux données
+- Interface web de visualisation
 
 ## Installation
 
-```bash
-# Cloner le dépôt
-git clone https://github.com/yourusername/sadie.git
-cd sadie
+### Prérequis
 
-# Installation en mode développement
+- Python 3.9+
+- Redis 6.0+
+- TimescaleDB 2.0+
+- Docker (optionnel)
+
+### Installation des dépendances
+
+```bash
+# Installation basique
 pip install -e .
+
+# Installation avec toutes les fonctionnalités
+pip install -e .[analysis,database,test,dev,docs]
+```
+
+### Configuration de la base de données
+
+1. Redis :
+```bash
+# Installation
+sudo apt install redis-server
+
+# Démarrage
+sudo systemctl start redis
+```
+
+2. TimescaleDB :
+```bash
+# Installation via Docker
+docker run -d \
+    --name timescaledb \
+    -p 5432:5432 \
+    -e POSTGRES_PASSWORD=postgres \
+    timescale/timescaledb:latest-pg14
+
+# Création de la base de données
+psql -h localhost -U postgres -c "CREATE DATABASE sadie;"
 ```
 
 ## Utilisation
 
-### Collecte de trades
+### Collecte des données
 
 ```python
 from sadie.data.collectors import BinanceTradeCollector
+from sadie.storage import RedisStorage, TimescaleStorage
+
+# Configuration du stockage
+redis = RedisStorage(
+    name="redis",
+    host="localhost",
+    port=6379
+)
+
+timescale = TimescaleStorage(
+    name="timescale",
+    dsn="postgresql://postgres:postgres@localhost:5432/sadie"
+)
 
 # Création du collecteur
 collector = BinanceTradeCollector(
     name="binance",
-    symbols=["BTC-USD", "ETH-USD"]
+    symbols=["BTC/USDT", "ETH/USDT"],
+    storage=redis  # Stockage en temps réel
 )
 
 # Démarrage de la collecte
 await collector.start()
 
 # Récupération des données
-data = await collector.collect()
+trades = await redis.get_trades("BTC/USDT")
+stats = await redis.get_statistics("BTC/USDT")
 
-# Arrêt du collecteur
+# Arrêt de la collecte
 await collector.stop()
 ```
 
-### Agrégation multi-exchanges
+### API Web
 
-```python
-from sadie.data.collectors import (
-    BinanceTradeCollector,
-    KrakenTradeCollector,
-    CoinbaseTradeCollector
-)
-
-# Création des collecteurs
-collectors = [
-    BinanceTradeCollector(name="binance", symbols=symbols),
-    KrakenTradeCollector(name="kraken", symbols=symbols),
-    CoinbaseTradeCollector(name="coinbase", symbols=symbols)
-]
-
-# Démarrage des collecteurs
-for collector in collectors:
-    await collector.start()
-
-# Collecte et agrégation des données
-for collector in collectors:
-    data = await collector.collect()
-    # Traitement des données...
-
-# Arrêt des collecteurs
-for collector in collectors:
-    await collector.stop()
+```bash
+# Démarrage du serveur
+uvicorn sadie.web.app:app --reload
 ```
 
-## Exemples
+L'API est ensuite accessible sur http://localhost:8000
 
-Le dossier `examples/` contient plusieurs exemples d'utilisation :
+## Architecture
 
-- `trades_example.py` : Collecte simple de trades
-- `market_aggregator.py` : Agrégation de données multi-exchanges
-- `arbitrage_detector.py` : Détection d'opportunités d'arbitrage
+### Stockage des données
 
-## Documentation
+Le système utilise une architecture de stockage hybride :
 
-La documentation complète est disponible sur [https://yourusername.github.io/sadie](https://yourusername.github.io/sadie).
+1. Redis (temps réel) :
+   - Stockage des derniers trades (limité en nombre)
+   - Statistiques en temps réel
+   - Faible latence pour les requêtes fréquentes
+
+2. TimescaleDB (historique) :
+   - Stockage permanent de tous les trades
+   - Agrégation temporelle des données
+   - Requêtes analytiques complexes
+
+### Collecteurs
+
+Les collecteurs de données peuvent être configurés pour utiliser l'un ou l'autre des systèmes de stockage, ou les deux en même temps.
+
+La classe `BaseCollector` fournit :
+- Gestion du stockage
+- Calcul des statistiques
+- Gestion de la mémoire
+
+Les implémentations spécifiques (`BinanceTradeCollector`, `KrakenTradeCollector`, `CoinbaseTradeCollector`) ajoutent :
+- Connexion aux APIs
+- Normalisation des données
+- Gestion des reconnexions
 
 ## Tests
 
 ```bash
-# Exécution des tests
-pytest
+# Tests unitaires
+pytest tests/unit
 
-# Avec couverture de code
+# Tests d'intégration
+pytest tests/integration
+
+# Tests de performance
+pytest tests/performance
+
+# Tous les tests avec couverture
 pytest --cov=sadie
 ```
 
 ## Contribution
 
-Les contributions sont les bienvenues ! Consultez [CONTRIBUTING.md](CONTRIBUTING.md) pour les détails.
+1. Fork du projet
+2. Création d'une branche (`git checkout -b feature/nouvelle-fonctionnalite`)
+3. Commit des changements (`git commit -am 'Ajout de la fonctionnalité'`)
+4. Push de la branche (`git push origin feature/nouvelle-fonctionnalite`)
+5. Création d'une Pull Request
 
 ## Licence
 
-Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
-## Changelog
-
-Voir [CHANGELOG.md](CHANGELOG.md) pour l'historique des changements. 
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails. 
