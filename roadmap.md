@@ -1,117 +1,70 @@
-# SADIE - Roadmap et Suivi de Développement
+# Roadmap sadie
 
-## État Actuel (Version 0.2.1)
+## ✅ Réalisé
 
-### ✅ Fonctionnalités Complétées
+### Architecture de base
+- ✅ Refactoring du code pour utiliser "sadie" en minuscules
+- ✅ Mise en place de la structure du projet
+- ✅ Implémentation des collecteurs de base
+- ✅ Support multi-exchange (Binance, Kraken, Coinbase)
 
-#### Core (v0.1.0 - v0.2.1)
-- ✓ Structure initiale du projet
-  - ✓ Configuration Git et GitHub Actions
-  - ✓ Tests unitaires et d'intégration
-  - ✓ Configuration de l'environnement
-- ✓ Collecte de données en temps réel
-  - ✓ Classe de base `BaseCollector`
-  - ✓ Implémentation `AsyncRESTCollector`
-  - ✓ Implémentation `AsyncWebSocketCollector`
-  - ✓ Tests de stress et résilience
-- ✓ Optimisations techniques majeures
-  - ✓ Cache intelligent avec Redis
-  - ✓ Parallélisation des calculs
-  - ✓ Tests de charge (4800+ trades/sec)
-  - ✓ Gestion avancée des erreurs et résilience
+### Stockage des données
+- ✅ Architecture de stockage hybride (Redis + TimescaleDB)
+- ✅ Implémentation du stockage Redis pour les données temps réel
+- ✅ Implémentation du stockage TimescaleDB pour l'historique
+- ✅ Tests unitaires et d'intégration pour le stockage
+- ✅ Tests de résilience du stockage
+- ✅ Exemples d'utilisation du stockage
 
-#### Analyse (v0.2.0)
-- ✓ Analyse statistique avancée
-- ✓ Calcul des ratios de performance
-- ✓ Métriques de risque (VaR, CVaR)
-- ✓ Tests de normalité et stationnarité
-- ✓ Détection de patterns harmoniques
+## 🚧 En cours
 
-#### Interface (v0.2.1)
-- ✓ Dashboard en temps réel
-  - ✓ Graphiques interactifs (prix, volume)
-  - ✓ Statistiques en direct
-  - ✓ WebSocket pour données temps réel
-  - ✓ Interface responsive avec Tailwind CSS
+### API et Interface Web
+- Développement de l'API REST
+- Implémentation des endpoints WebSocket
+- Interface web de visualisation des données
+- Documentation de l'API
 
-### 🔄 En Cours de Développement
+### Analyse des données
+- Calcul de métriques avancées
+- Détection d'opportunités d'arbitrage
+- Backtesting des stratégies
+- Optimisation des performances
 
-#### Optimisations (v0.2.2)
-- [ ] Compression des données historiques
-- [ ] Documentation API complète
-- [ ] Monitoring en temps réel
-- [ ] CI/CD complet
+## 📅 Planifié
 
-#### Analyse Avancée (v0.2.2)
-- [ ] Détection automatique des figures chartistes
-- [ ] Analyse des vagues d'Elliott
-- [ ] Patterns de chandeliers japonais
-- [ ] Visualisation 3D des patterns
-- [ ] Export de rapports PDF
+### Phase 1 : API et Visualisation (2-3 semaines)
+1. Finaliser l'API REST avec FastAPI
+2. Implémenter les WebSockets pour les données temps réel
+3. Créer une interface web moderne avec React/Vue.js
+4. Ajouter des graphiques interactifs (TradingView)
+5. Documenter l'API avec OpenAPI/Swagger
 
-### 📅 Prochaines Versions
+### Phase 2 : Analyse et Trading (3-4 semaines)
+1. Développer des indicateurs techniques
+2. Implémenter la détection d'arbitrage
+3. Créer un moteur de backtesting
+4. Ajouter le support des ordres en papier
+5. Optimiser les performances du système
 
-#### Version 0.3.0 - Intelligence Artificielle
-- [ ] Classification des patterns par ML
-- [ ] Prédiction des zones de retournement
-- [ ] Détection des anomalies
-- [ ] Optimisation multi-objectif
-  - [ ] Paramètres de trading optimaux
-  - [ ] Gestion du risque adaptative
-- [ ] Interface web avancée
-  - [ ] Dashboard personnalisable
-  - [ ] Alertes en temps réel
-  - [ ] Collaboration temps réel
+### Phase 3 : Production et Monitoring (2-3 semaines)
+1. Ajouter des métriques Prometheus
+2. Configurer des alertes Grafana
+3. Optimiser la gestion de la mémoire
+4. Améliorer la résilience du système
+5. Préparer le déploiement en production
 
-## Backlog Technique
+## 🎯 Objectifs futurs
+
+### Fonctionnalités avancées
+- Support d'exchanges supplémentaires
+- Analyse de sentiment (Twitter, Reddit, News)
+- Machine Learning pour la prédiction
+- Stratégies de trading automatisées
+- Support des NFTs et DeFi
 
 ### Infrastructure
-- [ ] Support multi-exchange
-- [ ] Analyse multi-timeframe
-- [ ] Stratégies de trading automatisées
-- [ ] Intégration sociale et sentiment
-
-### Documentation
-- [ ] Guide utilisateur détaillé
-- [ ] Documentation API
-- [ ] Exemples interactifs
-
-## Notes de Développement
-
-### Points Forts
-1. Architecture modulaire et extensible
-2. Excellentes performances (4800+ trades/sec)
-3. Tests complets (unitaires, intégration, stress)
-4. Interface moderne et réactive
-
-### Points d'Amélioration
-1. Documentation à compléter
-2. Processus CI/CD à finaliser
-3. Monitoring à améliorer
-4. Tests de charge à automatiser
-
-## Conventions de Développement
-
-### Git Flow
-1. `main` : version stable
-2. `develop` : développement principal
-3. `feature/*` : nouvelles fonctionnalités
-4. `hotfix/*` : corrections urgentes
-5. `release/*` : préparation des versions
-
-### Commits
-- Format : `type(scope): description`
-- Types : `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-- Exemple : `feat(collector): add retry mechanism for network errors`
-
-### Tests
-- Tests unitaires pour chaque nouvelle fonctionnalité
-- Tests d'intégration pour les interactions
-- Tests de performance pour les optimisations
-- Couverture minimale : 80%
-
-### Documentation
-- Docstrings pour toutes les classes et méthodes
-- README à jour pour chaque module
-- Changelog maintenu pour chaque version
-- Exemples de code pour les fonctionnalités principales 
+- Déploiement sur Kubernetes
+- Scaling automatique
+- Backup et disaster recovery
+- Support multi-région
+- Optimisation des coûts 
