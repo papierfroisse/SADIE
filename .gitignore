@@ -21,73 +21,52 @@ wheels/
 *.egg
 
 # Virtual Environment
-venv/
-env/
-ENV/
 .env
+.venv
+env/
+venv/
+ENV/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-.project
-.pydevproject
-.settings/
+*~
+
+# Testing
+.coverage
+coverage.xml
+.pytest_cache/
+.mypy_cache/
+.tox/
+htmlcov/
+.benchmarks/
+
+# Documentation
+site/
+docs/_build/
 
 # Logs
-logs/
 *.log
+logs/
 log/
 
 # Data
 data/
-*.csv
-*.json
-*.pkl
-*.h5
-*.parquet
-
-# Documentation
-docs/_build/
-docs/api/
-
-# Tests
-.coverage
-coverage.xml
-.pytest_cache/
-htmlcov/
-
-# Notebooks
-.ipynb_checkpoints
-*.ipynb
-
-# Models
-models/*.pkl
-models/*.h5
-models/*.pt
-models/*.pth
-models/*.onnx
+*.db
+*.sqlite3
+*.redis
+*.rdb
 
 # Cache
 .cache/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
+.npm/
+.yarn/
 
-# Système
+# Temporary files
+*.bak
+*.tmp
+*.temp
 .DS_Store
 Thumbs.db
-
-# Configuration locale
-.env
-*.local
-config/*.local.yml
-config/*.local.yaml
-
-# Autres
-*.bak
-*.swp
-*.swo
-*~
-.history/

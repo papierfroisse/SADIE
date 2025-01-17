@@ -1,4 +1,4 @@
-name: SADIE CI/CD
+name: CI/CD
 
 on:
   push:
@@ -9,6 +9,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
     services:
       redis:
         image: redis
@@ -20,12 +24,8 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    strategy:
-      matrix:
-        python-version: [3.9, 3.10, 3.11, 3.12]
-
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -35,16 +35,17 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements/dev.txt
+        pip install -e ".[dev,test]"
         
-    - name: Run linting
+    - name: Lint with black
       run: |
-        pylint SADIE/
-        black --check SADIE/
-        isort --check-only SADIE/
+        black . --check
         
-    - name: Run type checking
+    - name: Check imports with isort
+      run: |
+        isort . --check-only --diff
+        
+    - name: Type check with mypy
       run: |
         mypy SADIE/
         
@@ -52,7 +53,7 @@ jobs:
       run: |
         pytest tests/ --cov=SADIE --cov-report=xml
         
-    - name: Upload coverage
+    - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
@@ -60,48 +61,53 @@ jobs:
   benchmark:
     needs: test
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+          
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.12'
+        python-version: "3.12"
         
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements/dev.txt
+        pip install -e ".[test]"
         
     - name: Run benchmarks
       run: |
-        pytest benchmarks/ --benchmark-only
-        
-    - name: Store benchmark results
-      uses: benchmark-action/github-action-benchmark@v1
-      with:
-        tool: 'pytest'
-        output-file-path: benchmark.json
+        pytest tests/stress/ --benchmark-only
         
   deploy-docs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.12'
+        python-version: "3.12"
         
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install mkdocs mkdocs-material
+        pip install -e ".[docs]"
         
-    - name: Build and deploy documentation
+    - name: Build docs
       run: |
-        mkdocs gh-deploy --force 
+        mkdocs build
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./site 
