@@ -1,103 +1,58 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
-      - id: check-added-large-files
-      - id: check-ast
-      - id: check-json
-      - id: check-merge-conflict
-      - id: check-symlinks
       - id: check-toml
-      - id: debug-statements
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
       - id: detect-private-key
       - id: mixed-line-ending
-      - id: requirements-txt-fixer
 
   - repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 24.1.1
     hooks:
       - id: black
-        language_version: python3.10
+        language_version: python3
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+    rev: 5.13.2
     hooks:
       - id: isort
-        args: ["--profile", "black"]
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        additional_dependencies:
-          - flake8-bugbear
-          - flake8-comprehensions
-          - flake8-docstrings
-          - flake8-quotes
-          - flake8-string-format
-        args: ["--max-line-length=88"]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.3.0
+    rev: v1.8.0
     hooks:
       - id: mypy
         additional_dependencies:
+          - types-redis
           - types-requests
-          - types-setuptools
           - types-PyYAML
-        args: ["--ignore-missing-imports"]
+          - types-python-dateutil
 
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
+  - repo: https://github.com/pycqa/pylint
+    rev: v3.0.3
     hooks:
-      - id: bandit
-        args: ["-c", "pyproject.toml"]
-        additional_dependencies: ["bandit[toml]"]
-
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.4.0
-    hooks:
-      - id: pyupgrade
-        args: ["--py310-plus"]
-
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.2.2
-    hooks:
-      - id: commitizen
-        stages: [commit-msg]
+      - id: pylint
+        args:
+          - --rcfile=pyproject.toml
+        additional_dependencies:
+          - pylint-pytest
 
   - repo: https://github.com/python-poetry/poetry
-    rev: 1.4.2
+    rev: 1.7.1
     hooks:
       - id: poetry-check
       - id: poetry-lock
       - id: poetry-export
         args: ["-f", "requirements.txt", "-o", "requirements.txt"]
 
-  - repo: local
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.1.0
     hooks:
-      - id: pytest
-        name: pytest
-        entry: pytest
-        language: system
-        pass_filenames: false
-        always_run: true
-        args: ["tests/"]
-
-      - id: coverage
-        name: coverage
-        entry: coverage run -m pytest
-        language: system
-        pass_filenames: false
-        always_run: true
-        args: ["tests/"]
-
-      - id: coverage-report
-        name: coverage-report
-        entry: coverage report
-        language: system
-        pass_filenames: false
-        always_run: true 
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [] 

@@ -1,14 +1,23 @@
 site_name: SADIE Documentation
-site_description: Documentation for SADIE - Système Avancé d'Intelligence et d'Exécution
-site_author: Your Name
+site_description: Documentation for SADIE - Advanced Trading Data Collection and Analysis System
 repo_url: https://github.com/yourusername/SADIE
 repo_name: SADIE
 
 theme:
   name: material
   palette:
-    primary: indigo
-    accent: deep purple
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   features:
     - navigation.instant
     - navigation.tracking
@@ -22,61 +31,58 @@ theme:
 plugins:
   - search
   - mkdocstrings:
-      default_handler: python
       handlers:
         python:
           setup_commands:
             - import sys
             - sys.path.append(".")
-          selection:
-            docstring_style: google
-          rendering:
+          options:
             show_source: true
             show_root_heading: true
+            show_category_heading: true
+            show_if_no_docstring: true
 
 markdown_extensions:
   - admonition
-  - codehilite
-  - footnotes
-  - meta
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
   - toc:
       permalink: true
-  - pymdownx.arithmatex
-  - pymdownx.betterem:
-      smart_enable: all
-  - pymdownx.caret
-  - pymdownx.critic
-  - pymdownx.details
-  - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-  - pymdownx.highlight
-  - pymdownx.inlinehilite
-  - pymdownx.keys
-  - pymdownx.mark
-  - pymdownx.smartsymbols
-  - pymdownx.superfences
-  - pymdownx.tabbed
-  - pymdownx.tasklist:
-      custom_checkbox: true
-  - pymdownx.tilde
 
 nav:
-  - Accueil: index.md
-  - Guide Utilisateur:
-    - Installation: user-guide/installation.md
-    - Configuration: user-guide/configuration.md
-    - Utilisation: user-guide/usage.md
-    - Interface Web: user-guide/web-interface.md
-  - Documentation Technique:
-    - Architecture: technical/architecture.md
-    - Collecteurs: technical/collectors.md
-    - Analyse: technical/analysis.md
-    - Cache: technical/cache.md
-    - API: technical/api.md
-  - Développement:
-    - Contribution: development/contributing.md
-    - Tests: development/testing.md
-    - CI/CD: development/ci-cd.md
-    - Monitoring: development/monitoring.md
-  - Changelog: changelog.md 
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Configuration: configuration.md
+    - Quick Start: quickstart.md
+  - User Guide:
+    - Core Components: 
+      - Trade Collector: core/trade_collector.md
+      - Cache System: core/cache.md
+      - Data Models: core/models.md
+    - Web Interface:
+      - REST API: web/rest_api.md
+      - WebSocket API: web/websocket_api.md
+      - Dashboard: web/dashboard.md
+    - Analysis:
+      - Market Cycles: analysis/market_cycles.md
+      - Chart Patterns: analysis/chart_patterns.md
+  - Development:
+    - Contributing: contributing.md
+    - Architecture: architecture.md
+    - Testing: testing.md
+    - Monitoring: monitoring.md
+  - About:
+    - Roadmap: roadmap.md
+    - Changelog: changelog.md 
