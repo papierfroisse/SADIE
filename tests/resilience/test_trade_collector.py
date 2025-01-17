@@ -1,13 +1,10 @@
-"""Tests de résilience du collecteur de transactions."""
+"""Tests de résilience du collecteur de trades."""
 
-import asyncio
 import pytest
-from datetime import datetime
-from decimal import Decimal
-from unittest.mock import Mock, patch
+from datetime import datetime, timedelta
 
-from SADIE.data.collectors.trades import TradeCollector, Trade, TradeManager
-from SADIE.core.monitoring import get_logger
+from sadie.data.collectors.trades import TradeCollector, Trade, TradeManager
+from sadie.core.monitoring import get_logger
 
 logger = get_logger(__name__)
 

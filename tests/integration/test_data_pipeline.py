@@ -1,9 +1,6 @@
-"""
-Tests d'intégration pour le pipeline de données.
-"""
+"""Tests d'intégration du pipeline de données."""
 
 import pytest
-import asyncio
 from datetime import datetime, timedelta
 
 from sadie.data.collectors import WebSocketCollector

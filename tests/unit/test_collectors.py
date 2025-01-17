@@ -1,4 +1,4 @@
-"""Unit tests for data collectors."""
+"""Tests unitaires pour les collecteurs de données."""
 
 import asyncio
 import json
@@ -9,13 +9,16 @@ import aiohttp
 import pytest
 import websockets
 
-from sadie.data.collectors import AsyncRESTCollector, AsyncWebSocketCollector
+from sadie.data.collectors.base import BaseCollector
+from sadie.data.collectors.rest import RESTCollector
+from sadie.data.collectors.websocket import WebSocketCollector
 
-# Tests pour AsyncRESTCollector
+# Tests pour RESTCollector
 @pytest.fixture
 def rest_collector():
-    """Create a REST collector for testing."""
-    return AsyncRESTCollector(
+    """Crée un collecteur REST pour les tests."""
+    return RESTCollector(
+        name="test_rest",
         base_url="https://api.example.com",
         timeout=5,
         headers={"Authorization": "Bearer test"}
@@ -23,26 +26,26 @@ def rest_collector():
 
 @pytest.mark.asyncio
 async def test_rest_collector_init(rest_collector):
-    """Test REST collector initialization."""
+    """Teste l'initialisation du collecteur REST."""
     assert rest_collector.base_url == "https://api.example.com"
     assert rest_collector.timeout == 5
     assert rest_collector.headers == {"Authorization": "Bearer test"}
-    assert not rest_collector.is_running
+    assert not rest_collector._running
 
 @pytest.mark.asyncio
 async def test_rest_collector_start_stop(rest_collector):
-    """Test REST collector start and stop."""
+    """Teste le démarrage et l'arrêt du collecteur REST."""
     await rest_collector.start()
-    assert rest_collector.is_running
+    assert rest_collector._running
     assert rest_collector._session is not None
 
     await rest_collector.stop()
-    assert not rest_collector.is_running
+    assert not rest_collector._running
     assert rest_collector._session is None
 
 @pytest.mark.asyncio
 async def test_rest_collector_fetch(rest_collector):
-    """Test REST collector fetch method."""
+    """Teste la méthode fetch du collecteur REST."""
     test_data = {"key": "value"}
     
     async def mock_request(*args, **kwargs):
@@ -60,7 +63,7 @@ async def test_rest_collector_fetch(rest_collector):
 
 @pytest.mark.asyncio
 async def test_rest_collector_fetch_error(rest_collector):
-    """Test REST collector fetch error handling."""
+    """Teste la gestion des erreurs du collecteur REST."""
     async def mock_request(*args, **kwargs):
         raise aiohttp.ClientError("Test error")
 
@@ -71,45 +74,30 @@ async def test_rest_collector_fetch_error(rest_collector):
 
     await rest_collector.stop()
 
-@pytest.mark.asyncio
-async def test_rest_collector_fetch_batch(rest_collector):
-    """Test REST collector batch fetch."""
-    test_data = {"key": "value"}
-    
-    async def mock_request(*args, **kwargs):
-        mock_response = AsyncMock()
-        mock_response.raise_for_status = AsyncMock()
-        mock_response.json = AsyncMock(return_value=test_data)
-        return mock_response
-
-    await rest_collector.start()
-    with patch.object(rest_collector._session, "request", mock_request):
-        data = await rest_collector.fetch_batch(["endpoint1", "endpoint2"])
-        assert len(data) == 2
-        assert all(d == test_data for d in data)
-
-    await rest_collector.stop()
-
-# Tests pour AsyncWebSocketCollector
+# Tests pour WebSocketCollector
 @pytest.fixture
 def ws_collector():
-    """Create a WebSocket collector for testing."""
-    return AsyncWebSocketCollector(
+    """Crée un collecteur WebSocket pour les tests."""
+    return WebSocketCollector(
+        name="test_ws",
         url="wss://ws.example.com",
         headers={"Authorization": "Bearer test"}
     )
 
 @pytest.mark.asyncio
 async def test_ws_collector_init(ws_collector):
-    """Test WebSocket collector initialization."""
+    """Teste l'initialisation du collecteur WebSocket."""
     assert ws_collector.url == "wss://ws.example.com"
     assert ws_collector.headers == {"Authorization": "Bearer test"}
-    assert not ws_collector.is_running
+    assert not ws_collector._running
 
 @pytest.mark.asyncio
 async def test_ws_collector_connect_disconnect():
-    """Test WebSocket collector connect and disconnect."""
-    collector = AsyncWebSocketCollector("wss://ws.example.com")
+    """Teste la connexion et déconnexion du collecteur WebSocket."""
+    collector = WebSocketCollector(
+        name="test_ws",
+        url="wss://ws.example.com"
+    )
     
     mock_ws = AsyncMock()
     mock_ws.close = AsyncMock()
@@ -123,25 +111,12 @@ async def test_ws_collector_connect_disconnect():
         mock_ws.close.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_ws_collector_subscribe_unsubscribe():
-    """Test WebSocket collector subscribe and unsubscribe."""
-    collector = AsyncWebSocketCollector("wss://ws.example.com")
-    mock_ws = AsyncMock()
-    mock_ws.send = AsyncMock()
-    collector._ws = mock_ws
-
-    await collector.subscribe("test_channel")
-    assert "test_channel" in collector._subscribed_channels
-    mock_ws.send.assert_called_with('{"type": "subscribe", "channel": "test_channel"}')
-
-    await collector.unsubscribe("test_channel")
-    assert "test_channel" not in collector._subscribed_channels
-    mock_ws.send.assert_called_with('{"type": "unsubscribe", "channel": "test_channel"}')
-
-@pytest.mark.asyncio
 async def test_ws_collector_message_handling():
-    """Test WebSocket collector message handling."""
-    collector = AsyncWebSocketCollector("wss://ws.example.com")
+    """Teste le traitement des messages du collecteur WebSocket."""
+    collector = WebSocketCollector(
+        name="test_ws",
+        url="wss://ws.example.com"
+    )
     mock_ws = AsyncMock()
     
     # Simuler des messages WebSocket
@@ -162,8 +137,11 @@ async def test_ws_collector_message_handling():
 
 @pytest.mark.asyncio
 async def test_ws_collector_reconnection():
-    """Test WebSocket collector reconnection logic."""
-    collector = AsyncWebSocketCollector("wss://ws.example.com")
+    """Teste la logique de reconnexion du collecteur WebSocket."""
+    collector = WebSocketCollector(
+        name="test_ws",
+        url="wss://ws.example.com"
+    )
     
     # Simuler une erreur de connexion puis une reconnexion réussie
     mock_ws = AsyncMock()

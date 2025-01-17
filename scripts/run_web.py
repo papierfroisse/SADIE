@@ -1,9 +1,9 @@
-"""Script de lancement de l'interface web."""
+"""Script de lancement de l'application web."""
 
 import uvicorn
 import asyncio
 import logging
-from SADIE.web import app, StreamManager
+from sadie.web import app, StreamManager
 
 # Configuration du logging
 logging.basicConfig(

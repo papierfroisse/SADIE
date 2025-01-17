@@ -1,69 +1,87 @@
-"""Exemple d'utilisation du collecteur de transactions."""
+"""Exemple d'utilisation des collecteurs de trades."""
 
 import asyncio
 import json
-from datetime import datetime
+import os
+from typing import Dict, List
 
-from SADIE.data.collectors.trades import TradeCollector
-from SADIE.core.monitoring import get_logger
+from sadie.data.collectors import (
+    BinanceTradeCollector,
+    KrakenTradeCollector,
+    CoinbaseTradeCollector
+)
 
-logger = get_logger(__name__)
-
-async def print_trades(data: dict) -> None:
-    """Affiche les données de transactions.
+async def print_trades(collector_name: str, data: Dict[str, dict]) -> None:
+    """Affiche les trades collectés.
     
     Args:
-        data: Données de transactions
+        collector_name: Nom du collecteur
+        data: Données collectées
     """
-    for symbol, trade_data in data.items():
-        print(f"\n=== {symbol} ===")
-        stats = trade_data["statistics"]
-        
-        print("Statistiques (100 dernières transactions):")
-        print(f"Nombre de trades: {stats['count']}")
-        print(f"Volume total: {stats['volume']['total']}")
-        print(f"Valeur totale: {stats['value']['total']}")
-        print(f"Prix: {stats['price']['last']} ({stats['price']['change']:.2f}%)")
-        
-        print("\nDernières transactions:")
-        for trade in trade_data["trades"][-5:]:  # 5 dernières transactions
-            print(
-                f"  {trade['timestamp']} - "
-                f"{trade['side'].upper()} "
-                f"{trade['amount']} @ {trade['price']}"
-            )
-        print("-" * 40)
+    print(f"\nDonnées de {collector_name}:")
+    for symbol, symbol_data in data.items():
+        stats = symbol_data["statistics"]
+        print(f"\n{symbol}:")
+        print(f"  Nombre de trades: {stats['count']}")
+        print(f"  Volume total: {stats['volume']['total']:.8f}")
+        print(f"  Valeur totale: {stats['value']['total']:.2f}")
+        print(f"  Dernier prix: {stats['price']['last']:.2f}")
+        print(f"  Variation: {stats['price']['change']:.2f}%")
 
 async def main():
     """Point d'entrée principal."""
-    # Configuration du collecteur
+    # Configuration
     symbols = ["BTC-USD", "ETH-USD"]
-    collector = TradeCollector(
-        name="example",
-        symbols=symbols,
-        update_interval=1.0,
-        max_trades=1000
-    )
+    update_interval = 1.0
+    collection_time = 30  # Durée de collecte en secondes
+    
+    # Création des collecteurs
+    collectors = [
+        BinanceTradeCollector(
+            name="binance",
+            symbols=symbols,
+            update_interval=update_interval
+        ),
+        KrakenTradeCollector(
+            name="kraken",
+            symbols=symbols,
+            update_interval=update_interval
+        ),
+        CoinbaseTradeCollector(
+            name="coinbase",
+            symbols=symbols,
+            update_interval=update_interval
+        )
+    ]
+    
+    # Démarrage des collecteurs
+    for collector in collectors:
+        await collector.start()
+        print(f"Collecteur {collector.name} démarré")
     
     try:
-        # Démarrage du collecteur
-        await collector.start()
-        logger.info("Collecteur démarré")
+        # Collecte pendant la durée spécifiée
+        print(f"\nCollecte des trades pendant {collection_time} secondes...")
+        await asyncio.sleep(collection_time)
         
-        # Collecte pendant 30 secondes
-        for _ in range(30):
+        # Affichage des résultats
+        for collector in collectors:
             data = await collector.collect()
-            await print_trades(data)
-            await asyncio.sleep(1)
+            await print_trades(collector.name, data)
             
-    except KeyboardInterrupt:
-        logger.info("Arrêt demandé par l'utilisateur")
-    except Exception as e:
-        logger.error(f"Erreur: {e}")
     finally:
-        # Arrêt propre du collecteur
-        await collector.stop()
-        logger.info("Collecteur arrêté")
+        # Arrêt des collecteurs
+        for collector in collectors:
+            await collector.stop()
+            print(f"\nCollecteur {collector.name} arrêté")
 
 if __name__ == "__main__":
+    # Configuration du logging
+    import logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    )
+    
+    # Exécution
     asyncio.run(main()) 

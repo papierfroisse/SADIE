@@ -4,7 +4,7 @@ import pytest
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta, timezone
-from SADIE.analysis.backtesting import Strategy, Backtester, Position, Trade
+from sadie.analysis.backtesting import Strategy, Backtester, Position, Trade
 
 class SimpleStrategy(Strategy):
     """Stratégie simple pour les tests."""

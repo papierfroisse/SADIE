@@ -1,17 +1,11 @@
-"""Tests de performance et profilage mémoire."""
+"""Tests de performance de la gestion mémoire."""
 
-import os
-import sys
-import time
-import psutil
-import asyncio
-from memory_profiler import profile
+import pytest
+from datetime import datetime, timedelta
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
-from SADIE.collectors.market import OrderBookCollector
-from SADIE.core.cache import Cache
-from SADIE.core.models import DataPoint
+from sadie.collectors.market import OrderBookCollector
+from sadie.core.cache import Cache
+from sadie.core.models import DataPoint
 
 @profile
 async def test_memory_orderbook():

@@ -1,120 +1,110 @@
-# SADIE - Système Avancé d'Intelligence et d'Exécution
+# sadie
 
-## Vue d'ensemble
-
-SADIE est une plateforme avancée de collecte et d'analyse de données financières en temps réel. Elle offre :
-
-- Collecte haute performance de trades (4800+ trades/sec)
-- Monitoring complet avec Prometheus/Grafana
-- Cache distribué avec Redis
-- API REST et WebSocket
-- Interface web moderne avec Tailwind CSS
-
-## Architecture
-
-```mermaid
-graph TD
-    A[Exchanges] -->|Trades| B[Trade Collector]
-    B -->|Métriques| C[Prometheus]
-    B -->|Cache| D[Redis]
-    B -->|API| E[FastAPI]
-    C -->|Visualisation| F[Grafana]
-    E -->|Interface| G[Web UI]
-```
-
-## Installation
-
-### Prérequis
-- Python 3.9+
-- Redis 6.0+
-- Prometheus/Grafana (pour monitoring)
-
-### Installation rapide
-```bash
-# Cloner le repo
-git clone https://github.com/votre-repo/sadie.git
-cd sadie
-
-# Créer un environnement virtuel
-python -m venv venv
-source venv/bin/activate  # ou venv\Scripts\activate sous Windows
-
-# Installation pour développement (avec outils de dev, test et docs)
-pip install -e ".[dev,test,docs]"
-
-# OU Installation simple (sans outils de développement)
-pip install .
-
-# Copier et éditer la configuration
-cp config/.env.example config/.env
-```
-
-### Installation par composants
-
-SADIE est modulaire. Vous pouvez installer uniquement les composants dont vous avez besoin :
-
-```bash
-# Analyse avancée
-pip install ".[analysis]"
-
-# Support base de données
-pip install ".[database]"
-
-# Outils de debug
-pip install ".[debug]"
-
-# Documentation
-pip install ".[docs]"
-```
-
-## Documentation
-
-- [Modèles de Données](docs/models.md)
-- [Monitoring](docs/monitoring.md)
-- [API Reference](docs/api/README.md)
-- [Guide Contribution](docs/development/contributing.md)
+Système avancé de collecte et d'analyse de données de trading.
 
 ## Fonctionnalités
 
-### Collecte de Données
-- Support multi-exchanges
-- Gestion automatique des reconnexions
-- Validation et normalisation des données
-- Buffer circulaire pour gestion de charge
+- Collecte de données en temps réel via WebSocket
+- Support multi-exchanges (Binance, Kraken, Coinbase)
+- Agrégation de données de marché
+- Détection d'opportunités d'arbitrage
+- Interface web avec visualisation
+- Monitoring et métriques
 
-### Monitoring
-- Dashboards Grafana préconfigurés
-- Métriques détaillées de performance
-- Alertes configurables
-- Exporters Redis et système
+## Installation
 
-### Interface Web
-- Design responsive avec Tailwind
-- Graphiques temps réel avec Plotly
-- WebSocket pour données live
-- Filtres par exchange/symbol
+```bash
+# Cloner le dépôt
+git clone https://github.com/yourusername/sadie.git
+cd sadie
 
-## Performance
+# Installation en mode développement
+pip install -e .
+```
 
-- **Traitement** : 4800+ trades/seconde
-- **Latence** : P95 < 100ms
-- **Mémoire** : ~500MB pour 10 symbols
-- **CPU** : ~20% sur un cœur
+## Utilisation
+
+### Collecte de trades
+
+```python
+from sadie.data.collectors import BinanceTradeCollector
+
+# Création du collecteur
+collector = BinanceTradeCollector(
+    name="binance",
+    symbols=["BTC-USD", "ETH-USD"]
+)
+
+# Démarrage de la collecte
+await collector.start()
+
+# Récupération des données
+data = await collector.collect()
+
+# Arrêt du collecteur
+await collector.stop()
+```
+
+### Agrégation multi-exchanges
+
+```python
+from sadie.data.collectors import (
+    BinanceTradeCollector,
+    KrakenTradeCollector,
+    CoinbaseTradeCollector
+)
+
+# Création des collecteurs
+collectors = [
+    BinanceTradeCollector(name="binance", symbols=symbols),
+    KrakenTradeCollector(name="kraken", symbols=symbols),
+    CoinbaseTradeCollector(name="coinbase", symbols=symbols)
+]
+
+# Démarrage des collecteurs
+for collector in collectors:
+    await collector.start()
+
+# Collecte et agrégation des données
+for collector in collectors:
+    data = await collector.collect()
+    # Traitement des données...
+
+# Arrêt des collecteurs
+for collector in collectors:
+    await collector.stop()
+```
+
+## Exemples
+
+Le dossier `examples/` contient plusieurs exemples d'utilisation :
+
+- `trades_example.py` : Collecte simple de trades
+- `market_aggregator.py` : Agrégation de données multi-exchanges
+- `arbitrage_detector.py` : Détection d'opportunités d'arbitrage
+
+## Documentation
+
+La documentation complète est disponible sur [https://yourusername.github.io/sadie](https://yourusername.github.io/sadie).
+
+## Tests
+
+```bash
+# Exécution des tests
+pytest
+
+# Avec couverture de code
+pytest --cov=sadie
+```
 
 ## Contribution
 
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/amazing`)
-3. Commit les changements (`git commit -m 'Add amazing feature'`)
-4. Push la branche (`git push origin feature/amazing`)
-5. Ouvrir une Pull Request
+Les contributions sont les bienvenues ! Consultez [CONTRIBUTING.md](CONTRIBUTING.md) pour les détails.
 
 ## Licence
 
-Ce projet est sous licence MIT. Voir [LICENSE](LICENSE) pour plus de détails.
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
-## Support
+## Changelog
 
-- GitHub Issues pour les bugs
-- Discussions pour les questions
-- Email pour support professionnel 
+Voir [CHANGELOG.md](CHANGELOG.md) pour l'historique des changements. 
