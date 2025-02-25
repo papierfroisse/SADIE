@@ -1,0 +1,55 @@
+# Utilisation de l'image Python officielle
+FROM python:3.9-slim
+
+# Installation des dépendances système
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    gcc \
+    g++ \
+    make \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installation de ta-lib
+RUN cd /tmp && \
+    wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
+    tar -xvzf ta-lib-0.4.0-src.tar.gz && \
+    cd ta-lib/ && \
+    ./configure --prefix=/usr && \
+    make && \
+    make install && \
+    cd .. && \
+    rm -rf ta-lib-0.4.0-src.tar.gz ta-lib/
+
+# Création d'un utilisateur non privilégié
+RUN groupadd -r appuser && useradd -r -g appuser -s /sbin/nologin -d /app appuser
+
+WORKDIR /app
+
+# Installation des dépendances Python
+COPY requirements.txt .
+RUN pip install --no-cache-dir numpy==1.26.4 && \
+    pip install --no-cache-dir TA-Lib==0.4.24 && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copie du code source avec les bonnes permissions
+COPY --chown=appuser:appuser sadie/ sadie/
+
+# Configuration des permissions
+RUN chmod -R 550 /app/sadie \
+    && chmod -R 440 /app/requirements.txt \
+    && apt-get remove -y gcc g++ make wget \
+    && apt-get autoremove -y
+
+# Passage à l'utilisateur non privilégié
+USER appuser
+
+# Configuration de l'environnement Python
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random
+
+HEALTHCHECK --interval=30s --timeout=3s \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+CMD ["uvicorn", "sadie.web.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--limit-concurrency", "100"] 

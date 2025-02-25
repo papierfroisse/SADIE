@@ -1,0 +1,63 @@
+/* TradingView Widget Custom Styles */
+.tradingview-widget-container {
+  background-color: #131722 !important;
+}
+
+.chart-container {
+  background-color: #131722 !important;
+}
+
+.chart-markup-table {
+  border: none !important;
+}
+
+.pane-legend-line > span {
+  color: #787B86 !important;
+}
+
+.pane-legend-item-value-wrap {
+  color: #D1D4DC !important;
+}
+
+.chart-page .chart-container-border {
+  background-color: #131722 !important;
+}
+
+.loading-indicator {
+  background-color: #131722 !important;
+}
+
+.chart-controls-bar {
+  background-color: #1E222D !important;
+}
+
+.group-wWM3zP_M- {
+  background-color: #1E222D !important;
+}
+
+/* Candlestick Colors */
+.price-axis__item--current {
+  color: #26a69a !important; /* Up color */
+}
+
+.price-axis__item--current.price-axis__item--down {
+  color: #ef5350 !important; /* Down color */
+}
+
+/* Grid Lines */
+.chart-markup-table.pane {
+  border-color: #363c4e !important;
+}
+
+.price-axis.price-axis-right {
+  border-color: #363c4e !important;
+}
+
+/* Text Colors */
+.price-axis__value {
+  color: #AAA !important;
+}
+
+.time-axis__value {
+  color: #AAA !important;
+} 
