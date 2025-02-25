@@ -70,3 +70,25 @@ data/
 *.temp
 .DS_Store
 Thumbs.db
+node_modules
+
+# Fichiers spécifiques au projet à ignorer
+error.txt
+hello_world.py
+tatus
+web.log
+fix_files.py
+sadie_copie.code-workspace
+conversation_gpt.md
+analysis.html
+
+# Dossiers de backup
+backup_*/
+
+# Fichiers sensitifs
+api_keys.json
+credentials.json
+secrets.json
+tokens.json
+*.pem
+*.key

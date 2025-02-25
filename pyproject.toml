@@ -1,16 +1,155 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sadie"
+version = "0.2.1"
+description = "Advanced Trading Data Collection and Analysis System"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+keywords = ["trading", "data", "analysis", "crypto", "stocks"]
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Scientific/Engineering :: Information Analysis"
+]
+dependencies = [
+    "fastapi>=0.104.1",
+    "uvicorn>=0.24.0",
+    "websockets>=12.0",
+    "aiohttp>=3.9.1",
+    "redis>=5.0.1",
+    "asyncpg>=0.29.0",
+    "pandas>=2.1.4",
+    "numpy>=1.26.2",
+    "plotly>=5.18.0",
+    "scipy>=1.11.4",
+    "python-binance>=1.0.19",
+    "prometheus-client>=0.19.0",
+    "pydantic>=2.5.2"
+]
+
+[project.optional-dependencies]
+analysis = [
+    "scikit-learn>=1.3.2",
+    "statsmodels>=0.14.1",
+    "tensorflow>=2.15.0",
+    "torch>=2.1.1"
+]
+database = [
+    "asyncpg>=0.29.0",
+    "redis>=5.0.1",
+    "sqlalchemy>=2.0.23",
+    "alembic>=1.13.0"
+]
+test = [
+    "pytest>=7.4.3",
+    "pytest-asyncio>=0.23.2",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0"
+]
+dev = [
+    "black>=23.11.0",
+    "isort>=5.12.0",
+    "flake8>=6.1.0",
+    "mypy>=1.7.1"
+]
+debug = [
+    "ipython>=8.18.1",
+    "ipdb>=0.13.13"
+]
+docs = [
+    "mkdocs>=1.5.3",
+    "mkdocs-material>=9.5.2",
+    "mkdocstrings>=0.24.0"
+]
 
 [tool.black]
 line-length = 88
-target-version = ["py39", "py310", "py311"]
+target-version = ["py38"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | old
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip_glob = ["*/old/*"]
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = "E203"
+exclude = [
+    ".git",
+    "__pycache__",
+    "docs/source/conf.py",
+    "old",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+]
+per-file-ignores = [
+    "__init__.py:F401"
+]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+exclude = ["old/.*"]
+
+[[tool.mypy.overrides]]
+module = [
+    "pandas.*",
+    "redis.*",
+    "websockets.*"
+]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-addopts = "-v --cov=sadie --cov-report=term-missing"
-asyncio_mode = "auto"
-
-[tool.coverage.run]
-source = ["sadie"] 
+minversion = "6.0"
+addopts = "--cov=sadie --cov-report=term-missing"
+testpaths = [
+    "tests",
+] 

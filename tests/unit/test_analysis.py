@@ -1,112 +1,140 @@
-"""
-Tests unitaires pour l'analyse des données.
-"""
+"""Tests unitaires pour les modules d'analyse technique."""
 
 import pytest
-import numpy as np
 import pandas as pd
+import numpy as np
 from datetime import datetime, timedelta
 
-from sadie.analysis import BaseAnalyzer, StatisticalAnalyzer, TimeSeriesAnalyzer
-from sadie.data.exceptions import DataProcessingError
+from sadie.analysis.indicators import TechnicalIndicators
+from sadie.analysis.harmonic_patterns import HarmonicAnalyzer, PatternType, TrendType
+from sadie.analysis.visualization import ChartVisualizer
 
 @pytest.fixture
-def time_series_data():
-    """Fixture pour les données de séries temporelles."""
-    dates = pd.date_range(start="2024-01-01", periods=100, freq="H")
+def sample_data():
+    """Crée un DataFrame de test avec des données OHLCV."""
+    dates = pd.date_range(start='2024-01-01', periods=100, freq='1H')
     data = {
-        "price": np.random.normal(100, 10, 100),
-        "volume": np.random.exponential(50, 100)
+        'open': np.random.normal(100, 10, 100),
+        'high': np.random.normal(105, 10, 100),
+        'low': np.random.normal(95, 10, 100),
+        'close': np.random.normal(100, 10, 100),
+        'volume': np.random.normal(1000, 100, 100)
     }
-    return pd.DataFrame(data, index=dates)
+    
+    # Correction des high/low pour assurer high >= low
+    data['high'] = np.maximum(
+        data['high'],
+        np.maximum(data['open'], data['close'])
+    )
+    data['low'] = np.minimum(
+        data['low'],
+        np.minimum(data['open'], data['close'])
+    )
+    
+    df = pd.DataFrame(data, index=dates)
+    return df
 
-@pytest.fixture
-def statistical_data():
-    """Fixture pour les données statistiques."""
-    return pd.DataFrame({
-        "values": np.random.normal(0, 1, 1000),
-        "groups": np.random.choice(["A", "B", "C"], 1000)
-    })
+def test_technical_indicators(sample_data):
+    """Teste le calcul des indicateurs techniques."""
+    indicators = TechnicalIndicators(sample_data)
+    
+    # Test des Bandes de Bollinger
+    bb_mid, bb_up, bb_low, bb_b = indicators.bollinger_bands()
+    assert len(bb_mid) == len(sample_data)
+    assert all(bb_up >= bb_mid)
+    assert all(bb_low <= bb_mid)
+    assert all((bb_b >= 0) & (bb_b <= 1))
+    
+    # Test du MACD
+    macd, signal, hist = indicators.macd()
+    assert len(macd) == len(sample_data)
+    assert len(signal) == len(sample_data)
+    assert len(hist) == len(sample_data)
+    assert np.allclose(hist, macd - signal)
+    
+    # Test du Stochastique
+    k, d = indicators.stochastic()
+    assert len(k) == len(sample_data)
+    assert len(d) == len(sample_data)
+    assert all((k >= 0) & (k <= 100))
+    assert all((d >= 0) & (d <= 100))
+    
+    # Test du RSI
+    rsi = indicators.rsi()
+    assert len(rsi) == len(sample_data)
+    assert all((rsi >= 0) & (rsi <= 100))
+    
+    # Test de l'ATR
+    atr = indicators.atr()
+    assert len(atr) == len(sample_data)
+    assert all(atr >= 0)
 
-@pytest.mark.asyncio
-async def test_time_series_analyzer_init():
-    """Teste l'initialisation de l'analyseur de séries temporelles."""
-    analyzer = TimeSeriesAnalyzer(window_size=20)
-    assert analyzer.window_size == 20
+def test_harmonic_analyzer(sample_data):
+    """Teste l'analyseur de patterns harmoniques."""
+    analyzer = HarmonicAnalyzer(sample_data)
+    
+    # Test de la détection des points pivots
+    swing_points = analyzer._find_swing_points()
+    assert len(swing_points) > 0
+    
+    # Test du calcul des ratios
+    points = [(0, 100), (1, 110), (2, 105), (3, 108)]
+    ratios = analyzer._calculate_ratios(points)
+    assert len(ratios) == 3
+    assert all(r >= 0 for r in ratios)
+    
+    # Test de la validation des ratios
+    valid = analyzer._check_pattern_ratios(
+        ratios,
+        PatternType.GARTLEY,
+        TrendType.BULLISH
+    )
+    assert isinstance(valid, bool)
+    
+    # Test de l'identification des patterns
+    patterns = analyzer.identify_patterns()
+    for pattern in patterns:
+        assert hasattr(pattern, 'pattern_type')
+        assert hasattr(pattern, 'trend')
+        assert hasattr(pattern, 'points')
+        assert hasattr(pattern, 'confidence')
+        assert hasattr(pattern, 'potential_reversal_zone')
+        assert 0 <= pattern.confidence <= 1
+        assert len(pattern.potential_reversal_zone) == 2
 
-@pytest.mark.asyncio
-async def test_time_series_analyzer_process(time_series_data):
-    """Teste le traitement des séries temporelles."""
-    analyzer = TimeSeriesAnalyzer(window_size=20)
-    results = await analyzer.process(time_series_data.reset_index().to_dict("records"))
+def test_chart_visualizer(sample_data):
+    """Teste le visualiseur de graphiques."""
+    visualizer = ChartVisualizer(sample_data)
     
-    assert "mean" in results
-    assert "std" in results
-    assert "rolling_mean" in results
-    assert "trend" in results
+    # Test de la création du graphique complet
+    fig = visualizer.create_chart(
+        show_volume=True,
+        show_bb=True,
+        show_macd=True,
+        show_stoch=True,
+        show_patterns=True
+    )
+    assert fig is not None
     
-    assert isinstance(results["mean"], dict)
-    assert "price" in results["mean"]
-    assert "volume" in results["mean"]
-
-@pytest.mark.asyncio
-async def test_time_series_analyzer_analyze(time_series_data):
-    """Teste l'analyse des séries temporelles."""
-    analyzer = TimeSeriesAnalyzer(window_size=20)
-    results = await analyzer.analyze(time_series_data)
+    # Test des sous-graphiques
+    assert len(fig.data) > 0  # Au moins le graphique principal
     
-    assert "trend" in results
-    assert all(trend in ["up", "down"] for trend in results["trend"].values())
+    # Test sans indicateurs
+    fig = visualizer.create_chart(
+        show_volume=False,
+        show_bb=False,
+        show_macd=False,
+        show_stoch=False,
+        show_patterns=False
+    )
+    assert fig is not None
+    assert len(fig.data) == 1  # Uniquement le graphique principal
     
-    assert "rolling_mean" in results
-    assert isinstance(results["rolling_mean"], dict)
-    assert all(isinstance(v, float) for v in results["rolling_mean"].values())
-
-@pytest.mark.asyncio
-async def test_statistical_analyzer_init():
-    """Teste l'initialisation de l'analyseur statistique."""
-    analyzer = StatisticalAnalyzer(confidence_level=0.95)
-    assert analyzer.confidence_level == 0.95
-
-@pytest.mark.asyncio
-async def test_statistical_analyzer_process(statistical_data):
-    """Teste le traitement des données statistiques."""
-    analyzer = StatisticalAnalyzer()
-    results = await analyzer.process(statistical_data.to_dict("records"))
+    # Test des couleurs personnalisées
+    custom_colors = visualizer.colors.copy()
+    custom_colors['up'] = '#00ff00'
+    custom_colors['down'] = '#ff0000'
+    visualizer.colors = custom_colors
     
-    assert "describe" in results
-    assert isinstance(results["describe"], dict)
-    assert "values" in results["describe"]
-    
-    assert "values_normal_test" in results
-    assert "statistic" in results["values_normal_test"]
-    assert "p_value" in results["values_normal_test"]
-    assert "is_normal" in results["values_normal_test"]
-
-@pytest.mark.asyncio
-async def test_statistical_analyzer_analyze(statistical_data):
-    """Teste l'analyse statistique."""
-    analyzer = StatisticalAnalyzer()
-    results = await analyzer.analyze(statistical_data)
-    
-    assert "describe" in results
-    assert all(stat in results["describe"]["values"] 
-              for stat in ["count", "mean", "std", "min", "max"])
-    
-    # Test de normalité
-    assert "values_normal_test" in results
-    assert isinstance(results["values_normal_test"]["is_normal"], bool)
-
-@pytest.mark.asyncio
-async def test_analyzer_error_handling():
-    """Teste la gestion des erreurs d'analyse."""
-    analyzer = TimeSeriesAnalyzer()
-    
-    with pytest.raises(DataProcessingError):
-        await analyzer.process({"invalid": "data"})
-    
-    with pytest.raises(DataProcessingError):
-        await analyzer.process([])
-    
-    with pytest.raises(DataProcessingError):
-        await analyzer.analyze(pd.DataFrame()) 
+    fig = visualizer.create_chart()
+    assert fig is not None 
