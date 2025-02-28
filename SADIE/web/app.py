@@ -20,7 +20,7 @@ from .stream_manager import StreamManager
 from .auth import (
     authenticate_user, create_access_token, get_current_active_user,
     get_read_data_user, get_write_data_user, get_admin_user,
-    Token, User, fake_users_db, ACCESS_TOKEN_EXPIRE_MINUTES
+    Token, User, UserInDB, fake_users_db, ACCESS_TOKEN_EXPIRE_MINUTES, get_password_hash
 )
 from sadie.data.collectors.base import start_metrics_manager, stop_metrics_manager
 from .routes.metrics import router as metrics_router, startup_metrics_manager, shutdown_metrics_manager
@@ -77,6 +77,19 @@ class ErrorResponse(BaseModel):
     error: str
     code: int
     timestamp: int = Field(default_factory=lambda: int(time.time() * 1000))
+
+# Modèle pour l'inscription d'un nouvel utilisateur
+class UserRegister(BaseModel):
+    username: str
+    password: str
+    email: str
+    full_name: Optional[str] = None
+
+class UserRegisterResponse(BaseModel):
+    success: bool
+    message: str
+    user: Optional[User] = None
+    error: Optional[str] = None
 
 # Création de l'application FastAPI
 app = FastAPI(
@@ -614,4 +627,57 @@ async def get_or_create_collector(exchange: str, symbol: str) -> Union[KrakenTra
         error_message = f"Erreur lors de la création du collecteur pour {exchange}:{symbol}: {str(e)}"
         logger.error(error_message)
         logger.error(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=error_message) 
+        raise HTTPException(status_code=500, detail=error_message)
+
+# Endpoint pour l'inscription
+@app.post("/api/register", response_model=UserRegisterResponse)
+async def register_user(user_data: UserRegister):
+    """Endpoint pour créer un nouveau compte utilisateur."""
+    # Vérifier si l'utilisateur existe déjà
+    if user_data.username in fake_users_db:
+        return {
+            "success": False,
+            "message": "Ce nom d'utilisateur est déjà pris",
+            "error": "username_taken"
+        }
+    
+    # Créer un nouvel utilisateur avec des droits de lecture par défaut
+    hashed_password = get_password_hash(user_data.password)
+    new_user = {
+        "username": user_data.username,
+        "full_name": user_data.full_name or user_data.username,
+        "email": user_data.email,
+        "hashed_password": hashed_password,
+        "disabled": False,
+        "scopes": ["read:data"]  # Droits par défaut
+    }
+    
+    # Ajouter l'utilisateur à la base de données
+    fake_users_db[user_data.username] = new_user
+    
+    # Créer un utilisateur pour la réponse (sans le mot de passe)
+    user_response = User(
+        username=new_user["username"],
+        email=new_user["email"],
+        full_name=new_user["full_name"],
+        disabled=new_user["disabled"],
+        scopes=new_user["scopes"]
+    )
+    
+    return {
+        "success": True,
+        "message": "Compte créé avec succès",
+        "user": user_response
+    }
+
+# Endpoint public pour répertorier tous les API endpoints
+@app.get("/api/endpoints")
+async def list_endpoints():
+    """Liste tous les endpoints disponibles dans l'API."""
+    endpoints = [
+        {"path": "/api/token", "method": "POST", "description": "Authentification et obtention d'un JWT token", "requires_auth": False},
+        {"path": "/api/register", "method": "POST", "description": "Créer un nouveau compte utilisateur", "requires_auth": False},
+        {"path": "/api/users/me", "method": "GET", "description": "Récupérer les informations de l'utilisateur connecté", "requires_auth": True},
+        # ... autres endpoints ...
+    ]
+    return endpoints 

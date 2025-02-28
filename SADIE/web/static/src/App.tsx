@@ -11,6 +11,7 @@ import DashboardPage from './pages/Dashboard';
 import PrometheusSettings from './pages/PrometheusSettings';
 import Login from './pages/Login';
 import UserProfile from './pages/UserProfile';
+import Register from './pages/Register';
 import { isAuthenticated } from './services/api';
 
 // Composant pour protéger les routes
@@ -53,6 +54,9 @@ const App: React.FC = () => {
           <Routes>
             {/* Route publique pour la connexion */}
             <Route path="/login" element={<Login />} />
+            
+            {/* Route publique pour l'inscription */}
+            <Route path="/register" element={<Register />} />
             
             {/* Routes protégées */}
             <Route

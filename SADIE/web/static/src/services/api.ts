@@ -174,3 +174,52 @@ export const logoutUser = (): void => {
   localStorage.removeItem('auth_token');
   localStorage.removeItem('username');
 };
+
+/**
+ * Interface pour les données d'inscription
+ */
+export interface RegisterData {
+  username: string;
+  password: string;
+  email: string;
+  full_name?: string;
+}
+
+/**
+ * Interface pour la réponse d'inscription
+ */
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  user?: {
+    username: string;
+    email: string;
+    full_name?: string;
+    disabled?: boolean;
+    scopes: string[];
+  };
+  error?: string;
+}
+
+/**
+ * Fonction pour créer un nouvel utilisateur
+ * @param userData Données de l'utilisateur
+ * @returns Promesse avec le résultat de l'inscription
+ */
+export const registerUser = async (userData: RegisterData): Promise<RegisterResponse> => {
+  const response = await fetch('/api/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData),
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'Erreur lors de l\'inscription');
+  }
+
+  return data;
+};
