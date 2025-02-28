@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Alert, WebSocketMessage } from '../types';
+import { Alert } from '../types';
+import ApiService from '../services/api';
 import { useWebSocket } from '../context/WebSocketContext';
-import { api } from '../services/api';
 
 interface UseAlertsProps {
   symbol?: string;
@@ -22,23 +22,24 @@ export const useAlerts = ({ symbol }: UseAlertsProps = {}): UseAlertsReturn => {
   const [error, setError] = useState<string | null>(null);
   const [lastTriggered, setLastTriggered] = useState<Alert | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const api = new ApiService();
 
-  const loadAlerts = useCallback(async () => {
+  const fetchAlerts = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await api.getAlerts();
       if (response.success && response.data) {
         setAlerts(response.data);
-        setError(null);
       } else {
-        setError(response.error || 'Failed to load alerts');
+        setError(response.error || 'Erreur lors de la récupération des alertes');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError('Erreur de connexion au serveur');
+      console.error(err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   const createAlert = async (alert: Omit<Alert, 'id'>) => {
     try {
@@ -85,8 +86,8 @@ export const useAlerts = ({ symbol }: UseAlertsProps = {}): UseAlertsReturn => {
   }, []);
 
   useEffect(() => {
-    loadAlerts();
-  }, [loadAlerts]);
+    fetchAlerts();
+  }, [fetchAlerts]);
 
   useEffect(() => {
     if (!symbol) return;

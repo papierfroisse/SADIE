@@ -1,7 +1,17 @@
 import axios, { AxiosInstance } from 'axios';
-import { MarketData, Alert, Trade, ApiResponse } from '../types';
+import { MarketData, Alert, ApiResponse } from '../types';
+// Ajouté par le script de correction
+export interface Trade {
+  type: 'trade';
+  id: string;
+  symbol: string;
+  price: number;
+  quantity: number;
+  side: 'buy' | 'sell';
+  timestamp: number;
+};
 
-class ApiService {
+export default class ApiService {
   private api: AxiosInstance;
   private wsBaseUrl: string;
 
@@ -114,3 +124,53 @@ class ApiService {
 }
 
 export const api = new ApiService();
+
+/**
+ * Interface pour la réponse d'authentification
+ */
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+}
+
+/**
+ * Fonction pour authentifier un utilisateur
+ * @param username Nom d'utilisateur
+ * @param password Mot de passe
+ * @returns Promesse avec le token d'accès
+ */
+export const loginUser = async (username: string, password: string): Promise<AuthResponse> => {
+  const formData = new URLSearchParams();
+  formData.append('username', username);
+  formData.append('password', password);
+
+  const response = await fetch('/api/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Authentification échouée');
+  }
+
+  return response.json();
+};
+
+/**
+ * Vérifie si l'utilisateur est authentifié
+ * @returns true si l'utilisateur est connecté
+ */
+export const isAuthenticated = (): boolean => {
+  return !!localStorage.getItem('auth_token');
+};
+
+/**
+ * Déconnecte l'utilisateur
+ */
+export const logoutUser = (): void => {
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('username');
+};

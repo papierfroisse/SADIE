@@ -353,6 +353,138 @@ async def get_trades(
         logger.error(traceback.format_exc())
         return ErrorResponse(error=str(e), code=500)
 
+# Nouvelle route pour accéder aux données de chandeliers
+@app.get("/api/market/{exchange}/{symbol}/klines", response_model=Union[List[Dict[str, Any]], ErrorResponse])
+async def get_klines(
+    exchange: str, 
+    symbol: str, 
+    interval: str = Query("1h", description="Intervalle des chandeliers (1m, 5m, 15m, 30m, 1h, 4h, 1d)"),
+    limit: int = Query(500, ge=1, le=1000),
+    start_time: Optional[int] = Query(None, description="Timestamp de début en millisecondes")
+):
+    """Récupère les données de chandeliers (OHLCV) pour un symbole.
+    
+    Args:
+        exchange: Nom de l'exchange (kraken, binance, etc.)
+        symbol: Symbole/paire de trading (format: BTCUSDT sans '/')
+        interval: Intervalle de temps pour les chandeliers
+        limit: Nombre maximum de chandeliers à récupérer
+        start_time: Timestamp de début en millisecondes (optionnel)
+        
+    Returns:
+        Liste des chandeliers avec données OHLCV
+    """
+    try:
+        # Pour cette démo, nous générons des données simulées
+        # En production, connectez-vous à votre base de données TimescaleDB
+        import random
+        from datetime import datetime, timedelta
+        
+        # Conversion des intervalles en minutes
+        interval_map = {
+            "1m": 1, "5m": 5, "15m": 15, "30m": 30,
+            "1h": 60, "4h": 240, "1d": 1440
+        }
+        minutes = interval_map.get(interval, 60)
+        
+        # Définir l'heure de fin (maintenant) et calculer l'heure de début
+        end_time = datetime.now()
+        if start_time:
+            start_datetime = datetime.fromtimestamp(start_time / 1000)
+        else:
+            start_datetime = end_time - timedelta(minutes=minutes * limit)
+        
+        # Générer les chandeliers
+        klines = []
+        current_time = start_datetime
+        last_close = 30000.0  # Prix de départ approximatif pour BTC
+        
+        while current_time <= end_time and len(klines) < limit:
+            # Variation aléatoire du prix
+            price_change = random.uniform(-0.005, 0.005)
+            open_price = last_close
+            close_price = open_price * (1 + price_change)
+            high_price = max(open_price, close_price) * (1 + random.uniform(0, 0.003))
+            low_price = min(open_price, close_price) * (1 - random.uniform(0, 0.003))
+            volume = random.uniform(0.5, 10.0)
+            
+            klines.append({
+                "timestamp": int(current_time.timestamp() * 1000),
+                "open": open_price,
+                "high": high_price,
+                "close": close_price,
+                "low": low_price,
+                "volume": volume
+            })
+            
+            last_close = close_price
+            current_time += timedelta(minutes=minutes)
+        
+        return klines
+        
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des chandeliers: {str(e)}")
+        return {"error": f"Erreur lors de la récupération des chandeliers: {str(e)}"}
+
+# Route pour obtenir la liste des symboles disponibles
+@app.get("/api/market/symbols", response_model=Union[Dict[str, List[str]], ErrorResponse])
+async def get_available_symbols(exchange: str = Query("binance")):
+    """Récupère la liste des symboles disponibles pour un exchange donné.
+    
+    Args:
+        exchange: Nom de l'exchange (kraken, binance, etc.)
+        
+    Returns:
+        Liste des symboles disponibles
+    """
+    try:
+        # Pour cette démo, nous retournons une liste statique
+        # En production, récupérez les symboles depuis votre base de données
+        symbols = {
+            "binance": ["BTC/USDT", "ETH/USDT", "BNB/USDT", "SOL/USDT", "XRP/USDT", 
+                        "ADA/USDT", "AVAX/USDT", "DOGE/USDT", "MATIC/USDT", "DOT/USDT"],
+            "kraken": ["BTC/USD", "ETH/USD", "XRP/USD", "ADA/USD", "SOL/USD", 
+                       "DOT/USD", "DOGE/USD", "MATIC/USD", "LINK/USD", "UNI/USD"]
+        }
+        
+        return {"success": True, "data": symbols.get(exchange, [])}
+        
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des symboles: {str(e)}")
+        return {"error": f"Erreur lors de la récupération des symboles: {str(e)}"}
+
+# Route pour sauvegarder la configuration du graphique
+@app.post("/api/user/chart-config", response_model=Dict[str, Any])
+async def save_chart_configuration(
+    config: Dict[str, Any],
+    current_user: User = Depends(get_current_active_user)
+):
+    """Sauvegarde la configuration du graphique pour l'utilisateur.
+    
+    Args:
+        config: Configuration du graphique (exchange, symbol, timeframe, indicateurs, etc.)
+        current_user: Utilisateur authentifié
+        
+    Returns:
+        Statut de la sauvegarde
+    """
+    try:
+        # En production, sauvegardez dans votre base de données
+        logger.info(f"Configuration sauvegardée pour {current_user.username}: {config}")
+        
+        return {
+            "success": True,
+            "message": "Configuration sauvegardée avec succès",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Erreur lors de la sauvegarde de la configuration: {str(e)}")
+        return {
+            "success": False,
+            "error": f"Erreur lors de la sauvegarde: {str(e)}"
+        }
+
 # Routes pour les alertes
 @app.get("/api/alerts", response_model=AlertsResponse)
 async def get_alerts():

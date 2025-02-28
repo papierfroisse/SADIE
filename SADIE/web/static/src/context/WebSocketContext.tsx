@@ -27,10 +27,24 @@ interface WebSocketProviderProps {
   maxReconnectAttempts?: number;
 }
 
+// Interface pour les messages WebSocket entrants
+interface MarketDataMessage {
+  type: 'market_data';
+  symbol: string;
+  timestamp: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  timeframe: string;
+}
+
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [marketData, setMarketData] = useState<{ [key: string]: MarketData }>({});
   const [lastAlert, setLastAlert] = useState<Alert | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<MarketData | null>(null);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 5;
@@ -75,22 +89,33 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
       newWs.onmessage = event => {
         try {
-          const message = JSON.parse(event.data);
+          const message = JSON.parse(event.data) as MarketDataMessage | Alert;
           console.log('Message reçu:', message);
 
-          if (message.type === 'market_data' && message.symbol === symbol && message.timeframe === timeframe) {
-            setMarketData(prev => ({
-              ...prev,
-              [symbol]: {
+          if ('type' in message) {
+            if (message.type === 'market_data' && message.symbol === symbol) {
+              const newData: MarketData = {
                 symbol: message.symbol,
                 timestamp: message.timestamp,
                 open: message.open,
                 high: message.high,
                 low: message.low,
                 close: message.close,
-                volume: message.volume
-              },
-            }));
+                volume: message.volume,
+                type: message.type,
+                timeframe: message.timeframe
+              };
+              
+              setMarketData(prev => ({
+                ...prev,
+                [symbol]: newData
+              }));
+              
+              setLastUpdate(newData);
+            } else if (message.type === 'price' || message.type === 'volume' || message.type === 'indicator') {
+              // C'est une alerte
+              setLastAlert(message as Alert);
+            }
           }
         } catch (error) {
           console.error('Erreur lors du parsing du message WebSocket:', error);
@@ -152,7 +177,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         marketData,
         lastAlert,
         error,
-        lastUpdate: marketData[currentSymbol] || null,
+        lastUpdate: lastUpdate,
       }}
     >
       {children}

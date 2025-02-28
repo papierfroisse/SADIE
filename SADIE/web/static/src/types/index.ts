@@ -8,6 +8,7 @@ export interface MarketData {
   close: number;
   volume: number;
   type?: string;
+  timeframe?: string;
   indicators?: {
     rsi?: number;
     macd?: number;
@@ -46,16 +47,15 @@ export interface Order {
 
 // Types pour les alertes
 export interface Alert {
-  type: 'alert';
   id: string;
   symbol: string;
-  alertType: 'price' | 'indicator';
-  condition: 'above' | 'below';
+  type: 'price' | 'volume' | 'indicator';
+  condition: string;
   value: number;
-  notification_type: 'browser' | 'email';
-  created_at: number;
+  notificationType: 'browser' | 'email';
+  createdAt?: number;
   triggered?: boolean;
-  triggered_at?: number;
+  triggeredAt?: number;
 }
 
 // Types pour l'analyse de sentiment
@@ -70,6 +70,16 @@ export interface SentimentData {
 }
 
 // Types pour les WebSocket
+export interface Trade {
+  type: 'trade';
+  id: string;
+  symbol: string;
+  price: number;
+  quantity: number;
+  side: 'buy' | 'sell';
+  timestamp: number;
+}
+
 export type WebSocketMessage = MarketData | Alert | Trade;
 
 // Types pour les réponses API
@@ -95,14 +105,4 @@ export interface UserSettings {
     showOrderBook: boolean;
     showTrades: boolean;
   };
-}
-
-export interface Trade {
-  type: 'trade';
-  id: string;
-  symbol: string;
-  price: number;
-  quantity: number;
-  side: 'buy' | 'sell';
-  timestamp: number;
 }

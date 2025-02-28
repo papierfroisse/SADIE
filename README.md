@@ -296,4 +296,20 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 Pour toute question ou problème :
 1. Consulter la [documentation](docs/)
 2. Ouvrir une issue sur GitHub
-3. Contacter l'équipe de support 
+3. Contacter l'équipe de support
+
+## Tests utilisateur
+
+Pour tester l'application du point de vue d'un utilisateur final, suivez les instructions dans notre [Guide de test utilisateur](docs/guide_test_utilisateur.md).
+
+Ce guide vous permettra de :
+- Vous connecter avec OAuth2
+- Configurer votre profil utilisateur
+- Explorer les données de marché
+- Utiliser les fonctionnalités d'analyse technique
+- Gérer les alertes
+
+Un script automatisé est également disponible pour tester rapidement l'ensemble des fonctionnalités :
+```bash
+python scripts/test_user_flow.py
+``` 
