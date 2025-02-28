@@ -161,7 +161,10 @@ const Login: React.FC = () => {
       
       <Box mt={2} textAlign="center">
         <Typography variant="body2" color="textSecondary">
-          Pour obtenir un compte, veuillez contacter l'administrateur du système.
+          Vous n'avez pas de compte ? 
+          <Link href="/register" variant="body2" sx={{ ml: 1 }}>
+            Créer un compte
+          </Link>
         </Typography>
       </Box>
       

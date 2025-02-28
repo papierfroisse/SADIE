@@ -81,6 +81,13 @@ interface Dashboard {
 // Couleurs pour les graphiques
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
+// Configuration des tailles de widgets
+const sizeMap = {
+  small: 4,  // 1/3 de la largeur
+  medium: 6, // 1/2 de la largeur
+  large: 12  // Largeur complète
+};
+
 // Composant principal
 const DashboardPage: React.FC = () => {
   const [dashboards, setDashboards] = useState<Dashboard[]>([]);
