@@ -37,6 +37,9 @@ import {
   NotificationsActive as NotificationsActiveIcon,
   NotificationsOff as NotificationsOffIcon,
   FilterList as FilterListIcon,
+  AttachMoney as AttachMoneyIcon,
+  BarChart as BarChartIcon,
+  ShowChart as ShowChartIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { Alert } from '../types';
@@ -62,11 +65,10 @@ export const AlertList: React.FC = () => {
   });
   const [newAlert, setNewAlert] = useState<Partial<Alert>>({
     symbol: '',
-    type: 'alert',
-    alertType: 'price',
+    type: 'price',
     condition: 'above',
     value: 0,
-    notification_type: 'browser',
+    notificationType: 'browser',
   });
 
   const loadAlerts = async () => {
@@ -129,7 +131,7 @@ export const AlertList: React.FC = () => {
         setError(null);
         const alertToCreate = {
           ...newAlert,
-          created_at: Date.now(),
+          createdAt: Date.now(),
           triggered: false,
         } as Omit<Alert, 'id'>;
 
@@ -139,11 +141,10 @@ export const AlertList: React.FC = () => {
           setOpenDialog(false);
           setNewAlert({
             symbol: '',
-            type: 'alert',
-            alertType: 'price',
+            type: 'price',
             condition: 'above',
             value: 0,
-            notification_type: 'browser',
+            notificationType: 'browser',
           });
         } else {
           setError("Erreur lors de la création de l'alerte");
@@ -169,11 +170,16 @@ export const AlertList: React.FC = () => {
   };
 
   const getAlertIcon = (alert: Alert) => {
-    return alert.condition === 'above' ? (
-      <ArrowUpwardIcon color={alert.triggered ? 'success' : 'inherit'} />
-    ) : (
-      <ArrowDownwardIcon color={alert.triggered ? 'success' : 'inherit'} />
-    );
+    switch (alert.type) {
+      case 'price':
+        return <AttachMoneyIcon />;
+      case 'volume':
+        return <BarChartIcon />;
+      case 'indicator':
+        return <ShowChartIcon />;
+      default:
+        return <NotificationsIcon />;
+    }
   };
 
   const getNotificationIcon = (type: string) => {
@@ -351,7 +357,7 @@ export const AlertList: React.FC = () => {
                         <Grid container spacing={1} alignItems="center">
                           <Grid item>
                             <Typography variant="body2" color="text.secondary">
-                              {alert.alertType === 'price' ? 'Prix' : 'Volume'}{' '}
+                              {alert.type === 'price' ? 'Prix' : alert.type === 'volume' ? 'Volume' : 'Indicateur'}{' '}
                               {alert.condition === 'above' ? 'supérieur' : 'inférieur'} à{' '}
                               {alert.value}
                             </Typography>
@@ -361,8 +367,8 @@ export const AlertList: React.FC = () => {
                           </Grid>
                           <Grid item>
                             <Chip
-                              icon={getNotificationIcon(alert.notification_type)}
-                              label={alert.notification_type === 'browser' ? 'Navigateur' : 'Email'}
+                              icon={getNotificationIcon(alert.notificationType)}
+                              label={alert.notificationType === 'browser' ? 'Navigateur' : 'Email'}
                               size="small"
                               color={alert.triggered ? 'success' : 'default'}
                             />
@@ -372,7 +378,7 @@ export const AlertList: React.FC = () => {
                     }
                     secondary={
                       <Typography variant="caption" color="text.secondary">
-                        Créée le {format(new Date(alert.created_at), 'dd/MM/yyyy HH:mm')}
+                        Créée le {format(new Date(alert.createdAt), 'dd/MM/yyyy HH:mm')}
                       </Typography>
                     }
                   />
@@ -413,27 +419,14 @@ export const AlertList: React.FC = () => {
                     label="Type"
                     data-testid="type-select"
                     onChange={e =>
-                      setNewAlert({ ...newAlert, type: e.target.value as 'alert' })
-                    }
-                  >
-                    <MenuItem value="alert">Alert</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="alert-type-label">Alert Type</InputLabel>
-                  <Select
-                    labelId="alert-type-label"
-                    id="alert-type"
-                    value={newAlert.alertType}
-                    label="Alert Type"
-                    data-testid="alert-type-select"
-                    onChange={e =>
-                      setNewAlert({ ...newAlert, alertType: e.target.value as 'price' | 'indicator' })
+                      setNewAlert({ 
+                        ...newAlert, 
+                        type: e.target.value as 'price' | 'volume' | 'indicator' 
+                      })
                     }
                   >
                     <MenuItem value="price">Prix</MenuItem>
+                    <MenuItem value="volume">Volume</MenuItem>
                     <MenuItem value="indicator">Indicateur</MenuItem>
                   </Select>
                 </FormControl>
@@ -473,13 +466,13 @@ export const AlertList: React.FC = () => {
                   <Select
                     labelId="notification-type-label"
                     id="notification-type"
-                    value={newAlert.notification_type}
+                    value={newAlert.notificationType}
                     label="Type de notification"
                     data-testid="notification-type-select"
                     onChange={e =>
                       setNewAlert({
                         ...newAlert,
-                        notification_type: e.target.value as 'browser' | 'email',
+                        notificationType: e.target.value as 'browser' | 'email',
                       })
                     }
                   >

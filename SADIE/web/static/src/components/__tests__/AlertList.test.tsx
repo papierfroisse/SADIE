@@ -7,6 +7,7 @@ import { AlertList } from '../AlertList';
 import { WebSocketProvider } from '../../context/WebSocketContext';
 import { format } from 'date-fns';
 import { Alert, MarketData } from '../../types';
+import { useAlerts } from '../../hooks/useAlerts';
 
 // Mock du contexte WebSocket
 const mockWebSocket = {
@@ -54,6 +55,11 @@ const renderWithProviders = (children: React.ReactNode) => {
 // Mock Notification API
 const mockNotification = jest.fn();
 
+// Mock des hooks
+jest.mock('../../hooks/useAlerts', () => ({
+  useAlerts: jest.fn(),
+}));
+
 beforeAll(() => {
   // @ts-expect-error Mocking Notification API for testing
   global.Notification = class MockNotification {
@@ -86,6 +92,122 @@ beforeEach(() => {
   });
   (global.Notification.requestPermission as jest.Mock).mockReset();
   (global.Notification.requestPermission as jest.Mock).mockResolvedValue('granted');
+});
+
+describe('AlertList Component', () => {
+  const mockAlerts: Alert[] = [
+    {
+      id: '1',
+      symbol: 'BTC/USDT',
+      type: 'price',
+      condition: '>',
+      value: 50000,
+      notificationType: 'browser',
+      createdAt: Date.now(),
+      triggered: false,
+    },
+    {
+      id: '2',
+      symbol: 'ETH/USDT',
+      type: 'volume',
+      condition: '<',
+      value: 1000,
+      notificationType: 'browser',
+      createdAt: Date.now(),
+      triggered: true,
+      triggeredAt: Date.now(),
+    },
+  ];
+
+  const mockDeleteAlert = jest.fn().mockResolvedValue(undefined);
+  const mockCreateAlert = jest.fn().mockResolvedValue(undefined);
+
+  beforeEach(() => {
+    (useAlerts as jest.Mock).mockReturnValue({
+      alerts: mockAlerts,
+      loading: false,
+      error: null,
+      lastTriggered: null,
+      createAlert: mockCreateAlert,
+      deleteAlert: mockDeleteAlert,
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('renders alert list correctly', () => {
+    render(<AlertList />);
+    
+    // Vérifier que le titre est présent
+    expect(screen.getByText(/Alertes/i)).toBeInTheDocument();
+    
+    // Vérifier que les alertes sont affichées
+    expect(screen.getByText('BTC/USDT')).toBeInTheDocument();
+    expect(screen.getByText('ETH/USDT')).toBeInTheDocument();
+    
+    // Vérifier que les détails des conditions sont présents
+    expect(screen.getByText(/Prix > 50000/i)).toBeInTheDocument();
+    expect(screen.getByText(/Volume < 1000/i)).toBeInTheDocument();
+  });
+
+  test('handles loading state', () => {
+    (useAlerts as jest.Mock).mockReturnValue({
+      alerts: [],
+      loading: true,
+      error: null,
+      lastTriggered: null,
+      createAlert: mockCreateAlert,
+      deleteAlert: mockDeleteAlert,
+    });
+    
+    render(<AlertList />);
+    
+    // Vérifier qu'un indicateur de chargement est affiché
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  test('handles error state', () => {
+    const errorMessage = 'Failed to load alerts';
+    (useAlerts as jest.Mock).mockReturnValue({
+      alerts: [],
+      loading: false,
+      error: errorMessage,
+      lastTriggered: null,
+      createAlert: mockCreateAlert,
+      deleteAlert: mockDeleteAlert,
+    });
+    
+    render(<AlertList />);
+    
+    // Vérifier que le message d'erreur est affiché
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
+  });
+
+  test('deletes an alert when delete button is clicked', async () => {
+    render(<AlertList />);
+    
+    // Trouver tous les boutons de suppression et cliquer sur le premier
+    const deleteButtons = screen.getAllByRole('button', { name: /supprimer/i });
+    fireEvent.click(deleteButtons[0]);
+    
+    // Vérifier que la fonction de suppression a été appelée avec le bon ID
+    await waitFor(() => {
+      expect(mockDeleteAlert).toHaveBeenCalledWith('1');
+    });
+  });
+
+  test('opens alert creation dialog when Add button is clicked', () => {
+    render(<AlertList />);
+    
+    // Trouver le bouton d'ajout et cliquer dessus
+    const addButton = screen.getByText(/Ajouter une alerte/i);
+    fireEvent.click(addButton);
+    
+    // Vérifier que le dialogue d'ajout est affiché
+    expect(screen.getByText(/Créer une nouvelle alerte/i)).toBeInTheDocument();
+  });
 });
 
 describe('AlertList', () => {

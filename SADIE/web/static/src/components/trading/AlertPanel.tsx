@@ -20,7 +20,7 @@ interface AlertPanelProps {
 }
 
 const AlertPanel: React.FC<AlertPanelProps> = ({ symbol, currentPrice, onCreateAlert }) => {
-  const [type, setType] = useState<'price' | 'indicator'>('price');
+  const [alertType, setAlertType] = useState<'price' | 'volume' | 'indicator'>('price');
   const [condition, setCondition] = useState<'above' | 'below'>('above');
   const [value, setValue] = useState<string>('');
   const [notificationType, setNotificationType] = useState<'browser' | 'email'>('browser');
@@ -30,19 +30,17 @@ const AlertPanel: React.FC<AlertPanelProps> = ({ symbol, currentPrice, onCreateA
     try {
       const newAlert: Omit<Alert, 'id'> = {
         symbol,
-        type: 'alert' as const,
-        alertType: type,
+        type: alertType,
         condition,
         value: currentPrice * (1 + Number(value) / 100),
-        notification_type: notificationType,
-        created_at: Date.now(),
+        notificationType,
+        createdAt: Date.now(),
         triggered: false,
       };
       await onCreateAlert(newAlert);
-      // Reset form
       setValue('');
-    } catch (err) {
-      console.error('Failed to create alert:', err);
+    } catch (error) {
+      console.error('Erreur lors de la création de l\'alerte:', error);
     }
   };
 
@@ -57,11 +55,12 @@ const AlertPanel: React.FC<AlertPanelProps> = ({ symbol, currentPrice, onCreateA
             <FormControl fullWidth>
               <InputLabel>Alert Type</InputLabel>
               <Select
-                value={type}
+                value={alertType}
                 label="Alert Type"
-                onChange={e => setType(e.target.value as 'price' | 'indicator')}
+                onChange={e => setAlertType(e.target.value as 'price' | 'volume' | 'indicator')}
               >
                 <MenuItem value="price">Price</MenuItem>
+                <MenuItem value="volume">Volume</MenuItem>
                 <MenuItem value="indicator">Indicator</MenuItem>
               </Select>
             </FormControl>
