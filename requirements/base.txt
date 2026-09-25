@@ -11,7 +11,7 @@ scipy>=1.11.0
 
 # Configuration et logging
 pyyaml>=6.0.1
-python-dotenv>=1.0.0
+python-dotenv>=1.2.2
 
 # Utilitaires
 psutil>=5.9.0
