@@ -2,7 +2,7 @@
 
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -218,11 +218,11 @@ class TestPerformanceAlert:
         assert alert.should_trigger(10.0, "latency") is False
         
         # Test du cooldown
-        alert.last_triggered = datetime.utcnow() - timedelta(seconds=100)
+        alert.last_triggered = datetime.now(timezone.utc) - timedelta(seconds=100)
         assert alert.should_trigger(10.0, "error_rate") is False
         
         # Après le cooldown
-        alert.last_triggered = datetime.utcnow() - timedelta(seconds=350)
+        alert.last_triggered = datetime.now(timezone.utc) - timedelta(seconds=350)
         assert alert.should_trigger(10.0, "error_rate") is True
     
     def test_trigger(self, alert):

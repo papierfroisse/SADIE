@@ -4,7 +4,7 @@ Exemple de collecte de données d'orderbook.
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sadie.data.collectors import OrderBookCollector
 from sadie.storage import MemoryStorage
@@ -37,8 +37,8 @@ async def main():
             logger.info(f"Souscrit à {symbol}")
         
         # Collecte pendant 5 minutes
-        start_time = datetime.utcnow()
-        while (datetime.utcnow() - start_time).total_seconds() < 300:
+        start_time = datetime.now(timezone.utc)
+        while (datetime.now(timezone.utc) - start_time).total_seconds() < 300:
             for symbol in symbols:
                 # Récupération des données
                 orderbook = await collector.get_order_book(symbol)
@@ -47,7 +47,7 @@ async def main():
                 # Stockage des données
                 await storage.store({
                     "symbol": symbol,
-                    "timestamp": datetime.utcnow(),
+                    "timestamp": datetime.now(timezone.utc),
                     "orderbook": orderbook,
                     "metrics": metrics
                 })
@@ -56,7 +56,7 @@ async def main():
             await asyncio.sleep(1)
             
             # Affichage des statistiques
-            if (datetime.utcnow() - start_time).total_seconds() % 60 == 0:
+            if (datetime.now(timezone.utc) - start_time).total_seconds() % 60 == 0:
                 stats = collector.get_cache_stats()
                 for symbol in symbols:
                     if symbol in stats:

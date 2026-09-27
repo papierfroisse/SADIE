@@ -3,7 +3,7 @@
 import logging
 import threading
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
 
 from prometheus_client import start_http_server, Gauge, Counter, Info
@@ -112,7 +112,7 @@ class PrometheusExporter:
     async def _refresh_metrics(self):
         """Rafraîchit les métriques Prometheus avec les données les plus récentes."""
         # Récupération des métriques des dernières 5 minutes
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(minutes=5)
         
         metrics = await global_metrics_manager.get_metrics(

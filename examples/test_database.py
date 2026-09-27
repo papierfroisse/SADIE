@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -41,7 +41,7 @@ async def test_database():
             # Création d'un événement de test
             event = MarketEvent(
                 topic="test_market",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 data={"raw_data": "test"},
                 symbol="BTC/USD",
                 price=50000 * 10**8,  # $50,000

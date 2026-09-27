@@ -3,7 +3,7 @@
 import asyncio
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List
 
 import psutil
@@ -139,7 +139,7 @@ class InstrumentedOrderBookCollector(OrderBookCollector):
                 start_time = time.time()
                 
                 # Store order books
-                timestamp = datetime.utcnow()
+                timestamp = datetime.now(timezone.utc)
                 for symbol, book in self._order_books.items():
                     db_start = time.time()
                     await self._db_manager.insert_order_book(

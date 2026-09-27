@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any, Callable, Union
 from dataclasses import dataclass, field, asdict
 
@@ -55,7 +55,7 @@ class PerformanceAlert:
     symbols: List[str] = field(default_factory=list)  # Symboles concernés (vide = tous)
     thresholds: List[PerformanceThreshold] = field(default_factory=list)  # Seuils d'alerte
     notification_channels: List[str] = field(default_factory=list)  # Canaux de notification
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     last_triggered: Optional[datetime] = None
     trigger_count: int = 0
     
@@ -92,7 +92,7 @@ class PerformanceAlert:
                 if threshold.apply(metric_value):
                     # Vérifie le cooldown
                     if (self.last_triggered and 
-                        (datetime.utcnow() - self.last_triggered).total_seconds() < threshold.cooldown):
+                        (datetime.now(timezone.utc) - self.last_triggered).total_seconds() < threshold.cooldown):
                         # En période de cooldown
                         return False
                     return True
@@ -100,7 +100,7 @@ class PerformanceAlert:
     
     def trigger(self) -> Dict[str, Any]:
         """Déclenche l'alerte et renvoie les données d'alerte."""
-        self.last_triggered = datetime.utcnow()
+        self.last_triggered = datetime.now(timezone.utc)
         self.trigger_count += 1
         
         return {
@@ -281,7 +281,7 @@ class PerformanceAlertManager:
     async def _check_alerts(self):
         """Vérifie toutes les alertes par rapport aux métriques récentes."""
         # Récupère les métriques récentes
-        start_time = datetime.utcnow() - timedelta(minutes=5)
+        start_time = datetime.now(timezone.utc) - timedelta(minutes=5)
         metrics = await self.metrics_manager.get_metrics(start_time=start_time)
         
         if not metrics:

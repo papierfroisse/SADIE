@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
 from prometheus_client import start_http_server
@@ -83,7 +83,7 @@ async def main():
     
     # 2. Transforme les données (ajoute le timestamp unix)
     def add_timestamp(data):
-        return {**data, "timestamp_unix": datetime.utcnow().timestamp()}
+        return {**data, "timestamp_unix": datetime.now(timezone.utc).timestamp()}
     
     transformer = TransformProcessor(add_timestamp)
     

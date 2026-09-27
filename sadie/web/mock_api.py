@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import random
 import os
@@ -90,7 +90,7 @@ def create_user(user_data: UserRegister):
 # Création du token
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=30)):
     to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
+    expire = datetime.now(timezone.utc) + expires_delta
     to_encode.update({"exp": expire.timestamp()})
     encoded_jwt = json.dumps(to_encode)  # Simplifié pour le mock
     return encoded_jwt

@@ -2,7 +2,7 @@
 
 import asyncio
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from sadie.core.monitoring.metrics import (
@@ -50,7 +50,7 @@ class TestCollectorMetric:
     
     def test_metric_to_dict(self):
         """Test la conversion d'une métrique en dictionnaire."""
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         metric = CollectorMetric(
             name="test_collector",
             exchange="binance",
@@ -121,11 +121,11 @@ class TestCollectorMetricsManager:
             symbols=["BTCUSDT"],
             metric_type="throughput",
             value=10.0,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(timezone.utc)
         )
         
         # Métrique ancienne (hors période de rétention)
-        old_timestamp = datetime.utcnow() - timedelta(hours=2)
+        old_timestamp = datetime.now(timezone.utc) - timedelta(hours=2)
         old_metric = CollectorMetric(
             name="test_collector",
             exchange="binance",

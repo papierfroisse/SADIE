@@ -4,7 +4,7 @@ Exemple d'analyse de données.
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
@@ -28,7 +28,7 @@ async def main():
         await storage.connect()
         
         # Récupération des données des dernières 24h
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(days=1)
         
         data = await storage.retrieve(

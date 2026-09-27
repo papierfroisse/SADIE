@@ -96,8 +96,10 @@ class TestExportFunctions:
         """Test de la génération du nom de fichier d'exportation."""
         # Création d'une date fixe pour le test
         with patch('sadie.web.routes.export.datetime') as mock_datetime:
-            mock_datetime.utcnow.return_value = datetime(2024, 5, 1, 12, 30, 15)
-            mock_datetime.strftime = datetime.strftime
+            # Le code appelle `datetime.now(timezone.utc).strftime(...)` : c'est
+            # donc `now` qu'il faut immobiliser (auparavant le test mockait
+            # `utcnow`, qui n'est plus utilisé — le mock n'avait plus d'effet).
+            mock_datetime.now.return_value = datetime(2024, 5, 1, 12, 30, 15)
             
             # Test avec tous les paramètres définis
             filename = generate_export_filename(

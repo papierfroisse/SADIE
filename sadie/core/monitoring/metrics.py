@@ -4,7 +4,7 @@ import time
 import logging
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import statistics
 import asyncio
 import json
@@ -20,7 +20,7 @@ class CollectorMetric:
     symbols: List[str]  # Symboles suivis
     metric_type: str  # Type de métrique (throughput, latency, health, etc.)
     value: float  # Valeur de la métrique
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     unit: str = ""  # Unité de la métrique (ms, tps, %, etc.)
     labels: Dict[str, str] = field(default_factory=dict)  # Labels additionnels
     
@@ -84,7 +84,7 @@ class CollectorMetricsManager:
     
     async def cleanup(self):
         """Supprime les métriques plus anciennes que la période de rétention."""
-        cutoff = datetime.utcnow() - self.retention_period
+        cutoff = datetime.now(timezone.utc) - self.retention_period
         
         async with self._lock:
             original_count = len(self.metrics)
@@ -205,7 +205,7 @@ class CollectorPerformanceMonitor:
         self.exchange = exchange
         self.symbols = symbols
         self.metrics_manager = metrics_manager
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(timezone.utc)
         
         # Compteurs et statistiques
         self.trades_processed = 0
@@ -227,7 +227,7 @@ class CollectorPerformanceMonitor:
         """Incrémente le compteur de trades pour un symbole."""
         self.trades_processed += count
         self.trades_per_symbol[symbol] = self.trades_per_symbol.get(symbol, 0) + count
-        self.last_trades[symbol] = datetime.utcnow()
+        self.last_trades[symbol] = datetime.now(timezone.utc)
     
     def record_processing_time(self, duration_ms: float):
         """Enregistre un temps de traitement."""
@@ -257,7 +257,7 @@ class CollectorPerformanceMonitor:
         # Enregistrement toutes les 60 secondes ou si forcé
         if force or (current_time - self.last_metric_time >= 60):
             # Calcul des métriques
-            duration = datetime.utcnow() - self.start_time
+            duration = datetime.now(timezone.utc) - self.start_time
             duration_seconds = duration.total_seconds()
             
             # Throughput (trades par seconde). La valeur par defaut est
@@ -333,7 +333,7 @@ class CollectorPerformanceMonitor:
             
     async def get_performance_report(self) -> Dict[str, Any]:
         """Génère un rapport complet des performances du collecteur."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         duration = now - self.start_time
         duration_seconds = duration.total_seconds()
         

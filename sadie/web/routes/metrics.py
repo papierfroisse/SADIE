@@ -1,7 +1,7 @@
 """Routes API pour les métriques de performance des collecteurs."""
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -29,7 +29,7 @@ async def get_collectors_metrics(
 ):
     """Récupère les métriques agrégées des collecteurs selon les critères spécifiés."""
     # Conversion du timeframe en datetime
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     start_time = None
     
     if timeframe == "5m":
@@ -89,7 +89,7 @@ async def get_raw_metrics(
 ):
     """Récupère les métriques brutes des collecteurs selon les critères spécifiés."""
     # Conversion du timeframe en datetime
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     start_time = None
     
     if timeframe == "5m":
@@ -155,7 +155,7 @@ async def get_collectors_health(
         collector_name=collector_name,
         exchange=exchange,
         metric_type="health",
-        start_time=datetime.utcnow() - timedelta(minutes=10)  # 10 dernières minutes
+        start_time=datetime.now(timezone.utc) - timedelta(minutes=10)  # 10 dernières minutes
     )
     
     # Organisation par collecteur
@@ -177,7 +177,7 @@ async def get_collectors_health(
         "collectors": list(collectors_health.values()),
         "metadata": {
             "count": len(collectors_health),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "filters": {
                 "collector_name": collector_name,
                 "exchange": exchange
@@ -193,7 +193,7 @@ async def get_collectors_summary(
 ):
     """Récupère un résumé global des métriques des collecteurs."""
     # Récupération des métriques des dernières 24 heures
-    start_time = datetime.utcnow() - timedelta(hours=24)
+    start_time = datetime.now(timezone.utc) - timedelta(hours=24)
     
     # Métriques par type
     throughput_metrics = await metrics_manager.get_metrics(
@@ -243,7 +243,7 @@ async def get_collectors_summary(
         "metadata": {
             "timeframe": "24h",
             "start_time": start_time.isoformat(),
-            "end_time": datetime.utcnow().isoformat(),
+            "end_time": datetime.now(timezone.utc).isoformat(),
             "metrics_count": {
                 "throughput": len(throughput_metrics),
                 "latency": len(latency_metrics),

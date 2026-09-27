@@ -2,7 +2,7 @@
 
 import os
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Union, Any
 
 from fastapi import FastAPI, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
@@ -70,7 +70,7 @@ async def health_check():
     """Endpoint public pour vérifier la santé de l'API."""
     return {
         "status": "ok",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": "0.2.1"
     }
 
@@ -80,7 +80,7 @@ async def get_market_data(current_user: User = Depends(get_read_data_user)):
     """Endpoint protégé pour lire les données de marché (lecture seule)."""
     return {
         "data": "Données de marché simulées",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "user": current_user.username
     }
 
@@ -94,7 +94,7 @@ async def update_configuration(
     return {
         "status": "Configuration mise à jour",
         "config": config,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "user": current_user.username
     }
 
@@ -105,7 +105,7 @@ async def list_users(current_user: User = Depends(get_admin_user)):
     return {
         "users": list(fake_users_db.keys()),
         "count": len(fake_users_db),
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "admin": current_user.username
     }
 

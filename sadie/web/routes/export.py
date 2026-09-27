@@ -4,7 +4,7 @@ import io
 import csv
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
@@ -28,7 +28,7 @@ async def export_metrics_json(
 ):
     """Exporte les métriques au format JSON."""
     # Calcul de la période
-    end_time = datetime.utcnow()
+    end_time = datetime.now(timezone.utc)
     start_time = calculate_start_time(timeframe, end_time)
     
     # Récupération des métriques
@@ -67,7 +67,7 @@ async def export_metrics_csv(
 ):
     """Exporte les métriques au format CSV."""
     # Calcul de la période
-    end_time = datetime.utcnow()
+    end_time = datetime.now(timezone.utc)
     start_time = calculate_start_time(timeframe, end_time)
     
     # Récupération des métriques
@@ -155,7 +155,7 @@ def generate_export_filename(
     metric_type: Optional[str] = None
 ) -> str:
     """Génère un nom de fichier pour l'exportation."""
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     parts = ["metrics"]
     
     if collector_name:

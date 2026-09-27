@@ -2,7 +2,7 @@
 
 import os
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Set, Union
 
 from fastapi import Depends, HTTPException, Security, status
@@ -31,6 +31,11 @@ if SECRET_KEY == "d1ff1cult_s3cr3t_k3y_f0r_d3v3l0pm3nt":
     )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# Durée de vie par défaut d'un jeton, alignée sur la constante ci-dessus.
+# Auparavant cette fonction retombait sur 15 minutes alors que la constante
+# annonçait 30 : deux valeurs coexistaient, sans raison lisible.
+DEFAULT_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_MINUTES
 
 # Contexte de hachage pour les mots de passe
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -127,7 +132,9 @@ def create_access_token(
 ) -> str:
     """Crée un token JWT avec les données spécifiées."""
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
+    expire = datetime.now(timezone.utc) + (
+            expires_delta or timedelta(minutes=DEFAULT_TOKEN_EXPIRE_MINUTES)
+        )
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

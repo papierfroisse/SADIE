@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Dict, Optional, List, Any, Union, Literal
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import asyncio
 import json
 import time
@@ -142,7 +142,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @app.get("/api/healthcheck")
 async def healthcheck():
     """Vérifie l'état de santé de l'API."""
-    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+    return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 # Endpoint protégé pour récupérer le profil utilisateur
 @app.get("/api/users/me", response_model=User)
@@ -224,7 +224,7 @@ async def websocket_endpoint(
                 
                 # Formatage de la réponse
                 response = {
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "exchange": exchange,
                     "symbols": formatted_symbols,
                     "data": data,
@@ -391,7 +391,7 @@ async def get_klines(
         # Pour cette démo, nous générons des données simulées
         # En production, connectez-vous à votre base de données TimescaleDB
         import random
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         
         # Conversion des intervalles en minutes
         interval_map = {
@@ -488,7 +488,7 @@ async def save_chart_configuration(
         return {
             "success": True,
             "message": "Configuration sauvegardée avec succès",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
     except Exception as e:
