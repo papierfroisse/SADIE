@@ -8,23 +8,23 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from prometheus_client import start_http_server
 
-from SADIE.core.streaming import StreamEvent, StreamManager
-from SADIE.core.streaming.processors import (
+from sadie.core.streaming import StreamEvent, StreamManager
+from sadie.core.streaming.processors import (
     FilterProcessor,
     TransformProcessor,
     ValidationProcessor,
     ThrottleProcessor
 )
-from SADIE.core.streaming.handlers import (
+from sadie.core.streaming.handlers import (
     LoggingHandler,
     CacheHandler,
     DatabaseHandler,
     AlertHandler
 )
-from SADIE.core.cache import Cache, RedisCache
-from SADIE.core.models.events import MarketEvent
-from SADIE.core.monitoring.metrics import MetricsHandler
-from SADIE.core.analytics.queries import TimeScaleQueries
+from sadie.core.cache import Cache, RedisCache
+from sadie.core.models.events import MarketEvent
+from sadie.core.monitoring.metrics import MetricsHandler
+from sadie.core.analytics.queries import TimeScaleQueries
 
 # Chargement des variables d'environnement
 load_dotenv()

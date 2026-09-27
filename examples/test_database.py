@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from SADIE.core.models.events import Event, MarketEvent
+from sadie.core.models.events import Event, MarketEvent
 
 # Chargement des variables d'environnement
 load_dotenv()

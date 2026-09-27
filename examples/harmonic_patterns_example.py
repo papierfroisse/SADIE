@@ -8,9 +8,9 @@ import plotly.graph_objects as go
 import platform
 from plotly.subplots import make_subplots
 
-from SADIE.analysis.harmonic_patterns import HarmonicAnalyzer, PatternType
-from SADIE.core.collectors.trade_collector import TradeCollector
-from SADIE.core.models.events import Exchange, Symbol, Timeframe
+from sadie.analysis.harmonic_patterns import HarmonicAnalyzer, PatternType
+from sadie.core.collectors.trade_collector import TradeCollector
+from sadie.core.models.events import Exchange, Symbol, Timeframe
 
 async def get_market_data(exchange: str = "binance", symbol: str = "BTC/USDT", timeframe: str = "1h", limit: int = 1000) -> pd.DataFrame:
     """Récupère les données historiques du marché."""

@@ -13,6 +13,11 @@ scipy>=1.11.0
 pyyaml>=6.0.1
 python-dotenv>=1.2.2
 
+# Authentification : passlib 1.7.4 n'est pas compatible avec bcrypt >= 4.1
+# (« ValueError: password cannot be longer than 72 bytes ») ; on verrouille
+# une version compatible avec la bibliothèque utilisée par SADIE.
+bcrypt==4.0.1
+
 # Utilitaires
 psutil>=5.9.0
 python-dateutil>=2.8.2

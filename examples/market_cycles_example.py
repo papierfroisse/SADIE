@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from SADIE.analysis.market_cycles import CycleAnalyzer
+from sadie.analysis.market_cycles import CycleAnalyzer
 
 def create_sample_data(days: int = 365) -> pd.DataFrame:
     """Crée des données simulées avec des cycles."""

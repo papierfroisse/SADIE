@@ -4,8 +4,8 @@ import asyncio
 import json
 from datetime import datetime
 
-from SADIE.data.collectors.orderbook import OrderBookCollector
-from SADIE.core.monitoring import get_logger
+from sadie.data.collectors.orderbook import OrderBookCollector
+from sadie.core.monitoring import get_logger
 
 logger = get_logger(__name__)
 
