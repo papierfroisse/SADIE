@@ -7,7 +7,7 @@ Dernière vérification : 27/09/2026, à la racine `sadie/web/static` (Node 26, 
 | Contrôle | Commande | Résultat |
 |---|---|---|
 | Types | `npm run type-check` | **0 erreur** (14 avant) |
-| Compilation | `npm run build` | **OK** — `build/` produit, `main.js` 391,5 kB |
+| Compilation | `npm run build` | **OK** — `build/` produit, `main.js` 396,9 kB |
 | Lint | `npm run lint` | **270 erreurs**, 895 avertissements |
 | Tests | `npm run test:ci` | **17 échecs / 20 succès** sur 37, 4 suites en échec |
 | Installation reproductible | `npm ci` | OK (le lock est cohérent) |
