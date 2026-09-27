@@ -1,7 +1,7 @@
 site_name: sadie
 site_description: Advanced Trading Data Collection and Analysis System
-site_author: Your Name
-repo_url: https://github.com/yourusername/sadie
+site_author: papierfroisse
+repo_url: https://github.com/papierfroisse/SADIE
 repo_name: sadie
 
 theme:

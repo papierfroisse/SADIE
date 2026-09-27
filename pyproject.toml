@@ -11,7 +11,7 @@ requires-python = ">=3.10"
 license = "MIT"
 keywords = ["trading", "data", "analysis", "crypto", "stocks"]
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "papierfroisse", email = "papierfroisse@users.noreply.github.com"}
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

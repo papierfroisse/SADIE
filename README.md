@@ -62,7 +62,7 @@ sadie/
 
 1. Cloner le dépôt
 ```bash
-git clone https://github.com/yourusername/sadie.git
+git clone https://github.com/papierfroisse/SADIE.git
 cd sadie
 ```
 
