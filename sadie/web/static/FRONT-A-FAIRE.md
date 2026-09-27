@@ -145,9 +145,16 @@ de l'ancien montage statique (qui exposait les sources) est bien fermée.
   54 hautes, 53 moyennes, 9 basses.
 - **axios concentrait à lui seul 30 alertes**, dont des critiques remontées par
   ses dépendances (`form-data`, `qs`). Il est monté de 1.7.9 à 1.20.0 dans le
-  commit `ff3a9cf`, sans effet sur les types, la compilation ni les tests.
-- Les autres critiques : `shell-quote`, `websocket-driver` (chaîne d'outils de
-  `react-scripts` 5, donc dépendances de développement).
+  commit `ff3a9cf`. **Résultat mesuré après le rescan** : le dépôt passe de 278 à
+  245 alertes, le front vivant de 120 à 87, et les alertes axios de 30 à 0 ; il
+  reste 3 critiques (contre 4), sans effet sur les types, la compilation ni les
+  tests.
+- Les critiques restantes ne sont atteignables que par la chaîne d'outils de
+  développement, d'après l'arbre npm : `shell-quote` 1.8.2
+  (`react-dev-utils`, `webpack-dev-server`), `websocket-driver` 0.7.4 (`sockjs`,
+  HMR) et `form-data` 3.0.2 (`jest` 27 → `jsdom` 16, chemin de test). `form-data`
+  en version récente (`4.0.6`, via axios) n'est pas concerné. Le paquet livré au
+  navigateur ne contient donc plus d'alerte critique.
 - Le reste vient de cette même chaîne d'outils : `minimatch` (9), `node-forge`
   (7), `webpack-dev-server` (6), `postcss` (5), `svgo` (4), `ws` (3). Les traiter
   suppose de sortir de `react-scripts` (Vite) ou de figer des `overrides`.
