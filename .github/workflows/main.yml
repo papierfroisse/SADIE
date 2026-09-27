@@ -50,7 +50,7 @@ jobs:
 
     - name: Run tests
       env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sadie_test
+        DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/sadie_test
       run: |
         pytest tests/ --cov=sadie --cov-report=xml
 

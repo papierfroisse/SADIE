@@ -1,5 +1,10 @@
 name: Documentation
 
+# peaceiris/actions-gh-pages publie sur la branche gh-pages : sans ce droit, le
+# deploiement echoue (« Permission to ... denied to github-actions[bot] »).
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ main ]
