@@ -26,7 +26,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mkdocs mkdocs-material
+          # mkdocstrings est declare dans mkdocs.yml : sans lui, `mkdocs build`
+          # s'arrete sur « Config value 'plugins': The "mkdocstrings" plugin is
+          # not installed ». L'extra [python] apporte le handler Python.
+          pip install mkdocs mkdocs-material "mkdocstrings[python]"
 
       - name: Build documentation
         run: mkdocs build

@@ -20,8 +20,12 @@ coinbase==2.1.0
 # Traitement des données
 pandas>=2.1.4
 numpy>=1.26.2
-ta-lib==0.4.24
 scikit-learn==1.5.0
+# ta-lib n'est importé nulle part dans le code, et son installation exige la
+# bibliothèque C (libta-lib) : `pip install` échouait donc sur la CI. Si les
+# indicateurs techniques doivent s'appuyer dessus un jour, voir
+# requirements/optionnels.txt (ta-lib >= 0.5 fournit des roues précompilées).
+# ta-lib==0.4.24
 
 # WebSocket
 websockets==12.0
@@ -31,7 +35,10 @@ httpx==0.25.2
 prometheus-client==0.19.0
 structlog==23.2.0
 python-json-logger==2.0.7
-grafana-api==1.0.4
+# grafana-api n'est pas importé par le code aujourd'hui. La version épinglée
+# (1.0.4) n'a jamais existé sur PyPI — la dernière publiée est 1.0.3 — ce qui
+# faisait échouer `pip install -r requirements.txt` et donc toute la CI.
+grafana-api==1.0.3
 psutil==5.9.8
 
 # API et Dashboard

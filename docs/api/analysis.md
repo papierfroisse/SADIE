@@ -18,21 +18,6 @@
 
 ## Patterns Harmoniques
 
-### Types de Patterns
-
-::: sadie.analysis.harmonic_patterns.PatternType
-    handler: python
-
-### Types de Tendance
-
-::: sadie.analysis.harmonic_patterns.TrendType
-    handler: python
-
-### Pattern Harmonique
-
-::: sadie.analysis.harmonic_patterns.HarmonicPattern
-    handler: python
-
 ### Analyseur de Patterns
 
 ::: sadie.analysis.harmonic_patterns.HarmonicAnalyzer

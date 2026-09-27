@@ -1,8 +1,12 @@
-"""Normalise l'encodage des fichiers Python : UTF-16 -> UTF-8.
+"""Normalise l'encodage des fichiers texte : UTF-16 -> UTF-8.
 
 Certains fichiers du dépôt ont été enregistrés en UTF-16 (BOM FF FE) alors que
 Python lit les sources en UTF-8 : `SyntaxError: source code string cannot
-contain null bytes`. Ce script les convertit en UTF-8 sans BOM.
+contain null bytes`. Un fichier YAML dans le même cas est tout aussi inutilisable
+(GitHub Actions refuse de lire un workflow qu'il ne peut pas décoder).
+
+Le script couvre les sources Python **et** les fichiers texte du projet
+(`.yml`, `.md`, `.json`, `.sh`…) et les convertit en UTF-8 sans BOM.
 
     .venv\\Scripts\\python.exe tools\\normaliser_encodage.py [--ecrire]
 
@@ -15,9 +19,19 @@ RACINE = Path(__file__).resolve().parent.parent
 EXCLUS = {'.git', 'old', '.venv', 'venv', 'node_modules', '__pycache__'}
 BOMS = {b'\xff\xfe': 'utf-16-le', b'\xfe\xff': 'utf-16-be'}
 
+# Extensions de fichiers texte : un fichier UTF-16 y est toujours un défaut.
+# Les formats binaires (images, archives, bases) sont volontairement exclus.
+EXTENSIONS = {
+    '.py', '.pyi', '.yml', '.yaml', '.md', '.rst', '.txt', '.json', '.toml',
+    '.ini', '.cfg', '.conf', '.sh', '.ps1', '.cmd', '.bat', '.html', '.css',
+    '.js', '.ts', '.env', '.sql', '.csv',
+}
+
 
 def fichiers_a_corriger():
-    for chemin in sorted(RACINE.rglob('*.py')):
+    for chemin in sorted(RACINE.rglob('*')):
+        if not chemin.is_file() or chemin.suffix.lower() not in EXTENSIONS:
+            continue
         if EXCLUS & set(chemin.relative_to(RACINE).parts):
             continue
         donnees = chemin.read_bytes()

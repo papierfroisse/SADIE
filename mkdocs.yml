@@ -49,16 +49,16 @@ plugins:
 
 nav:
   - Accueil: index.md
-  - Installation: installation.md
+  - Installation: user-guide/installation.md
   - Modules:
       - Collecteurs: collectors.md
-      - Stockage: storage.md
+      - Stockage: models.md
       - Analyse Technique: analysis.md
-      - Web: web.md
+      - Métriques: metrics.md
+      - Surveillance: development/monitoring.md
   - Exemples: examples.md
-  - API Reference:
-      - Core: api/core.md
-      - Data: api/data.md
-      - Analysis: api/analysis.md
-      - Web: api/web.md
-  - Contribution: contributing.md 
+  - Référence API:
+      - Vue d'ensemble: api/README.md
+      - Analyse: api/analysis.md
+      - Métriques: api/metrics.md
+  - Contribution: development/contributing.md 

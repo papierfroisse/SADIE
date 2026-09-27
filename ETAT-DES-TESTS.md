@@ -82,6 +82,34 @@ Le détail, fichier par fichier, est dans `tests/legacy/README.md`.
 Aucun test n'a été supprimé : l'intention est conservée, et deux pistes sont
 documentées (réécrire contre l'API actuelle, ou rétablir la fonctionnalité).
 
+## Intégration continue : cinq causes d'échec permanentes corrigées
+
+Les trois workflows n'avaient **jamais pu tourner** (échec à l'installation des
+dépendances, avant même d'atteindre les tests). Causes, toutes vérifiées :
+
+| # | Cause | Fichier | Preuve |
+|---|---|---|---|
+| 1 | `grafana-api==1.0.4` **n'existe pas sur PyPI** (dernière version : 1.0.3) → `pip install -r requirements.txt` échoue | `requirements.txt` | journal CI : « No matching distribution found for grafana-api==1.0.4 » |
+| 2 | Le classifieur de licence est interdit par setuptools récent (PEP 639) → `pip install -e .` échoue | `pyproject.toml` | reproduit localement : échec avant, `Successfully installed sadie-0.2.1` après |
+| 3 | `--cov=SADIE`, `mypy SADIE/`, `black --check SADIE` : anciens chemins du paquet (renommé `sadie/`) | `ci.yml`, `main.yml` | — |
+| 4 | `security.yml` était encodé en **UTF-16** : GitHub ne pouvait pas le lire, le workflow n'existait pas | `security.yml` | octets `FF FE` en tête ; converti en UTF-8 (BOM désormais `6E 61 6D 65`) |
+| 5 | `mkdocstrings` déclaré dans `mkdocs.yml` mais absent de l'installation → `mkdocs build` s'arrête ; 6 pages du sommaire inexistantes ; `docs/api/analysis.md` citait des classes supprimées | `docs.yml`, `mkdocs.yml`, `docs/api/analysis.md` | journal CI : « The "mkdocstrings" plugin is not installed » ; construction locale réussie (31 pages) |
+
+Corrections complémentaires :
+
+- `ta-lib==0.4.24` neutralisé : **aucun `import talib` dans le code**, et cette
+  version n'existe qu'en source (elle exige la bibliothèque C). Les paquets non
+  utilisés sont désormais documentés dans `requirements/optionnels.txt` ;
+- `security.yml` modernisé pour pouvoir aboutir : `upload-artifact` v3 → v4
+  (v3 est désactivé par GitHub), `pysa` retiré (installé mais utilisé par aucune
+  étape), analyseurs externes marqués informatifs (`continue-on-error`), alerte
+  Slack conditionnée à l'existence du secret ;
+- contrôles de qualité (`black`, `isort`, `mypy`, `pylint`) marqués **indicatifs**
+  : le formatage n'a jamais été appliqué au dépôt (des centaines de fichiers à
+  reformater). Ils restent visibles dans l'interface, sans bloquer la chaîne ;
+- `tools/normaliser_encodage.py` couvre maintenant **tous les fichiers texte**
+  (`.yml`, `.md`, `.json`, `.sh`…), et plus seulement les `.py`.
+
 ## Échecs restants : tests désynchronisés du code
 
 > **Section historique** — conservée pour mémoire. Elle décrit l'état *avant*

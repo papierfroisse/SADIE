@@ -1,0 +1,20 @@
+# Dépendances optionnelles, non installées par défaut
+#
+# Ce fichier existe pour documenter les paquets qui ne doivent pas figurer dans
+# `requirements.txt` parce qu'ils ne s'installent pas partout, alors qu'ils ne
+# sont pas (ou pas encore) utilisés par le code.
+
+# ta-lib — indicateurs techniques
+#   `import talib` n'apparaît nulle part dans sadie/ : les indicateurs sont
+#   calculés avec pandas/numpy (voir sadie/analysis/indicators.py).
+#   Installation : la version 0.4.x n'existe qu'en source et exige la
+#   bibliothèque C ; à partir de 0.5, des roues précompilées sont publiées.
+#   pip install "ta-lib>=0.5.1"
+ta-lib>=0.5.1
+
+# grafana-api — publication des métriques vers Grafana
+#   Aucun `import grafana_api` dans le code : l'exposition des métriques passe
+#   par Prometheus (sadie/core/monitoring/prometheus_exporter.py) et par le
+#   fichier `grafana/` (tableaux de bord importés à la main).
+#   La version 1.0.4 n'existe pas sur PyPI ; la dernière est 1.0.3.
+grafana-api==1.0.3
