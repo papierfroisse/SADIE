@@ -1,6 +1,9 @@
 """Point d'entrée principal de l'application."""
 
-from web.app import app
+# Import absolu : `from web.app import app` ne fonctionnait que depuis la racine
+# du dépôt (le dossier `sadie/` n'étant pas dans sys.path), et échouait donc dès
+# que le paquet était installé ou importé autrement.
+from sadie.web.app import app
 
 # L'application sera importée par uvicorn
 
