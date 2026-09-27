@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        # Python 3.9 retire : les dependances exigent >= 3.10 (cf. main.yml).
+        python-version: ["3.10", "3.11", "3.12"]
 
     services:
       redis:
@@ -59,9 +60,11 @@ jobs:
         pytest tests/ --cov=sadie --cov-report=xml
         
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
+        # N'echoue pas la chaine si Codecov est injoignable.
+        fail_ci_if_error: false
         
   benchmark:
     needs: test

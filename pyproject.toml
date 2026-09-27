@@ -7,7 +7,7 @@ name = "sadie"
 version = "0.2.1"
 description = "Advanced Trading Data Collection and Analysis System"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT"
 keywords = ["trading", "data", "analysis", "crypto", "stocks"]
 authors = [
@@ -18,9 +18,9 @@ classifiers = [
     "Intended Audience :: Financial and Insurance Industry",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Office/Business :: Financial :: Investment",
     "Topic :: Scientific/Engineering :: Information Analysis"
 ]
@@ -72,7 +72,9 @@ debug = [
 docs = [
     "mkdocs>=1.5.3",
     "mkdocs-material>=9.7.7",
-    "mkdocstrings>=0.24.0"
+    # Le handler Python est indispensable : mkdocs.yml declare le plugin
+    # mkdocstrings, et sans l'extra [python] `mkdocs build` s'arrete.
+    "mkdocstrings[python]>=1.0.0"
 ]
 
 [tool.black]

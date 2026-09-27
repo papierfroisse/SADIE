@@ -1,74 +1,16 @@
-# API
-fastapi==0.104.1
-uvicorn==0.24.0
-pydantic==2.5.2
-python-dotenv==1.2.2
-python-jose[cryptography]==3.4.0
-passlib[bcrypt]==1.7.4
-email-validator==2.1.0.post1
-
-# Base de données
-redis==5.0.1
-aioredis==2.0.1
-
-# Exchanges
-python-binance==1.0.19
-krakenex==2.1.0
-pykrakenapi==0.3.1
-coinbase==2.1.0
-
-# Traitement des données
-pandas>=2.1.4
-numpy>=1.26.2
-scikit-learn==1.5.0
-# ta-lib n'est importé nulle part dans le code, et son installation exige la
-# bibliothèque C (libta-lib) : `pip install` échouait donc sur la CI. Si les
-# indicateurs techniques doivent s'appuyer dessus un jour, voir
-# requirements/optionnels.txt (ta-lib >= 0.5 fournit des roues précompilées).
-# ta-lib==0.4.24
-
-# WebSocket
-websockets==12.0
-httpx==0.25.2
-
-# Monitoring
-prometheus-client==0.19.0
-structlog==23.2.0
-python-json-logger==2.0.7
-# grafana-api n'est pas importé par le code aujourd'hui. La version épinglée
-# (1.0.4) n'a jamais existé sur PyPI — la dernière publiée est 1.0.3 — ce qui
-# faisait échouer `pip install -r requirements.txt` et donc toute la CI.
-grafana-api==1.0.3
-psutil==5.9.8
-
-# API et Dashboard
-itsdangerous==2.2.0
-python-multipart==0.0.31
-jinja2==3.1.6
-aiofiles==23.2.1
-
-# Tests
-pytest==9.0.3
-pytest-asyncio==0.21.1
-pytest-cov==4.1.0
-pytest-mock==3.12.0
-pytest-env==1.1.1
-pytest-timeout==2.2.0
-coverage==7.3.2
-
-# Développement
-black==26.3.1
-isort==5.12.0
-flake8==6.1.0
-mypy==1.7.1
-pre-commit==3.5.0
-
-# Documentation
-mkdocs==1.5.3
-mkdocs-material==9.7.7
-mkdocstrings==0.24.0
-
-# Sécurité
-certifi>=2023.11.17
-cryptography>=41.0.5
-oauthlib==3.2.2 
+# Ce fichier ne fixe plus de versions : il renvoie au jeu de dépendances
+# maintenu dans requirements/.
+#
+# Historique : les épingles qui figuraient ici (issues des mises à jour
+# automatiques) étaient mutuellement incompatibles et certaines versions
+# n'existent pas sur PyPI :
+#   - python-dotenv==1.2.2  -> dernière version publiée : 1.2.1
+#   - grafana-api==1.0.4    -> dernière version publiée : 1.0.3
+#   - mkdocs==1.5.3         -> en conflit avec les autres épingles
+# Résultat : `pip install -r requirements.txt` échouait, donc **toutes** les
+# chaînes d'intégration continue s'arrêtaient à l'installation.
+#
+# requirements/tests.txt = base.txt + outils de test + clients d'exchange :
+# c'est le point de départ pour le développement et pour la CI.
+# requirements/prod.txt  = jeu destiné au déploiement.
+-r requirements/tests.txt 

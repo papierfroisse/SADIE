@@ -89,23 +89,41 @@ dépendances, avant même d'atteindre les tests). Causes, toutes vérifiées :
 
 | # | Cause | Fichier | Preuve |
 |---|---|---|---|
-| 1 | `grafana-api==1.0.4` **n'existe pas sur PyPI** (dernière version : 1.0.3) → `pip install -r requirements.txt` échoue | `requirements.txt` | journal CI : « No matching distribution found for grafana-api==1.0.4 » |
-| 2 | Le classifieur de licence est interdit par setuptools récent (PEP 639) → `pip install -e .` échoue | `pyproject.toml` | reproduit localement : échec avant, `Successfully installed sadie-0.2.1` après |
-| 3 | `--cov=SADIE`, `mypy SADIE/`, `black --check SADIE` : anciens chemins du paquet (renommé `sadie/`) | `ci.yml`, `main.yml` | — |
-| 4 | `security.yml` était encodé en **UTF-16** : GitHub ne pouvait pas le lire, le workflow n'existait pas | `security.yml` | octets `FF FE` en tête ; converti en UTF-8 (BOM désormais `6E 61 6D 65`) |
-| 5 | `mkdocstrings` déclaré dans `mkdocs.yml` mais absent de l'installation → `mkdocs build` s'arrête ; 6 pages du sommaire inexistantes ; `docs/api/analysis.md` citait des classes supprimées | `docs.yml`, `mkdocs.yml`, `docs/api/analysis.md` | journal CI : « The "mkdocstrings" plugin is not installed » ; construction locale réussie (31 pages) |
+| 1 | Le fichier d'épingles racine était **inutilisable** : versions inexistantes et conflits (`python-dotenv==1.2.2` → dernière publiée 1.2.1 ; `grafana-api==1.0.4` → dernière 1.0.3 ; `mkdocs==1.5.3` en conflit avec le reste) | `requirements.txt` | journal CI : « No matching distribution found for python-dotenv==1.2.2 », « ResolutionImpossible » |
+| 2 | La matrice testait **Python 3.9** alors que les dépendances déclarées exigent ≥ 3.10 (`black>=26.3.1`, `pytest>=9.0.3`) : installation impossible | `ci.yml`, `main.yml`, `pyproject.toml` | journal CI : « No matching distribution found for black>=26.3.1 » sur `test (3.9)` |
+| 3 | Le classifieur de licence est interdit par setuptools récent (PEP 639) → `pip install -e .` échoue | `pyproject.toml` | reproduit localement : échec avant, `Successfully installed sadie-0.2.1` après |
+| 4 | `--cov=SADIE`, `mypy SADIE/`, `bandit -r SADIE/`, `black --check SADIE` : anciens chemins du paquet (renommé `sadie/`) | `ci.yml`, `main.yml` | — |
+| 5 | `security.yml` était encodé en **UTF-16** : GitHub ne pouvait pas le lire, le workflow n'existait pas | `security.yml` | octets `FF FE` en tête ; converti (désormais `6E 61 6D 65`) ; le workflow apparaît dans la liste GitHub |
+| 6 | `mkdocstrings` déclaré dans `mkdocs.yml` mais absent de l'installation, puis option `setup_commands` **supprimée** dans mkdocstrings-python 2 ; 6 pages du sommaire inexistantes ; `docs/api/analysis.md` citait des classes supprimées | `docs.yml`, `mkdocs.yml`, `docs/api/analysis.md` | journal CI : « The "mkdocstrings" plugin is not installed », puis « TypeError: PythonConfig.__init__() got an unexpected keyword argument 'setup_commands' » |
+
+**Approche retenue pour les dépendances** : plutôt que de corriger les épingles
+une par une (fichier structurellement incohérent), le `requirements.txt` racine
+**renvoie désormais au jeu maintenu** `requirements/tests.txt` (base + outils de
+test + clients d'exchange), et les workflows l'installent directement :
+
+| Workflow | Avant | Après |
+|---|---|---|
+| `main.yml` (test, security) | `pip install -r requirements.txt` | `pip install -r requirements/tests.txt` |
+| `main.yml` (lint) | `-r requirements.txt` | `-r requirements/tests.txt` + `black isort mypy pylint` |
+| `security.yml` | `-r requirements.txt` + `bandit safety pysa semgrep` | `-r requirements/tests.txt` + `bandit safety semgrep` (`pysa` n'était utilisé par aucune étape) |
+| `ci.yml` (test) | `pip install -e ".[dev,test]"` | inchangé (l'extra `[test]` reste cohérent depuis le passage à ≥ 3.10) |
+| `ci.yml` (docs) | `pip install -e ".[docs]"` | extra `docs` complété avec `mkdocstrings[python]` |
+
+Vérification locale : `python -m pip install --dry-run -r requirements/tests.txt`
+se résout **sans erreur** (aucune version manquante, aucun conflit).
 
 Corrections complémentaires :
 
-- `ta-lib==0.4.24` neutralisé : **aucun `import talib` dans le code**, et cette
-  version n'existe qu'en source (elle exige la bibliothèque C). Les paquets non
-  utilisés sont désormais documentés dans `requirements/optionnels.txt` ;
-- `security.yml` modernisé pour pouvoir aboutir : `upload-artifact` v3 → v4
-  (v3 est désactivé par GitHub), `pysa` retiré (installé mais utilisé par aucune
-  étape), analyseurs externes marqués informatifs (`continue-on-error`), alerte
-  Slack conditionnée à l'existence du secret ;
-- contrôles de qualité (`black`, `isort`, `mypy`, `pylint`) marqués **indicatifs**
-  : le formatage n'a jamais été appliqué au dépôt (des centaines de fichiers à
+- `ta-lib==0.4.24` retiré du jeu installé : **aucun `import talib` dans le code**,
+  et cette version n'existe qu'en source (elle exige la bibliothèque C). Les
+  paquets non utilisés sont documentés dans `requirements/optionnels.txt` ;
+- `security.yml` modernisé pour pouvoir aboutir : `upload-artifact` v3 → v4 (v3
+  est désactivé par GitHub), `pysa` retiré, analyseurs externes marqués
+  informatifs, alerte Slack conditionnée à l'existence du secret ;
+- `Codecov` : action v3 → v4 et `fail_ci_if_error: false` (n'échoue plus quand le
+  service est injoignable) ;
+- contrôles de qualité (`black`, `isort`, `mypy`, `pylint`) marqués **indicatifs** :
+  le formatage n'a jamais été appliqué au dépôt (des centaines de fichiers à
   reformater). Ils restent visibles dans l'interface, sans bloquer la chaîne ;
 - `tools/normaliser_encodage.py` couvre maintenant **tous les fichiers texte**
   (`.yml`, `.md`, `.json`, `.sh`…), et plus seulement les `.py`.
