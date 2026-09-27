@@ -8,8 +8,8 @@ Dernière vérification : 27/09/2026, à la racine `sadie/web/static` (Node 26, 
 |---|---|---|
 | Types | `npm run type-check` | **0 erreur** (14 avant) |
 | Compilation | `npm run build` | **OK** — `build/` produit, `main.js` 391,5 kB |
-| Lint | `npm run lint` | **286 erreurs**, 941 avertissements |
-| Tests | `npm run test:ci` | **20 échecs / 13 succès**, 4 suites en échec |
+| Lint | `npm run lint` | **270 erreurs**, 895 avertissements |
+| Tests | `npm run test:ci` | **17 échecs / 20 succès** sur 37, 4 suites en échec |
 | Installation reproductible | `npm ci` | OK (le lock est cohérent) |
 
 Avant cette passe, **aucune chaîne ne vérifiait ce front** : ni la CI Python, ni
@@ -76,20 +76,38 @@ plus du tout.
    `npm ci`, `npm run type-check`, `npm run build`. C'est ce qui est vert
    aujourd'hui, donc ce qui peut être verrouillé sans mentir.
 
+10. **Contrat d'API front/back des alertes, rompu et rétabli.** Le modèle
+    `Alert` de `sadie/web/app.py` est en **snake_case** (`notification_type`,
+    `created_at` en millisecondes) alors que le front travaillait en camelCase :
+    `alert.createdAt` restait `undefined`, d'où un `RangeError: Invalid time
+    value` à l'affichage, et `createAlert` envoyait un payload rejeté en 422 par
+    FastAPI. La traduction se fait maintenant dans la couche API
+    (`versAlerte` / `versAlerteApi` dans `services/api.ts`), avec un test dédié
+    (`src/services/__tests__/api.test.ts`).
+
+11. **URL des WebSockets corrigée.** Le backend n'expose que
+    `@app.websocket("/ws/market")` avec `exchange` et `symbols` en paramètres de
+    requête ; le front ouvrait `.../ws/market/<symbole>`, une URL qui ne
+    correspond à aucune route : aucun flux de marché ne s'ouvrait. La
+    construction d'URL est corrigée. Le canal d'alerte, lui, n'existe pas côté
+    serveur : le hook ouvrait une connexion par alerte sur une URL inexistante et
+    testait `message.type === 'alert'`, une valeur que `Alert.type` ne peut jamais
+    prendre — branche morte retirée (voir §3 du travail restant).
+
 ## Travail restant, par ordre de valeur
 
-### 1. Lint — 286 erreurs, dont 202 dues au typage `any`
+### 1. Lint — 270 erreurs, dont près de 190 dues au typage `any`
 
 | Règle | Occurrences | Nature |
 |---|---|---|
-| `no-unsafe-member-access` | 80 | `any` venu d'axios / `JSON.parse` |
-| `no-unused-vars` | 42 | corrections mécaniques |
-| `no-unsafe-assignment` | 42 | idem `no-unsafe-*` |
-| `no-unsafe-argument` | 40 | idem |
-| `no-unsafe-call` | 27 | idem |
+| `no-unsafe-member-access` | 77 | `any` venu d'axios / `JSON.parse` |
+| `no-unused-vars` | 40 | corrections mécaniques |
+| `no-unsafe-assignment` | 40 | idem `no-unsafe-*` |
+| `no-unsafe-argument` | 36 | idem |
+| `no-unsafe-call` | 26 | idem |
 | `no-floating-promises` | 15 | promesses ignorées (vrai risque) |
 | `require-await` | 14 | `async` sans `await` |
-| `no-unsafe-return` | 13 | idem `no-unsafe-*` |
+| `no-unsafe-return` | 9 | idem `no-unsafe-*` |
 
 La majorité vient d'un point unique : **la couche API n'est pas typée**.
 `services/api.ts` renvoie des `any` qui contaminent les pages (`Dashboard.tsx` :
@@ -101,22 +119,43 @@ traiter au cas par cas, ce sont de vraies promesses non attendues.
 Autocorrectibles, à passer en un commit séparé : `prettier/prettier` (743
 avertissements), `import/order` (111), `sort-imports` (45).
 
-### 2. Tests — 20 échecs sur 33
+### 2. Tests — 17 échecs sur 37
 
-Suites en échec : `TradingChart.test.tsx`, `Layout.test.tsx`,
-`AlertList.test.tsx`, `WebSocketContext.test.tsx`. À traiter après le typage :
-les fixtures touchées ici montrent que ces tests ont été écrits contre les
-anciens contrats de données et n'ont jamais tourné depuis.
+Corrigé dans cette passe : 4 fixtures qui étaient en snake_case alors que le mock
+porte sur la couche API (donc sur le domaine en camelCase) — d'où les
+`RangeError: Invalid time value` —, et le mock de `useWebSocket` dans
+`Layout.test.tsx`, qui posait son implémentation sans jamais la remettre à zéro :
+elle fuyait sur les tests suivants. Le fichier `services/__tests__/api.test.ts`
+ajoute 4 tests sur la traduction du contrat.
 
-### 3. Contrat des messages WebSocket d'alerte — indécis
+Échecs restants, tous des **assertions écrites contre une version antérieure de
+l'interface** :
 
-`useAlerts` traite un message quand `message.type === 'alert'`, puis le convertit
+| Suite | Échecs | Nature |
+|---|---|---|
+| `Layout.test.tsx` | 8 | attend « SADIE Trading » et « Connecté » alors que le composant affiche « En ligne » / « Hors ligne », et cherche `notification-button` / `notification-badge` : le composant n'expose **aucun `data-testid`** |
+| `AlertList.test.tsx` | 5 | textes et rôles de l'UI actuelle (« Ajouter une alerte », bouton `/supprimer/i`), et un attendu de payload à revoir |
+| `TradingChart.test.tsx` | 2 | cherche `[data-testid="chart-container"]`, absent du composant |
+| `WebSocketContext.test.tsx` | 2 | `toHaveProperty` sur une structure qui a changé, et contenu de message d'erreur |
+
+Deux suites de travail : ajouter les `data-testid` manquants dans les composants
+(`Layout`, `TradingChart`) puis aligner les assertions ; pour `AlertList` et
+`WebSocketContext`, vérifier au cas par cas si l'écart révèle une régression de
+l'UI ou un test périmé. **Aucun de ces échecs ne vient du code applicatif** : le
+build et les types sont verts.
+
+### 3. Canal WebSocket d'alerte — à écrire côté serveur
+
+`useAlerts` traitait un message si `message.type === 'alert'`, puis le convertissait
 en `Alert`. Or `Alert.type` vaut `'price' | 'volume' | 'indicator'`, jamais
-`'alert'` : soit le serveur envoie l'alerte à plat dans une enveloppe
-`{ type: 'alert', ... }`, soit **la branche ne se déclenche jamais** et les
-alertes temps réel sont silencieusement ignorées. Aucun endpoint WebSocket
-d'alerte n'existe côté backend (`sadie/web/stream_manager.py` ne diffuse que du
-`market_data`) : le contrat doit être écrit côté serveur, puis le front aligné.
+`'alert'` : la branche ne pouvait pas s'exécuter. Elle ouvrait en plus une
+connexion par alerte sur `.../ws/market/alert/<id>`, une URL inexistante : aucun
+endpoint WebSocket d'alerte n'existe (`sadie/web/stream_manager.py` ne diffuse que
+du `market_data`). Ce code mort a été retiré plutôt que laissé en place.
+
+Reste à faire : écrire le canal côté serveur (endpoint + payload documenté), puis
+le rebrancher dans le front en réutilisant la traduction `versAlerte` déjà en
+place. En attendant, les alertes passent par l'API REST.
 
 ### 4. Décisions à prendre
 

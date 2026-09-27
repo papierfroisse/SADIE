@@ -127,7 +127,6 @@ describe('AlertList Component', () => {
       alerts: mockAlerts,
       loading: false,
       error: null,
-      lastTriggered: null,
       createAlert: mockCreateAlert,
       deleteAlert: mockDeleteAlert,
     });
@@ -157,7 +156,6 @@ describe('AlertList Component', () => {
       alerts: [],
       loading: true,
       error: null,
-      lastTriggered: null,
       createAlert: mockCreateAlert,
       deleteAlert: mockDeleteAlert,
     });
@@ -174,7 +172,6 @@ describe('AlertList Component', () => {
       alerts: [],
       loading: false,
       error: errorMessage,
-      lastTriggered: null,
       createAlert: mockCreateAlert,
       deleteAlert: mockDeleteAlert,
     });
@@ -236,8 +233,8 @@ describe('AlertList', () => {
         type: 'price',
         condition: 'above',
         value: 50000,
-        notification_type: 'browser',
-        created_at: mockDate.toISOString(),
+        notificationType: 'browser',
+        createdAt: mockDate.getTime(),
         triggered: false,
       },
     ];
@@ -283,12 +280,14 @@ describe('AlertList', () => {
   });
 
   it('creates a new alert and updates the list', async () => {
-    const newAlert = {
+    const newAlert: Omit<Alert, 'id'> = {
       symbol: 'BTCUSDT',
       type: 'price',
       condition: 'above',
       value: 50000,
-      notification_type: 'browser',
+      notificationType: 'browser',
+      triggered: false,
+      createdAt: 0,
     };
 
     mockApi.createAlert.mockResolvedValue({
@@ -296,9 +295,7 @@ describe('AlertList', () => {
       data: {
         ...newAlert,
         id: '1',
-        created_at: new Date().toISOString(),
-        triggered: false,
-        triggered_at: null,
+        createdAt: Date.now(),
       },
     });
 
@@ -378,14 +375,14 @@ describe('AlertList', () => {
   });
 
   it('deletes an alert and updates the list', async () => {
-    const mockAlert = {
+    const mockAlert: Alert = {
       id: '1',
       symbol: 'BTCUSDT',
       type: 'price',
       condition: 'above',
       value: 50000,
-      notification_type: 'browser',
-      created_at: new Date().toISOString(),
+      notificationType: 'browser',
+      createdAt: Date.now(),
       triggered: false,
     };
 
@@ -409,14 +406,14 @@ describe('AlertList', () => {
   });
 
   it('handles error when deleting alert', async () => {
-    const mockAlert = {
+    const mockAlert: Alert = {
       id: '1',
       symbol: 'BTCUSDT',
       type: 'price',
       condition: 'above',
       value: 50000,
-      notification_type: 'browser',
-      created_at: new Date().toISOString(),
+      notificationType: 'browser',
+      createdAt: Date.now(),
       triggered: false,
     };
 

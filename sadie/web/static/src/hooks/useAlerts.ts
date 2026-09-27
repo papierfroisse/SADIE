@@ -1,27 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Alert, WebSocketMessage } from '../types';
+import { Alert } from '../types';
 import ApiService from '../services/api';
-import { useWebSocket } from '../context/WebSocketContext';
-
-interface UseAlertsProps {
-  symbol?: string;
-}
 
 interface UseAlertsReturn {
   alerts: Alert[];
   loading: boolean;
   error: string | null;
-  lastTriggered: Alert | null;
   createAlert: (alert: Omit<Alert, 'id'>) => Promise<void>;
   deleteAlert: (id: string) => Promise<void>;
 }
 
-export const useAlerts = ({ symbol }: UseAlertsProps = {}): UseAlertsReturn => {
+export const useAlerts = (): UseAlertsReturn => {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastTriggered, setLastTriggered] = useState<Alert | null>(null);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const api = new ApiService();
 
   const fetchAlerts = async () => {
@@ -72,57 +64,24 @@ export const useAlerts = ({ symbol }: UseAlertsProps = {}): UseAlertsReturn => {
     }
   };
 
-  const processWebSocketMessage = useCallback((message: WebSocketMessage) => {
-    try {
-      if (message.type === 'alert') {
-        // Le canal d'alerte transmet les champs de l'alerte à plat, dans la
-        // même enveloppe que `type` — alors que `WebSocketMessage` décrit une
-        // enveloppe générique (`type`, `symbol`, `data`). La conversion est
-        // donc explicite. À clarifier : aucun endpoint WebSocket d'alerte
-        // n'existe côté backend pour l'instant (voir FRONT-A-FAIRE.md).
-        const alertData = message as unknown as Alert;
-        setLastTriggered(alertData);
-        setAlerts(prev => prev.map(a => (a.id === alertData.id ? alertData : a)));
-      }
-    } catch (err) {
-      console.error('Error processing WebSocket message:', err);
-      setError('Failed to process alert message');
-    }
-  }, []);
-
   useEffect(() => {
     fetchAlerts();
   }, [fetchAlerts]);
 
-  useEffect(() => {
-    if (!symbol) return;
-
-    const connectAlertWebSocket = (alertId: string) => {
-      const websocket = api.createWebSocket(`alert/${alertId}`);
-      websocket.onmessage = (event: MessageEvent) => {
-        const message = JSON.parse(event.data) as WebSocketMessage;
-        processWebSocketMessage(message);
-      };
-      return websocket;
-    };
-
-    const activeAlerts = alerts.filter(alert => alert.triggered !== true);
-    const websockets = activeAlerts.map(alert => connectAlertWebSocket(alert.id));
-
-    return () => {
-      websockets.forEach(ws => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.close();
-        }
-      });
-    };
-  }, [symbol, alerts, processWebSocketMessage]);
+  // Le suivi temps réel des alertes n'est pas implémenté : le backend n'expose
+  // aucune route WebSocket d'alerte (`sadie/web/app.py` ne déclare que
+  // `@app.websocket("/ws/market")`). Le hook ouvrait une connexion par alerte
+  // sur `.../ws/market/alert/<id>`, une URL inexistante, et ne traitait le
+  // contenu que si `message.type === 'alert'` — une valeur que `Alert.type` ne
+  // peut jamais prendre : la branche ne pouvait pas s'exécuter. Ces appels ont
+  // été retirés au lieu d'être laissés en place en donnant l'illusion d'un flux
+  // actif. Les alertes viennent de l'API REST ; le canal devra être écrit côté
+  // serveur avant d'être rebranché ici (voir FRONT-A-FAIRE.md).
 
   return {
     alerts,
     loading,
     error,
-    lastTriggered,
     createAlert,
     deleteAlert,
   };

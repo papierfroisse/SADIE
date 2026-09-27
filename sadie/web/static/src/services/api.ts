@@ -11,6 +11,49 @@ export interface Trade {
   timestamp: number;
 };
 
+/**
+ * Payload d'alerte tel que l'API le renvoie (modèle `Alert` de
+ * `sadie/web/app.py`) : en snake_case, avec des horodatages en millisecondes.
+ *
+ * Le domaine du front (`types.ts`) est en camelCase. La traduction se fait ici,
+ * à la frontière, et nulle part ailleurs : sans elle, `alert.createdAt` restait
+ * `undefined` et l'affichage plantait (`RangeError: Invalid time value`), tandis
+ * qu'un envoi en camelCase vers un modèle snake_case était rejeté en 422.
+ */
+export interface AlerteApi {
+  id?: string | null;
+  symbol: string;
+  type: string;
+  condition: string;
+  value: number;
+  notification_type: string;
+  triggered?: boolean;
+  created_at?: number | null;
+  triggered_at?: number | null;
+}
+
+/** Traduit une alerte de l'API vers le domaine du front. */
+export const versAlerte = (donnees: AlerteApi): Alert => ({
+  id: donnees.id ?? '',
+  symbol: donnees.symbol,
+  type: donnees.type as Alert['type'],
+  condition: donnees.condition,
+  value: donnees.value,
+  notificationType: donnees.notification_type === 'email' ? 'email' : 'browser',
+  triggered: donnees.triggered ?? false,
+  createdAt: donnees.created_at ?? Date.now(),
+  ...(donnees.triggered_at != null ? { triggeredAt: donnees.triggered_at } : {}),
+});
+
+/** Traduit une alerte du domaine du front vers le payload attendu par l'API. */
+export const versAlerteApi = (alerte: Omit<Alert, 'id'> | Partial<Alert>) => ({
+  symbol: alerte.symbol,
+  type: alerte.type,
+  condition: alerte.condition,
+  value: alerte.value,
+  notification_type: alerte.notificationType,
+});
+
 export default class ApiService {
   private api: AxiosInstance;
   private wsBaseUrl: string;
@@ -68,8 +111,17 @@ export default class ApiService {
   }
 
   // Méthodes pour les WebSockets
-  createWebSocket(symbol: string): WebSocket {
-    const ws = new WebSocket(`${this.wsBaseUrl}/market/${symbol}`);
+  /**
+   * Ouvre le flux temps réel du marché.
+   *
+   * Le backend expose `@app.websocket("/ws/market")` avec deux paramètres de
+   * requête obligatoires (`exchange`, `symbols` séparés par des virgules) :
+   * l'ancienne URL `/ws/market/${symbol}` ne correspondait à aucune route, donc
+   * aucun flux de marché ne s'ouvrait jamais.
+   */
+  createWebSocket(symbol: string, exchange: string = 'binance'): WebSocket {
+    const parametres = new URLSearchParams({ exchange, symbols: symbol });
+    const ws = new WebSocket(`${this.wsBaseUrl}/market?${parametres.toString()}`);
 
     ws.onerror = error => {
       console.error('WebSocket error:', error);
@@ -81,8 +133,9 @@ export default class ApiService {
   // Méthodes pour les alertes
   async getAlerts(): Promise<ApiResponse<Alert[]>> {
     try {
-      const response = await this.api.get('/alerts');
-      return response.data;
+      const response = await this.api.get<ApiResponse<AlerteApi[]>>('/alerts');
+      const { success, data, error } = response.data;
+      return { success, error, data: data?.map(versAlerte) };
     } catch (error) {
       return { success: false, error: this.handleError(error) };
     }
@@ -90,17 +143,30 @@ export default class ApiService {
 
   async createAlert(alert: Omit<Alert, 'id'>): Promise<ApiResponse<Alert>> {
     try {
-      const response = await this.api.post('/alerts', alert);
-      return response.data;
+      const response = await this.api.post<ApiResponse<AlerteApi>>(
+        '/alerts',
+        versAlerteApi(alert)
+      );
+      const { success, data, error } = response.data;
+      return { success, error, data: data ? versAlerte(data) : undefined };
     } catch (error) {
       return { success: false, error: this.handleError(error) };
     }
   }
 
+  /**
+   * Note : l'API n'expose pas de route `PUT /api/alerts/{id}` (`sadie/web/app.py`
+   * ne déclare que GET, POST et DELETE). Cet appel renverra donc 404 tant que la
+   * route n'existe pas ; le payload est déjà traduit pour rester cohérent.
+   */
   async updateAlert(id: string, alert: Partial<Alert>): Promise<ApiResponse<Alert>> {
     try {
-      const response = await this.api.put(`/alerts/${id}`, alert);
-      return response.data;
+      const response = await this.api.put<ApiResponse<AlerteApi>>(
+        `/alerts/${id}`,
+        versAlerteApi(alert)
+      );
+      const { success, data, error } = response.data;
+      return { success, error, data: data ? versAlerte(data) : undefined };
     } catch (error) {
       return { success: false, error: this.handleError(error) };
     }

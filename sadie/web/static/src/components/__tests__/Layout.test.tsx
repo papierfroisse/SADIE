@@ -5,15 +5,18 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import { Layout } from '../Layout';
 import { WebSocketProvider } from '../../context/WebSocketContext';
 
-// Mock du contexte WebSocket
+// Mock du contexte WebSocket.
+// `useWebSocket` doit être un `jest.fn` : plusieurs tests appellent
+// `mockImplementation` dessus. Déclaré comme simple fonction fléchée, l'appel
+// levait « mockUseWebSocket.mockImplementation is not a function ».
 jest.mock('../../context/WebSocketContext', () => ({
   WebSocketProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  useWebSocket: () => ({
+  useWebSocket: jest.fn(() => ({
     connect: jest.fn(),
     disconnect: jest.fn(),
     isConnected: true,
     lastAlert: null,
-  }),
+  })),
 }));
 
 const theme = createTheme({
@@ -33,6 +36,22 @@ const renderWithProviders = (children: React.ReactNode) => {
 };
 
 describe('Layout Component', () => {
+  const mockUseWebSocket = jest.requireMock('../../context/WebSocketContext')
+    .useWebSocket as jest.Mock;
+
+  beforeEach(() => {
+    // Chaque test repart d'un contexte neutre : sans cette remise à zéro, le
+    // `mockImplementation` posé par un test (alerte déclenchée, déconnexion…)
+    // fuyait sur les tests suivants et faussait leurs assertions.
+    mockUseWebSocket.mockReset();
+    mockUseWebSocket.mockImplementation(() => ({
+      connect: jest.fn(),
+      disconnect: jest.fn(),
+      isConnected: true,
+      lastAlert: null,
+    }));
+  });
+
   it('renders the app title', () => {
     renderWithProviders(<Layout>Test Content</Layout>);
     expect(screen.getByText('SADIE Trading')).toBeInTheDocument();
