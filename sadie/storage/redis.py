@@ -14,7 +14,8 @@ class RedisStorage(BaseStorage):
         host: str = "localhost",
         port: int = 6379,
         db: int = 0,
-        password: Optional[str] = None
+        password: Optional[str] = None,
+        name: str = "redis"
     ):
         """Initialise la connexion Redis.
         
@@ -23,7 +24,10 @@ class RedisStorage(BaseStorage):
             port: Port Redis
             db: Base de données Redis
             password: Mot de passe Redis optionnel
+            name: Nom du stockage (transmis à BaseStorage ; placé en dernier
+                pour ne pas décaler les appels positionnels existants)
         """
+        super().__init__(name)
         self.redis_url = f"redis://{host}:{port}/{db}"
         self.password = password
         self.client = None

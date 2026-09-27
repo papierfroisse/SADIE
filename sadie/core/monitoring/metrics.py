@@ -260,7 +260,11 @@ class CollectorPerformanceMonitor:
             duration = datetime.utcnow() - self.start_time
             duration_seconds = duration.total_seconds()
             
-            # Throughput (trades par seconde)
+            # Throughput (trades par seconde). La valeur par defaut est
+            # indispensable : la variable est utilisee dans le journal plus bas,
+            # il faut donc qu'elle existe meme si aucune mesure n'est
+            # disponible (c'est ce qui provoquait un UnboundLocalError).
+            throughput = 0.0
             if duration_seconds > 0:
                 throughput = self.trades_processed / duration_seconds
                 await self.metrics_manager.add_metric(CollectorMetric(
@@ -273,6 +277,7 @@ class CollectorPerformanceMonitor:
                 ))
             
             # Latence moyenne
+            avg_latency = 0.0
             if self.processing_times:
                 avg_latency = statistics.mean(self.processing_times)
                 await self.metrics_manager.add_metric(CollectorMetric(

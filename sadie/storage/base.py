@@ -1,5 +1,6 @@
 """Module de base pour le stockage."""
 
+import logging
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any
 from datetime import datetime
@@ -7,6 +8,21 @@ from datetime import datetime
 class BaseStorage(ABC):
     """Classe de base pour le stockage des données."""
     
+    def __init__(self, name: str, logger: Optional[logging.Logger] = None):
+        """Initialise le stockage.
+
+        Args:
+            name: Nom du stockage (identifie l'instance dans les journaux)
+            logger: Logger optionnel ; celui du module est utilisé par défaut
+
+        Sans cette méthode, `super().__init__(name, logger)` appelé par les
+        sous-classes retombait sur `object.__init__()` et levait
+        `TypeError: object.__init__() takes exactly one argument` : le stockage
+        TimescaleDB était alors impossible à instancier.
+        """
+        self.name = name
+        self.logger = logger or logging.getLogger(__name__)
+
     @abstractmethod
     async def connect(self) -> None:
         """Établit la connexion au stockage."""

@@ -194,8 +194,12 @@ class TestExportEndpoints:
         assert response.headers["Content-Disposition"].startswith("attachment; filename=metrics-collector_test_collector")
         assert response.headers["Content-Disposition"].endswith(".csv")
         
-        # Vérification du contenu CSV
-        content = "".join([chunk for chunk in response.body_iterator])
+        # Vérification du contenu CSV (body_iterator est un générateur
+        # asynchrone depuis le passage à StreamingResponse)
+        chunks = []
+        async for chunk in response.body_iterator:
+            chunks.append(chunk)
+        content = "".join(chunks)
         csv_reader = csv.reader(io.StringIO(content))
         rows = list(csv_reader)
         
