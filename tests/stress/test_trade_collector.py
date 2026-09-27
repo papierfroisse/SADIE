@@ -8,8 +8,8 @@ from datetime import datetime, timedelta
 import logging
 from unittest.mock import patch, MagicMock, AsyncMock
 
-from SADIE.core.collectors.trade_collector import TradeCollector
-from SADIE.core.models.events import Exchange, Symbol, Timeframe
+from sadie.core.collectors.trade_collector import TradeCollector
+from sadie.core.models.events import Exchange, Symbol, Timeframe
 
 logger = logging.getLogger(__name__)
 

@@ -387,3 +387,13 @@ async def measure_execution_time(func, *args, **kwargs):
     result = await func(*args, **kwargs)
     execution_time = (time.time() - start_time) * 1000  # ms
     return result, execution_time 
+# ── Noms historiques conservés pour la compatibilité ────────────────────────
+# Ancien nom de la métrique, encore utilisé par les annotations de
+# sadie/core/monitoring/prometheus_exporter.py.
+PerformanceMetric = CollectorMetric
+
+# ── Instance globale attendue par la couche web ─────────────────────────────
+# sadie/web/routes/{alerts,export,dashboards}.py font
+# `await global_metrics_manager.get_metrics(...)`. Le gestionnaire est unique
+# pour le processus : les collecteurs y publient leurs métriques.
+global_metrics_manager = CollectorMetricsManager()

@@ -4,7 +4,7 @@ import asyncio
 import logging
 from datetime import timedelta
 
-from SADIE.core.cache import Cache, RedisCache
+from sadie.core.cache import Cache, RedisCache
 
 # Configuration du logging
 logging.basicConfig(

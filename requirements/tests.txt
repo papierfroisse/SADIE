@@ -1,0 +1,12 @@
+# Dépendances minimales pour lancer les tests unitaires de SADIE
+# (les collecteurs sont testés avec des mocks : ni ta-lib ni redis au programme)
+-r base.txt
+
+# Tests
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Clients des collecteurs testés
+python-binance>=1.0.19
+tweepy>=4.14.0
+textblob>=0.18.0

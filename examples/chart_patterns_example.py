@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from SADIE.analysis.chart_patterns import ChartPatternAnalyzer, PatternType, ChartPattern
+from sadie.analysis.chart_patterns import ChartPatternAnalyzer, PatternType, ChartPattern
 
 def create_sample_data(days: int = 365) -> pd.DataFrame:
     """Génère des données de test avec des figures chartistes."""

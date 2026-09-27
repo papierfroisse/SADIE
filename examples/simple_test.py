@@ -4,8 +4,8 @@ import asyncio
 import logging
 from datetime import datetime
 
-from SADIE.core.streaming import StreamEvent, StreamManager
-from SADIE.core.streaming.handlers import LoggingHandler
+from sadie.core.streaming import StreamEvent, StreamManager
+from sadie.core.streaming.handlers import LoggingHandler
 
 # Configuration du logging
 logging.basicConfig(

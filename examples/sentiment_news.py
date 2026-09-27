@@ -5,7 +5,7 @@ import json
 import os
 from datetime import datetime
 
-from SADIE.data.sentiment import SentimentCollector, SentimentSource, SentimentAnalyzer
+from sadie.data.sentiment import SentimentCollector, SentimentSource, SentimentAnalyzer
 
 async def main():
     """Point d'entrée principal."""

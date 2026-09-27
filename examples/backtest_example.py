@@ -4,7 +4,7 @@ import asyncio
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta, timezone
-from SADIE.analysis.backtesting import Strategy, Backtester
+from sadie.analysis.backtesting import Strategy, Backtester
 
 class MovingAverageCrossStrategy(Strategy):
     """Stratégie basée sur le croisement de moyennes mobiles."""

@@ -8,8 +8,8 @@ import os
 from datetime import datetime
 from random import uniform
 
-from SADIE.data.collectors.trades import TradeCollector
-from SADIE.core.monitoring import get_logger
+from sadie.data.collectors.trades import TradeCollector
+from sadie.core.monitoring import get_logger
 
 logger = get_logger(__name__)
 
