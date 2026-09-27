@@ -166,6 +166,72 @@ asynchrone) ; `permissions: contents: write` pour la publication `gh-pages` ;
 `fail_ci_if_error: false` — l'envoi reste « token required » sans jeton, mais
 n'échoue plus la chaîne.
 
+## Sécurité de l'authentification : une faille de contrôle d'accès corrigée
+
+Audit du 27/09/2026 sur `sadie/web/auth.py`.
+
+### Le contrôle de portée (scope) était inopérant — vérifié, puis corrigé
+
+Les dépendances de rôle déclaraient la portée exigée comme **valeur par défaut** :
+
+```python
+async def get_admin_user(
+    security_scopes: SecurityScopes = SecurityScopes(["admin"]),   # inopérant
+    current_user: User = Depends(get_current_user)
+):
+```
+
+Or c'est uniquement `Security(get_current_user, scopes=[...])` qui inscrit la
+portée dans la chaîne de dépendances, laquelle est ensuite comparée par
+`get_current_user` aux portées du jeton. Avec un simple paramètre par défaut,
+aucune vérification n'avait lieu.
+
+**Preuve**, avant correction (`tools/verifications/verifier-scopes-fastapi.py`,
+jeton signé ne portant que `read:data`) :
+
+```
+admin-only   jeton SANS scope admin    -> LAISSE PASSER   (HTTP 200)
+write-only   jeton SANS write:data     -> LAISSE PASSER   (HTTP 200)
+```
+
+Les routes concernées n'étaient pas théoriques : `metrics.py:88` (« Accès admin
+uniquement »), `alerts.py:65`, `:144`, `:198`, plus les routes de
+`app_auth.py`. Un compte « analyst » (portée `read:data` seule) atteignait donc
+les points d'entrée réservés à l'administration.
+
+**Correction** : `Security(get_current_user, scopes=["admin"])` (idem pour
+`read:data` et `write:data`). Le point d'entrée de connexion émet déjà les
+portées du compte (`data={"sub": …, "scopes": user.scopes}`), donc aucun client
+correct n'est impacté.
+
+**Preuve après correction** :
+
+```
+admin-only   jeton SANS scope admin    -> refuse (403)
+admin-only   jeton AVEC admin          -> LAISSE PASSER   (HTTP 200)
+write-only   jeton SANS write:data     -> refuse (403)
+```
+
+Suite de tests inchangée : 37 réussis, 3 xfailed.
+
+### Clé de signature par défaut (avertissement ajouté, décision à prendre)
+
+`sadie/web/auth.py` retombe sur une clé **publique** (présente dans le dépôt)
+quand `SECRET_KEY` n'est pas définie : quiconque lit le code peut forger un jeton
+valide pour toute instance mal configurée. Un avertissement est désormais émis au
+chargement du module ; reste à décider si l'application doit **refuser de
+démarrer** en production sans `SECRET_KEY` (voir « Points en suspens »).
+
+### Comptes de démonstration câblés sur l'authentification réelle
+
+`sadie/web/auth.py:60-85` définit trois comptes en mémoire
+(`admin`/`adminpassword`, `analyst`/`analystpassword`,
+`operator`/`operatorpassword`) dont les mots de passe sont hachés **à l'import**,
+et `get_current_user` s'appuie dessus (`get_user(fake_users_db, …)`). Dans un
+dépôt **public**, ces identifiants sont connus de tous. À remplacer par un
+stockage d'utilisateurs réel, ou à charger depuis l'environnement en refusant de
+démarrer si rien n'est configuré.
+
 ## Échecs restants : tests désynchronisés du code
 
 > **Section historique** — conservée pour mémoire. Elle décrit l'état *avant*

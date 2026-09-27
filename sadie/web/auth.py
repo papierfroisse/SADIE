@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set, Union
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -15,7 +15,20 @@ from pydantic import BaseModel, ValidationError
 logger = logging.getLogger(__name__)
 
 # Configuration de la sécurité
+#
+# AVERTISSEMENT : cette cle par defaut est publique (elle figure dans le depot).
+# Quiconque la connait peut forger un jeton valide pour toute instance qui ne
+# definit pas SECRET_KEY. Elle n'existe que pour permettre le demarrage en
+# developpement ; en production, SECRET_KEY doit etre fournie par
+# l'environnement (valeur aleatoire : `python -c "import secrets;
+# print(secrets.token_urlsafe(48))"`).
 SECRET_KEY = os.getenv("SECRET_KEY", "d1ff1cult_s3cr3t_k3y_f0r_d3v3l0pm3nt")
+if SECRET_KEY == "d1ff1cult_s3cr3t_k3y_f0r_d3v3l0pm3nt":
+    logger.warning(
+        "SECRET_KEY non definie : la cle de developpement publique du depot est "
+        "utilisee. Definir SECRET_KEY avant tout deploiement (les jetons emis "
+        "seraient falsifiables)."
+    )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -172,23 +185,27 @@ async def get_current_active_user(
     return current_user
 
 # Dépendances pour les différents niveaux d'accès
+#
+# Le contrôle de portée doit passer par `Security(..., scopes=[...])` : c'est ce
+# mécanisme (et lui seul) qui transmet les portées exigées à `get_current_user`,
+# lequel les compare ensuite à celles du jeton. Déclarer un paramètre
+# `security_scopes: SecurityScopes = SecurityScopes([...])` n'inscrit RIEN dans
+# la chaîne de dépendances : la vérification était donc inopérante, et un jeton
+# ne portant que « read:data » accédait aux routes marquées « admin uniquement ».
 async def get_read_data_user(
-    security_scopes: SecurityScopes = SecurityScopes(["read:data"]),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Security(get_current_user, scopes=["read:data"])
 ) -> User:
     """Dépendance pour l'accès en lecture."""
     return current_user
 
 async def get_write_data_user(
-    security_scopes: SecurityScopes = SecurityScopes(["write:data"]),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Security(get_current_user, scopes=["write:data"])
 ) -> User:
     """Dépendance pour l'accès en écriture."""
     return current_user
 
 async def get_admin_user(
-    security_scopes: SecurityScopes = SecurityScopes(["admin"]),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Security(get_current_user, scopes=["admin"])
 ) -> User:
     """Dépendance pour l'accès administrateur."""
     return current_user 

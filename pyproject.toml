@@ -99,7 +99,8 @@ docs = [
 
 [tool.black]
 line-length = 88
-target-version = ["py38"]
+# Aligne sur `requires-python = ">=3.10"` (etait py38).
+target-version = ["py310"]
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -145,7 +146,8 @@ per-file-ignores = [
 ]
 
 [tool.mypy]
-python_version = "3.8"
+# Aligne sur `requires-python = ">=3.10"` (etait 3.8).
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
@@ -168,9 +170,8 @@ module = [
 ]
 ignore_missing_imports = true
 
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "--cov=sadie --cov-report=term-missing"
-testpaths = [
-    "tests",
-] 
+# La configuration pytest vit dans pytest.ini (fichier prioritaire). Elle
+# figurait AUSSI ici, et pytest l'ignorait en silence : « WARNING: ignoring
+# pytest config in pyproject.toml! ». L'`addopts = "--cov=..."` de ce bloc n'a
+# donc jamais été appliqué, ce qui explique que la couverture ne soit pas
+# mesurée lors des exécutions locales. Un seul endroit fait foi : pytest.ini. 
