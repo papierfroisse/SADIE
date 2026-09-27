@@ -142,6 +142,15 @@ Corrections complémentaires :
 `pytest` : **37 réussis, 3 xfailed** — identique en local et sur les trois
 versions de Python de la CI, y compris avec le service TimescaleDB.
 
+La publication a été vérifiée en ligne après activation de GitHub Pages (source :
+branche `gh-pages`, publication réversible depuis les réglages du dépôt) :
+
+| Page | Résultat |
+|---|---|
+| `https://papierfroisse.github.io/SADIE/` | HTTP 200 (27,7 Ko) |
+| `.../api/analysis/` | HTTP 200 (228 Ko — référence API rendue par mkdocstrings) |
+| `.../user-guide/installation/` | HTTP 200 (39,6 Ko) |
+
 Deux causes supplémentaires, découvertes une fois l'installation franchie :
 
 | Cause | Fichier | Effet |
