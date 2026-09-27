@@ -4,6 +4,7 @@ import logging
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Dict, Optional, List, Any, Union, Literal
 import os
@@ -77,6 +78,15 @@ class ErrorResponse(BaseModel):
     error: str
     code: int
     timestamp: int = Field(default_factory=lambda: int(time.time() * 1000))
+
+# Modèle de la liste des symboles disponibles.
+# Il manquait : `/api/market/symbols` déclarait `Union[Dict[str, List[str]],
+# ErrorResponse]` alors que la fonction renvoie {"success": ..., "data": {...}}.
+# Aucune des deux branches ne validait cette forme : FastAPI levait une erreur
+# de validation de réponse et l'endpoint répondait 500 en permanence.
+class SymbolsResponse(BaseModel):
+    success: bool = True
+    data: List[str] = []
 
 # Modèle pour l'inscription d'un nouvel utilisateur
 class UserRegister(BaseModel):
@@ -298,10 +308,11 @@ async def shutdown_event():
     
     logger.info("Application arrêtée")
 
-# Configuration du dossier static pour le frontend
-static_dir = os.path.join(os.path.dirname(__file__), "static")
-if os.path.exists(static_dir):
-    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+# NOTE : le montage des fichiers statiques se trouve en FIN de fichier.
+# Un `app.mount("/")` capte toutes les requêtes ; placé ici, il masquait les
+# 9 routes déclarées plus bas (market/trades, market/klines, market/symbols,
+# user/chart-config, alerts x3, register, endpoints), qui répondaient 404 alors
+# qu'elles figuraient bien dans le schéma OpenAPI.
 
 # Nouvelle route pour accéder aux données de trades directement
 @app.get("/api/market/{exchange}/{symbol}/trades", response_model=Union[List[TradeData], ErrorResponse])
@@ -440,7 +451,7 @@ async def get_klines(
         return {"error": f"Erreur lors de la récupération des chandeliers: {str(e)}"}
 
 # Route pour obtenir la liste des symboles disponibles
-@app.get("/api/market/symbols", response_model=Union[Dict[str, List[str]], ErrorResponse])
+@app.get("/api/market/symbols", response_model=SymbolsResponse)
 async def get_available_symbols(exchange: str = Query("binance")):
     """Récupère la liste des symboles disponibles pour un exchange donné.
     
@@ -680,4 +691,32 @@ async def list_endpoints():
         {"path": "/api/users/me", "method": "GET", "description": "Récupérer les informations de l'utilisateur connecté", "requires_auth": True},
         # ... autres endpoints ...
     ]
-    return endpoints 
+    return endpoints
+
+
+# ---------------------------------------------------------------------------
+# Frontend statique — DOIT rester en fin de fichier
+#
+# Un `app.mount("/")` (StaticFiles) capte toutes les requêtes : Starlette
+# s'arrête au premier motif qui correspond et ne retombe pas sur les routes
+# déclarées ensuite. Placé plus haut dans ce module, il masquait 9 routes /api
+# (market/trades, market/klines, market/symbols, user/chart-config, alerts x3,
+# register, endpoints) qui répondaient 404 tout en figurant dans le schéma
+# OpenAPI.
+#
+# On sert en priorité le dossier `build/`, résultat de `npm run build` dans
+# sadie/web/static. À défaut, on ne sert QUE la page d'accueil : monter le
+# dossier entier exposait le code source du frontend (src/, scripts/,
+# package.json, Dockerfile, docs...) sur l'API.
+# ---------------------------------------------------------------------------
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+build_dir = os.path.join(static_dir, "build")
+
+if os.path.isdir(build_dir):
+    app.mount("/", StaticFiles(directory=build_dir, html=True), name="frontend")
+elif os.path.isfile(os.path.join(static_dir, "index.html")):
+
+    @app.get("/", include_in_schema=False)
+    async def page_accueil():
+        """Page d'accueil provisoire, l'interface React n'étant pas compilée."""
+        return FileResponse(os.path.join(static_dir, "index.html")) 
