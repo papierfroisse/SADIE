@@ -38,12 +38,13 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          setup_commands:
-            - import sys
-            - sys.path.append(".")
-          selection:
+          # `paths` remplace l'ancien `setup_commands` (supprime dans
+          # mkdocstrings-python 2) : le projet n'etant pas installe dans le
+          # workflow de documentation, il doit etre importable depuis la racine.
+          paths:
+            - .
+          options:
             members: true
-          rendering:
             show_source: true
             show_if_no_docstring: true
 
