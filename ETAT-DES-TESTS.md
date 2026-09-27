@@ -128,6 +128,35 @@ Corrections complémentaires :
 - `tools/normaliser_encodage.py` couvre maintenant **tous les fichiers texte**
   (`.yml`, `.md`, `.json`, `.sh`…), et plus seulement les `.py`.
 
+### Résultat : les trois chaînes sont vertes
+
+État au 27/09/2026, sur le commit `d1f0fef` :
+
+| Workflow | Avant | Après |
+|---|---|---|
+| `SADIE CI/CD` (`main.yml`) | rouge depuis toujours (installation) | **vert** : `test (3.10)`, `test (3.11)`, `lint`, `security` |
+| `CI/CD` (`ci.yml`) | rouge depuis toujours (installation) | **vert** : `test (3.10)`, `test (3.11)`, `test (3.12)`, `deploy-docs` |
+| `Documentation` (`docs.yml`) | rouge (`mkdocstrings`, puis droits) | **vert** : construction **et publication** sur `gh-pages` |
+| `Analyse de Sécurité` (`security.yml`) | **n'existait pas** (fichier UTF-16 illisible) | **enregistré**, vert, et rejoué chaque nuit |
+
+`pytest` : **37 réussis, 3 xfailed** — identique en local et sur les trois
+versions de Python de la CI, y compris avec le service TimescaleDB.
+
+Deux causes supplémentaires, découvertes une fois l'installation franchie :
+
+| Cause | Fichier | Effet |
+|---|---|---|
+| `pyproject.toml` ne déclarait que 13 dépendances alors que le code en importe davantage (`krakenex`, `pykrakenapi`, `python-dotenv`, `python-jose`, `pyjwt`, `passlib`, `matplotlib`, `joblib`, `psutil`, `httpx`…) ; comme `sadie/__init__.py` importe `core`, `storage`, `analysis` et `web`, **tout import du paquet échouait** | `pyproject.toml` | `pip install -e .` installait trop peu → `ModuleNotFoundError: No module named 'krakenex'` et collecte pytest interrompue |
+| `sadie/main.py` faisait `from web.app import app` (chemin valable seulement depuis la racine du dépôt) | `sadie/main.py` | import invalide dès que le paquet est installé |
+
+Autres corrections de chaîne : `pytest-cov` ajouté à `requirements/tests.txt`
+(sans lui, `pytest` refusait `--cov`) ; URL de test passée en
+`postgresql+asyncpg://` (le pilote synchrone ne peut pas créer un moteur
+asynchrone) ; `permissions: contents: write` pour la publication `gh-pages` ;
+`bandit -r sadie/` (ancien chemin) ; action Codecov en v4 avec
+`fail_ci_if_error: false` — l'envoi reste « token required » sans jeton, mais
+n'échoue plus la chaîne.
+
 ## Échecs restants : tests désynchronisés du code
 
 > **Section historique** — conservée pour mémoire. Elle décrit l'état *avant*
