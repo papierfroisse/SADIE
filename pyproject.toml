@@ -72,7 +72,7 @@ debug = [
 ]
 docs = [
     "mkdocs>=1.5.3",
-    "mkdocs-material>=9.5.2",
+    "mkdocs-material>=9.7.7",
     "mkdocstrings>=0.24.0"
 ]
 
