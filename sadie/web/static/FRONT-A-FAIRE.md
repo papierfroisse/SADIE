@@ -138,3 +138,19 @@ Vérification faite après compilation locale (`TestClient`) : `GET /` renvoie 2
 avec la racine React (pas le placeholder), `/static/js/main.<hash>.js` renvoie
 200, et `/package.json`, `/src/index.tsx`, `/Dockerfile` renvoient 404 — la fuite
 de l'ancien montage statique (qui exposait les sources) est bien fermée.
+
+### 6. Dépendances vulnérables (Dependabot, relevé du 27/09/2026)
+
+- Front vivant (`sadie/web/static`) : **120 alertes ouvertes** — 4 critiques,
+  54 hautes, 53 moyennes, 9 basses.
+- **axios concentrait à lui seul 30 alertes**, dont des critiques remontées par
+  ses dépendances (`form-data`, `qs`). Il est monté de 1.7.9 à 1.20.0 dans le
+  commit `ff3a9cf`, sans effet sur les types, la compilation ni les tests.
+- Les autres critiques : `shell-quote`, `websocket-driver` (chaîne d'outils de
+  `react-scripts` 5, donc dépendances de développement).
+- Le reste vient de cette même chaîne d'outils : `minimatch` (9), `node-forge`
+  (7), `webpack-dev-server` (6), `postcss` (5), `svgo` (4), `ws` (3). Les traiter
+  suppose de sortir de `react-scripts` (Vite) ou de figer des `overrides`.
+- **157 des 278 alertes du dépôt** viennent de `old/SADIE_backup/`, une copie
+  morte du front : leur suppression est un gain immédiat qui ne touche pas le
+  code vivant.
