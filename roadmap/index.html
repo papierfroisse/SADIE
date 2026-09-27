@@ -1,0 +1,1545 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Advanced Trading Data Collection and Analysis System">
+      
+      
+        <meta name="author" content="Your Name">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Roadmap SADIE - sadie</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#roadmap-sadie" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="sadie" class="md-header__button md-logo" aria-label="sadie" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            sadie
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Roadmap SADIE
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/yourusername/sadie" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sadie
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="sadie" class="md-nav__button md-logo" aria-label="sadie" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    sadie
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/yourusername/sadie" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sadie
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accueil
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Modules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../collectors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Collecteurs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stockage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyse Technique
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Métriques
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Surveillance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exemples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Référence API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Référence API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vue d'ensemble
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Métriques
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#version-actuelle-021" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version actuelle : 0.2.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Version actuelle : 0.2.1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fonctionnalites-implementees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fonctionnalités implémentées ✅
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fonctionnalités implémentées ✅">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mvp-v010" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MVP (v0.1.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alertes-v020" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alertes (v0.2.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation-v021" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation (v0.2.1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#en-cours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        En cours 🚧
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="En cours 🚧">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authentification-v030" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentification (v0.3.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#indicateurs-techniques-v040" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Indicateurs techniques (v0.4.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#planifie" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planifié 📅
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Planifié 📅">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q2-2024" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q2 2024
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Q2 2024">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance-v050" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance (v0.5.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-exchange-v060" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-exchange (v0.6.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q3-2024" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q3 2024
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Q3 2024">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#machine-learning-v070" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Machine Learning (v0.7.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interface-mobile-v080" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface mobile (v0.8.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q4-2024" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q4 2024
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Q4 2024">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api-publique-v090" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API publique (v0.9.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#marketplace-v100" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Marketplace (v1.0.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#futur" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Futur 🔮
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Futur 🔮">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2025" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2025
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2025">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#intelligence-artificielle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intelligence artificielle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#social-trading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Social trading
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyse-avancee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyse avancée
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notes-de-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes de version
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Notes de version">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v021-actuelle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.2.1 (Actuelle)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v020" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.2.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v010" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.1.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#priorites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Priorités
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metriques-de-succes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Métriques de succès
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Métriques de succès">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Techniques
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#produit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Produit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ressources-necessaires" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ressources nécessaires
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ressources nécessaires">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#equipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Équipe
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outils" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outils
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#risques" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risques
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Risques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#techniques_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Techniques
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#business" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Business
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mitigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mitigation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mitigation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#techniques_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Techniques
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#business_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Business
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="roadmap-sadie">Roadmap SADIE<a class="headerlink" href="#roadmap-sadie" title="Permanent link">&para;</a></h1>
+<h2 id="version-actuelle-021">Version actuelle : 0.2.1<a class="headerlink" href="#version-actuelle-021" title="Permanent link">&para;</a></h2>
+<h3 id="fonctionnalites-implementees">Fonctionnalités implémentées ✅<a class="headerlink" href="#fonctionnalites-implementees" title="Permanent link">&para;</a></h3>
+<h4 id="mvp-v010">MVP (v0.1.0)<a class="headerlink" href="#mvp-v010" title="Permanent link">&para;</a></h4>
+<ul>
+<li>[x] Collecte des données en temps réel</li>
+<li>[x] Stockage Redis</li>
+<li>[x] API REST basique</li>
+<li>[x] Interface utilisateur minimale</li>
+</ul>
+<h4 id="alertes-v020">Alertes (v0.2.0)<a class="headerlink" href="#alertes-v020" title="Permanent link">&para;</a></h4>
+<ul>
+<li>[x] Système d'alertes sur les prix</li>
+<li>[x] Notifications WebSocket</li>
+<li>[x] Interface de gestion des alertes</li>
+<li>[x] Tests unitaires</li>
+</ul>
+<h4 id="documentation-v021">Documentation (v0.2.1)<a class="headerlink" href="#documentation-v021" title="Permanent link">&para;</a></h4>
+<ul>
+<li>[x] Documentation OpenAPI</li>
+<li>[x] Documentation WebSocket</li>
+<li>[x] Guide de contribution</li>
+<li>[x] Architecture détaillée</li>
+</ul>
+<h3 id="en-cours">En cours 🚧<a class="headerlink" href="#en-cours" title="Permanent link">&para;</a></h3>
+<h4 id="authentification-v030">Authentification (v0.3.0)<a class="headerlink" href="#authentification-v030" title="Permanent link">&para;</a></h4>
+<ul>
+<li>[ ] Système d'authentification JWT</li>
+<li>[ ] Gestion des rôles (RBAC)</li>
+<li>[ ] Sécurisation des WebSockets</li>
+<li>[ ] Tests d'intégration</li>
+</ul>
+<h4 id="indicateurs-techniques-v040">Indicateurs techniques (v0.4.0)<a class="headerlink" href="#indicateurs-techniques-v040" title="Permanent link">&para;</a></h4>
+<ul>
+<li>[ ] Implémentation RSI</li>
+<li>[ ] Implémentation MACD</li>
+<li>[ ] Implémentation Bollinger</li>
+<li>[ ] Backtesting basique</li>
+</ul>
+<h3 id="planifie">Planifié 📅<a class="headerlink" href="#planifie" title="Permanent link">&para;</a></h3>
+<h4 id="q2-2024">Q2 2024<a class="headerlink" href="#q2-2024" title="Permanent link">&para;</a></h4>
+<h5 id="performance-v050">Performance (v0.5.0)<a class="headerlink" href="#performance-v050" title="Permanent link">&para;</a></h5>
+<ul>
+<li>[ ] Optimisation des requêtes</li>
+<li>[ ] Cache distribué</li>
+<li>[ ] Compression WebSocket</li>
+<li>[ ] Tests de charge</li>
+</ul>
+<h5 id="multi-exchange-v060">Multi-exchange (v0.6.0)<a class="headerlink" href="#multi-exchange-v060" title="Permanent link">&para;</a></h5>
+<ul>
+<li>[ ] Support Binance</li>
+<li>[ ] Support Kraken</li>
+<li>[ ] Support Coinbase</li>
+<li>[ ] Agrégation des données</li>
+</ul>
+<h4 id="q3-2024">Q3 2024<a class="headerlink" href="#q3-2024" title="Permanent link">&para;</a></h4>
+<h5 id="machine-learning-v070">Machine Learning (v0.7.0)<a class="headerlink" href="#machine-learning-v070" title="Permanent link">&para;</a></h5>
+<ul>
+<li>[ ] Détection de patterns</li>
+<li>[ ] Prédiction de tendances</li>
+<li>[ ] Analyse de sentiment</li>
+<li>[ ] Backtesting avancé</li>
+</ul>
+<h5 id="interface-mobile-v080">Interface mobile (v0.8.0)<a class="headerlink" href="#interface-mobile-v080" title="Permanent link">&para;</a></h5>
+<ul>
+<li>[ ] Application React Native</li>
+<li>[ ] Notifications push</li>
+<li>[ ] Mode hors ligne</li>
+<li>[ ] Synchronisation</li>
+</ul>
+<h4 id="q4-2024">Q4 2024<a class="headerlink" href="#q4-2024" title="Permanent link">&para;</a></h4>
+<h5 id="api-publique-v090">API publique (v0.9.0)<a class="headerlink" href="#api-publique-v090" title="Permanent link">&para;</a></h5>
+<ul>
+<li>[ ] Documentation complète</li>
+<li>[ ] SDK client</li>
+<li>[ ] Rate limiting</li>
+<li>[ ] Monitoring</li>
+</ul>
+<h5 id="marketplace-v100">Marketplace (v1.0.0)<a class="headerlink" href="#marketplace-v100" title="Permanent link">&para;</a></h5>
+<ul>
+<li>[ ] Partage d'indicateurs</li>
+<li>[ ] Système de plugins</li>
+<li>[ ] Marketplace d'alertes</li>
+<li>[ ] Système de paiement</li>
+</ul>
+<h3 id="futur">Futur 🔮<a class="headerlink" href="#futur" title="Permanent link">&para;</a></h3>
+<h4 id="2025">2025<a class="headerlink" href="#2025" title="Permanent link">&para;</a></h4>
+<h5 id="intelligence-artificielle">Intelligence artificielle<a class="headerlink" href="#intelligence-artificielle" title="Permanent link">&para;</a></h5>
+<ul>
+<li>[ ] Deep learning</li>
+<li>[ ] NLP pour l'analyse</li>
+<li>[ ] Apprentissage par renforcement</li>
+<li>[ ] Optimisation de portfolio</li>
+</ul>
+<h5 id="social-trading">Social trading<a class="headerlink" href="#social-trading" title="Permanent link">&para;</a></h5>
+<ul>
+<li>[ ] Profils utilisateurs</li>
+<li>[ ] Partage de stratégies</li>
+<li>[ ] Copy trading</li>
+<li>[ ] Classements</li>
+</ul>
+<h5 id="analyse-avancee">Analyse avancée<a class="headerlink" href="#analyse-avancee" title="Permanent link">&para;</a></h5>
+<ul>
+<li>[ ] Corrélations multi-actifs</li>
+<li>[ ] Risk management</li>
+<li>[ ] Optimisation fiscale</li>
+<li>[ ] Reporting automatisé</li>
+</ul>
+<h3 id="notes-de-version">Notes de version<a class="headerlink" href="#notes-de-version" title="Permanent link">&para;</a></h3>
+<h4 id="v021-actuelle">v0.2.1 (Actuelle)<a class="headerlink" href="#v021-actuelle" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Documentation complète de l'API</li>
+<li>Guide de contribution</li>
+<li>Architecture détaillée</li>
+<li>Tests WebSocket</li>
+</ul>
+<h4 id="v020">v0.2.0<a class="headerlink" href="#v020" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Système d'alertes</li>
+<li>Notifications temps réel</li>
+<li>Interface de gestion</li>
+<li>Tests unitaires</li>
+</ul>
+<h4 id="v010">v0.1.0<a class="headerlink" href="#v010" title="Permanent link">&para;</a></h4>
+<ul>
+<li>MVP fonctionnel</li>
+<li>Données temps réel</li>
+<li>API REST basique</li>
+<li>Interface minimale</li>
+</ul>
+<h3 id="priorites">Priorités<a class="headerlink" href="#priorites" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Sécurité</li>
+<li>Authentification</li>
+<li>Autorisation</li>
+<li>
+<p>Protection des données</p>
+</li>
+<li>
+<p>Performance</p>
+</li>
+<li>Optimisation</li>
+<li>Mise à l'échelle</li>
+<li>
+<p>Monitoring</p>
+</li>
+<li>
+<p>Fonctionnalités</p>
+</li>
+<li>Indicateurs</li>
+<li>Multi-exchange</li>
+<li>Machine learning</li>
+</ol>
+<h3 id="metriques-de-succes">Métriques de succès<a class="headerlink" href="#metriques-de-succes" title="Permanent link">&para;</a></h3>
+<h4 id="techniques">Techniques<a class="headerlink" href="#techniques" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Couverture de tests &gt; 80%</li>
+<li>Temps de réponse &lt; 100ms</li>
+<li>Disponibilité &gt; 99.9%</li>
+<li>Scalabilité &gt; 1000 utilisateurs</li>
+</ul>
+<h4 id="produit">Produit<a class="headerlink" href="#produit" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Satisfaction utilisateur &gt; 4.5/5</li>
+<li>Rétention &gt; 80%</li>
+<li>Croissance mensuelle &gt; 20%</li>
+<li>Bugs critiques &lt; 1/mois</li>
+</ul>
+<h3 id="ressources-necessaires">Ressources nécessaires<a class="headerlink" href="#ressources-necessaires" title="Permanent link">&para;</a></h3>
+<h4 id="infrastructure">Infrastructure<a class="headerlink" href="#infrastructure" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Serveurs de production</li>
+<li>CDN</li>
+<li>Base de données</li>
+<li>Cache distribué</li>
+</ul>
+<h4 id="equipe">Équipe<a class="headerlink" href="#equipe" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Développeurs backend</li>
+<li>Développeurs frontend</li>
+<li>DevOps</li>
+<li>Data scientists</li>
+</ul>
+<h4 id="outils">Outils<a class="headerlink" href="#outils" title="Permanent link">&para;</a></h4>
+<ul>
+<li>CI/CD</li>
+<li>Monitoring</li>
+<li>Analytics</li>
+<li>Support client</li>
+</ul>
+<h3 id="risques">Risques<a class="headerlink" href="#risques" title="Permanent link">&para;</a></h3>
+<h4 id="techniques_1">Techniques<a class="headerlink" href="#techniques_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Performance sous charge</li>
+<li>Sécurité des données</li>
+<li>Fiabilité des exchanges</li>
+<li>Complexité du ML</li>
+</ul>
+<h4 id="business">Business<a class="headerlink" href="#business" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Régulation crypto</li>
+<li>Concurrence</li>
+<li>Adoption utilisateurs</li>
+<li>Monétisation</li>
+</ul>
+<h3 id="mitigation">Mitigation<a class="headerlink" href="#mitigation" title="Permanent link">&para;</a></h3>
+<h4 id="techniques_2">Techniques<a class="headerlink" href="#techniques_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Tests de charge réguliers</li>
+<li>Audits de sécurité</li>
+<li>Redondance des sources</li>
+<li>MVP pour le ML</li>
+</ul>
+<h4 id="business_1">Business<a class="headerlink" href="#business_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Veille réglementaire</li>
+<li>Différenciation produit</li>
+<li>UX optimisée</li>
+<li>Modèle freemium </li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

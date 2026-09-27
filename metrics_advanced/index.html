@@ -1,0 +1,1158 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Advanced Trading Data Collection and Analysis System">
+      
+      
+        <meta name="author" content="Your Name">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Fonctionnalités Avancées du Système de Métriques - sadie</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#fonctionnalites-avancees-du-systeme-de-metriques" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="sadie" class="md-header__button md-logo" aria-label="sadie" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            sadie
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Fonctionnalités Avancées du Système de Métriques
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/yourusername/sadie" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sadie
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="sadie" class="md-nav__button md-logo" aria-label="sadie" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    sadie
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/yourusername/sadie" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sadie
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accueil
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Modules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../collectors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Collecteurs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stockage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyse Technique
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Métriques
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Surveillance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exemples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Référence API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Référence API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vue d'ensemble
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analyse
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Métriques
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-des-matieres" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table des matières
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alertes-automatiques" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alertes Automatiques
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Alertes Automatiques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creation-dune-alerte" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Création d'une alerte
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gestion-des-alertes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gestion des alertes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-rest-pour-les-alertes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API REST pour les alertes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tableaux-de-bord-personnalisables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tableaux de Bord Personnalisables
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tableaux de Bord Personnalisables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creation-dun-tableau-de-bord" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Création d'un tableau de bord
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#types-de-widgets-disponibles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Types de widgets disponibles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#personnalisation-des-widgets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Personnalisation des widgets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gestion-des-tableaux-de-bord" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gestion des tableaux de bord
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exportation-des-donnees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exportation des Données
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Exportation des Données">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exportation-via-linterface-utilisateur" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exportation via l'interface utilisateur
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-rest-pour-lexportation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API REST pour l'exportation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-prometheusgrafana" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Intégration Prometheus/Grafana
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Intégration Prometheus/Grafana">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-de-lexportateur-prometheus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration de l'exportateur Prometheus
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metriques-exposees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Métriques exposées
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-de-prometheus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration de Prometheus
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creation-dun-tableau-de-bord-grafana" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Création d'un tableau de bord Grafana
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-rest-pour-prometheus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API REST pour Prometheus
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="fonctionnalites-avancees-du-systeme-de-metriques">Fonctionnalités Avancées du Système de Métriques<a class="headerlink" href="#fonctionnalites-avancees-du-systeme-de-metriques" title="Permanent link">&para;</a></h1>
+<p>Ce document décrit les fonctionnalités avancées du système de métriques de SADIE, incluant les alertes automatiques, les tableaux de bord personnalisables, l'exportation des données et l'intégration avec Prometheus/Grafana.</p>
+<h2 id="table-des-matieres">Table des matières<a class="headerlink" href="#table-des-matieres" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#alertes-automatiques">Alertes Automatiques</a></li>
+<li><a href="#tableaux-de-bord-personnalisables">Tableaux de Bord Personnalisables</a></li>
+<li><a href="#exportation-des-données">Exportation des Données</a></li>
+<li><a href="#intégration-prometheusgrafana">Intégration Prometheus/Grafana</a></li>
+</ol>
+<h2 id="alertes-automatiques">Alertes Automatiques<a class="headerlink" href="#alertes-automatiques" title="Permanent link">&para;</a></h2>
+<p>Le système d'alertes automatiques permet de surveiller les métriques de performance des collecteurs de données et de déclencher des notifications lorsque certaines conditions sont remplies.</p>
+<h3 id="creation-dune-alerte">Création d'une alerte<a class="headerlink" href="#creation-dune-alerte" title="Permanent link">&para;</a></h3>
+<p>Pour créer une alerte basée sur les performances :</p>
+<ol>
+<li>Accédez à l'interface d'alertes (/alerts)</li>
+<li>Cliquez sur "Créer une alerte de performance"</li>
+<li>Configurez les paramètres suivants :</li>
+<li>Nom de l'alerte</li>
+<li>Collecteur(s) à surveiller</li>
+<li>Exchange(s) à surveiller</li>
+<li>Symbole(s) à surveiller</li>
+<li>Seuils :<ul>
+<li>Type de métrique (débit, latence, taux d'erreur, santé)</li>
+<li>Opérateur de comparaison (&gt;, &lt;, =, &gt;=, &lt;=)</li>
+<li>Valeur seuil</li>
+<li>Durée (pendant combien de temps la condition doit être maintenue)</li>
+<li>Période de refroidissement (délai avant qu'une alerte puisse être redéclenchée)</li>
+</ul>
+</li>
+<li>Canaux de notification</li>
+</ol>
+<h3 id="gestion-des-alertes">Gestion des alertes<a class="headerlink" href="#gestion-des-alertes" title="Permanent link">&para;</a></h3>
+<p>Les alertes peuvent être activées, désactivées, modifiées ou supprimées à tout moment via l'interface d'administration.</p>
+<h3 id="api-rest-pour-les-alertes">API REST pour les alertes<a class="headerlink" href="#api-rest-pour-les-alertes" title="Permanent link">&para;</a></h3>
+<p>Les alertes peuvent également être gérées via l'API REST :</p>
+<ul>
+<li><code>POST /api/alerts</code> : Créer une nouvelle alerte</li>
+<li><code>GET /api/alerts</code> : Obtenir toutes les alertes</li>
+<li><code>GET /api/alerts/{alert_id}</code> : Obtenir une alerte spécifique</li>
+<li><code>PATCH /api/alerts/{alert_id}</code> : Mettre à jour une alerte</li>
+<li><code>DELETE /api/alerts/{alert_id}</code> : Supprimer une alerte</li>
+<li><code>GET /api/alerts/history</code> : Obtenir l'historique des alertes déclenchées</li>
+</ul>
+<h2 id="tableaux-de-bord-personnalisables">Tableaux de Bord Personnalisables<a class="headerlink" href="#tableaux-de-bord-personnalisables" title="Permanent link">&para;</a></h2>
+<p>Les tableaux de bord personnalisables permettent de visualiser les métriques selon vos préférences, en créant des widgets pour différents types de visualisations.</p>
+<h3 id="creation-dun-tableau-de-bord">Création d'un tableau de bord<a class="headerlink" href="#creation-dun-tableau-de-bord" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Accédez à l'interface des tableaux de bord (/dashboard)</li>
+<li>Cliquez sur "Créer un tableau de bord"</li>
+<li>Donnez un nom au tableau de bord</li>
+<li>Cliquez sur "Ajouter un widget" pour commencer à ajouter des visualisations</li>
+</ol>
+<h3 id="types-de-widgets-disponibles">Types de widgets disponibles<a class="headerlink" href="#types-de-widgets-disponibles" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Graphique linéaire</strong> : Affiche l'évolution d'une métrique dans le temps</li>
+<li><strong>Graphique à barres</strong> : Compare les valeurs de métriques entre collecteurs ou exchanges</li>
+<li><strong>Graphique circulaire</strong> : Visualise la répartition des métriques</li>
+<li><strong>Tableau</strong> : Affiche les données de métriques sous forme de tableau</li>
+<li><strong>Valeur unique</strong> : Affiche une seule valeur avec une tendance</li>
+</ul>
+<h3 id="personnalisation-des-widgets">Personnalisation des widgets<a class="headerlink" href="#personnalisation-des-widgets" title="Permanent link">&para;</a></h3>
+<p>Chaque widget peut être personnalisé :
+- Titre
+- Type de métrique à afficher
+- Collecteurs, exchanges et symboles à inclure
+- Taille (petit, moyen, grand)
+- Période de temps (5m, 15m, 1h, 6h, 24h, 7d)</p>
+<h3 id="gestion-des-tableaux-de-bord">Gestion des tableaux de bord<a class="headerlink" href="#gestion-des-tableaux-de-bord" title="Permanent link">&para;</a></h3>
+<p>Vous pouvez créer plusieurs tableaux de bord et basculer entre eux. Chaque tableau de bord peut être :
+- Modifié
+- Dupliqué
+- Supprimé
+- Défini comme tableau de bord par défaut</p>
+<h2 id="exportation-des-donnees">Exportation des Données<a class="headerlink" href="#exportation-des-donnees" title="Permanent link">&para;</a></h2>
+<p>Le système permet d'exporter les données de métriques pour une analyse externe.</p>
+<h3 id="exportation-via-linterface-utilisateur">Exportation via l'interface utilisateur<a class="headerlink" href="#exportation-via-linterface-utilisateur" title="Permanent link">&para;</a></h3>
+<p>À partir de n'importe quel tableau de bord :
+1. Cliquez sur le bouton "Exporter" dans le coin supérieur droit
+2. Choisissez le format d'exportation (JSON ou CSV)
+3. Sélectionnez les filtres souhaités (collecteurs, exchanges, symboles, période)
+4. Cliquez sur "Exporter"</p>
+<h3 id="api-rest-pour-lexportation">API REST pour l'exportation<a class="headerlink" href="#api-rest-pour-lexportation" title="Permanent link">&para;</a></h3>
+<p>Les données de métriques peuvent également être exportées via l'API REST :</p>
+<ul>
+<li><code>GET /api/export/metrics/json</code> : Exporter les métriques au format JSON</li>
+<li><code>GET /api/export/metrics/csv</code> : Exporter les métriques au format CSV</li>
+</ul>
+<p>Paramètres de requête :
+- <code>collector_name</code> : Filtrer par nom de collecteur
+- <code>exchange</code> : Filtrer par exchange
+- <code>metric_type</code> : Filtrer par type de métrique
+- <code>symbol</code> : Filtrer par symbole
+- <code>timeframe</code> : Fenêtre temporelle (5m, 15m, 1h, 6h, 24h, 7d)</p>
+<h2 id="integration-prometheusgrafana">Intégration Prometheus/Grafana<a class="headerlink" href="#integration-prometheusgrafana" title="Permanent link">&para;</a></h2>
+<p>SADIE peut exposer ses métriques dans un format compatible avec Prometheus, ce qui permet une intégration avec des outils de surveillance comme Grafana.</p>
+<h3 id="configuration-de-lexportateur-prometheus">Configuration de l'exportateur Prometheus<a class="headerlink" href="#configuration-de-lexportateur-prometheus" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Accédez à l'interface d'administration (/settings/prometheus)</li>
+<li>Activez l'exportateur Prometheus</li>
+<li>Configurez le port sur lequel les métriques seront exposées (par défaut : 9090)</li>
+<li>Cliquez sur "Enregistrer"</li>
+</ol>
+<h3 id="metriques-exposees">Métriques exposées<a class="headerlink" href="#metriques-exposees" title="Permanent link">&para;</a></h3>
+<p>Les métriques suivantes sont exposées au format Prometheus :</p>
+<ul>
+<li><code>sadie_collector_throughput</code> : Débit du collecteur en messages par seconde</li>
+<li><code>sadie_collector_latency</code> : Latence du collecteur en millisecondes</li>
+<li><code>sadie_collector_error_rate</code> : Taux d'erreurs du collecteur en pourcentage</li>
+<li><code>sadie_collector_health</code> : Santé du collecteur (1: sain, 0: défaillant)</li>
+<li><code>sadie_collector_total_messages</code> : Nombre total de messages traités par le collecteur</li>
+<li><code>sadie_collector_total_errors</code> : Nombre total d'erreurs rencontrées par le collecteur</li>
+</ul>
+<p>Chaque métrique est étiquetée avec :
+- <code>collector_name</code> : Nom du collecteur
+- <code>exchange</code> : Exchange concerné
+- <code>symbol</code> : Symbole concerné</p>
+<h3 id="configuration-de-prometheus">Configuration de Prometheus<a class="headerlink" href="#configuration-de-prometheus" title="Permanent link">&para;</a></h3>
+<p>Pour que Prometheus puisse scraper les métriques SADIE, ajoutez la configuration suivante à votre fichier <code>prometheus.yml</code> :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">scrape_configs</span><span class="p">:</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="s">'sadie'</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">static_configs</span><span class="p">:</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">'localhost:9090'</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">scrape_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15s</span>
+</code></pre></div>
+<h3 id="creation-dun-tableau-de-bord-grafana">Création d'un tableau de bord Grafana<a class="headerlink" href="#creation-dun-tableau-de-bord-grafana" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Ajoutez votre instance Prometheus comme source de données dans Grafana</li>
+<li>Créez un nouveau tableau de bord ou importez l'exemple fourni dans l'interface d'administration</li>
+<li>Utilisez les métriques SADIE dans vos panneaux Grafana</li>
+</ol>
+<h3 id="api-rest-pour-prometheus">API REST pour Prometheus<a class="headerlink" href="#api-rest-pour-prometheus" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>POST /api/prometheus/config</code> : Configurer l'exportateur Prometheus</li>
+<li><code>GET /api/prometheus/status</code> : Obtenir le statut de l'exportateur Prometheus </li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.annotate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
