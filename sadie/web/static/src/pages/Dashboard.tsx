@@ -330,7 +330,9 @@ const DashboardPage: React.FC = () => {
       case 'bar':
         // Transformer pour les graphiques temporels
         const chartData = [];
-        for (const [timestamp, values] of Object.entries(data.metrics)) {
+        for (const [timestamp, values] of Object.entries(
+          data.metrics as Record<string, Record<string, unknown>>
+        )) {
           chartData.push({
             timestamp,
             ...values
@@ -813,7 +815,7 @@ const DashboardPage: React.FC = () => {
               <InputLabel>Type de graphique</InputLabel>
               <Select
                 value={newWidget.type || 'line'}
-                onChange={(e) => setNewWidget({ ...newWidget, type: e.target.value })}
+                onChange={(e) => setNewWidget({ ...newWidget, type: e.target.value as Widget['type'] })}
               >
                 <MenuItem value="line">Ligne</MenuItem>
                 <MenuItem value="bar">Barre</MenuItem>
@@ -827,7 +829,7 @@ const DashboardPage: React.FC = () => {
               <InputLabel>Taille</InputLabel>
               <Select
                 value={newWidget.size || 'medium'}
-                onChange={(e) => setNewWidget({ ...newWidget, size: e.target.value })}
+                onChange={(e) => setNewWidget({ ...newWidget, size: e.target.value as Widget['size'] })}
               >
                 <MenuItem value="small">Petit</MenuItem>
                 <MenuItem value="medium">Moyen</MenuItem>

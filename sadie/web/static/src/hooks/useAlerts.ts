@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Alert } from '../types';
+import { Alert, WebSocketMessage } from '../types';
 import ApiService from '../services/api';
 import { useWebSocket } from '../context/WebSocketContext';
 
@@ -75,7 +75,12 @@ export const useAlerts = ({ symbol }: UseAlertsProps = {}): UseAlertsReturn => {
   const processWebSocketMessage = useCallback((message: WebSocketMessage) => {
     try {
       if (message.type === 'alert') {
-        const alertData = message as Alert;
+        // Le canal d'alerte transmet les champs de l'alerte à plat, dans la
+        // même enveloppe que `type` — alors que `WebSocketMessage` décrit une
+        // enveloppe générique (`type`, `symbol`, `data`). La conversion est
+        // donc explicite. À clarifier : aucun endpoint WebSocket d'alerte
+        // n'existe côté backend pour l'instant (voir FRONT-A-FAIRE.md).
+        const alertData = message as unknown as Alert;
         setLastTriggered(alertData);
         setAlerts(prev => prev.map(a => (a.id === alertData.id ? alertData : a)));
       }

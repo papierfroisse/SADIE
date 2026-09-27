@@ -66,6 +66,37 @@ jobs:
         # N'echoue pas la chaine si Codecov est injoignable.
         fail_ci_if_error: false
         
+  frontend:
+    runs-on: ubuntu-latest
+    # Le front (sadie/web/static) n'etait verifie par aucune chaine alors qu'il
+    # ne compilait plus : 14 erreurs TypeScript (contrat de types en double,
+    # `IndicatorPanel`, `OrderPanel`, `Dashboard`, fixtures de tests) et un MUI
+    # v4 declare mais absent du code. Cette tache verrouille ce qui est vert
+    # aujourd'hui : l'installation reproductible, les types et la compilation.
+    # Le lint (286 erreurs) et les tests (20 echecs) seront ajoutes ici en
+    # etapes bloquantes une fois le passif traite : sadie/web/static/FRONT-A-FAIRE.md.
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+        cache: npm
+        cache-dependency-path: sadie/web/static/package-lock.json
+
+    - name: Install dependencies
+      working-directory: sadie/web/static
+      run: npm ci --no-audit --no-fund
+
+    - name: Type check
+      working-directory: sadie/web/static
+      run: npm run type-check
+
+    - name: Build
+      working-directory: sadie/web/static
+      run: npm run build
+
   benchmark:
     needs: test
     runs-on: ubuntu-latest

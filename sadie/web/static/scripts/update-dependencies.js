@@ -122,7 +122,7 @@ function categorizeDependencies(outdatedPackages) {
   };
   
   // Liste des packages considérés comme critiques ou à haut risque
-  const criticalPackages = ['react', 'react-dom', 'react-router', 'react-router-dom', '@material-ui/core', '@mui/material'];
+  const criticalPackages = ['react', 'react-dom', 'react-router', 'react-router-dom', '@mui/material', '@mui/icons-material'];
   const highRiskPackages = ['redux', 'react-redux', '@reduxjs/toolkit', 'mobx', 'mobx-react', 'apollo-client', '@apollo/client'];
   
   // Analyser chaque package obsolète

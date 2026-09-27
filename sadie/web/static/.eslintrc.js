@@ -28,7 +28,8 @@ module.exports = {
       version: 'detect',
     },
     'import/resolver': {
-      typescript: {},
+      // Plus de résolveur `typescript` ici : voir la note sur
+      // `import/no-unresolved` dans les règles.
       node: {
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
       },
@@ -128,7 +129,15 @@ module.exports = {
       'newlines-between': 'always',
       alphabetize: { order: 'asc', caseInsensitive: true },
     }],
-    'import/no-unresolved': 'error',
+    // `import/no-unresolved` désactivé volontairement : la configuration
+    // demandait le résolveur `typescript` (import/resolver.typescript) sans que
+    // `eslint-import-resolver-typescript` soit installé, et l'ajouter entre en
+    // conflit avec react-scripts 5 (qui impose @typescript-eslint 5 quand le
+    // projet est en 6). La résolution des modules est déjà couverte par
+    // TypeScript : `npm run type-check` (tsc --noEmit) échoue sur un import
+    // irrésolu. La règle ne faisait donc que dupliquer ce contrôle, en le
+    // rendant moins fiable.
+    'import/no-unresolved': 'off',
     'import/no-cycle': 'warn',
     'import/no-unused-modules': 'warn',
     'import/no-duplicates': 'error',

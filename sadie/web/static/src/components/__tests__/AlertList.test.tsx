@@ -455,16 +455,16 @@ describe('AlertList - Notifications', () => {
   });
 
   it('shows notification when alert is triggered', async () => {
-    const mockAlert = {
+    const mockAlert: Alert = {
       id: '1',
       symbol: 'BTCUSDT',
       type: 'price',
       condition: 'above',
       value: 50000,
-      notification_type: 'browser',
-      created_at: new Date().toISOString(),
+      notificationType: 'browser',
+      createdAt: Date.now(),
       triggered: true,
-      triggered_at: new Date().toISOString(),
+      triggeredAt: Date.now(),
     };
 
     mockWebSocket.lastAlert = mockAlert;

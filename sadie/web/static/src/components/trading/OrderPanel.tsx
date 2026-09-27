@@ -16,7 +16,9 @@ import { Order } from '../../types';
 interface OrderPanelProps {
   symbol: string;
   currentPrice: number;
-  onSubmitOrder: (order: Omit<Order, 'id' | 'status' | 'timestamp'>) => Promise<void>;
+  onSubmitOrder: (
+    order: Omit<Order, 'id' | 'status' | 'createdAt' | 'updatedAt'>
+  ) => Promise<void>;
 }
 
 const OrderPanel: React.FC<OrderPanelProps> = ({ symbol, currentPrice, onSubmitOrder }) => {

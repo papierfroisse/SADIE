@@ -51,13 +51,11 @@ class MockWebSocket implements WebSocket {
       const mockData: MarketData = {
         symbol: 'BTCUSDT',
         timestamp: Date.now(),
-        data: {
-          open: 50000,
-          high: 51000,
-          low: 49000,
-          close: 50500,
-          volume: 100,
-        },
+        open: 50000,
+        high: 51000,
+        low: 49000,
+        close: 50500,
+        volume: 100,
       };
       
       this.onmessage.call(
@@ -132,7 +130,7 @@ const TestComponent = () => {
       <div data-testid="market-data">{JSON.stringify(marketData)}</div>
       <div data-testid="connection-status">{isConnected ? 'connected' : 'disconnected'}</div>
       {error && <div data-testid="error-message">{error}</div>}
-      <button onClick={() => connect('BTCUSDT')}>Connect</button>
+      <button onClick={() => connect('BTCUSDT', '1h')}>Connect</button>
       <button onClick={disconnect}>Disconnect</button>
     </div>
   );
