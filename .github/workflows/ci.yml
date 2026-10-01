@@ -73,8 +73,9 @@ jobs:
     # `IndicatorPanel`, `OrderPanel`, `Dashboard`, fixtures de tests) et un MUI
     # v4 declare mais absent du code. Cette tache verrouille ce qui est vert
     # aujourd'hui : l'installation reproductible, les types et la compilation.
-    # Le lint (286 erreurs) et les tests (20 echecs) seront ajoutes ici en
-    # etapes bloquantes une fois le passif traite : sadie/web/static/FRONT-A-FAIRE.md.
+    # Les 34 tests (verts) sont verrouilles ici. Le lint (220 erreurs, 703
+    # avertissements) reste a traiter avant de devenir bloquant :
+    # sadie/web/static/FRONT-A-FAIRE.md.
     steps:
     - uses: actions/checkout@v4
 
@@ -96,6 +97,10 @@ jobs:
     - name: Build
       working-directory: sadie/web/static
       run: npm run build
+
+    - name: Tests
+      working-directory: sadie/web/static
+      run: npm run test:ci
 
   benchmark:
     needs: test
