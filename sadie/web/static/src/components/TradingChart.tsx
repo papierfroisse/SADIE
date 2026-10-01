@@ -212,6 +212,12 @@ export const TradingChart: React.FC<TradingChartProps> = ({ symbol }) => {
               variant="outlined"
               size="small"
             />
+            <Chip
+              label={isConnected ? '🟢 En ligne' : '🔴 Hors ligne'}
+              color={isConnected ? 'success' : 'error'}
+              variant="outlined"
+              size="small"
+            />
             <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
               <InputLabel>Intervalle</InputLabel>
               <Select
@@ -251,6 +257,7 @@ export const TradingChart: React.FC<TradingChartProps> = ({ symbol }) => {
       <Divider sx={{ my: 2 }} />
       <Box
         ref={chartContainerRef}
+        data-testid="chart-container"
         sx={{
           width: '100%',
           height: isFullscreen ? 'calc(100vh - 200px)' : '500px',

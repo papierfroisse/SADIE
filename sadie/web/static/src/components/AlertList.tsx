@@ -244,6 +244,13 @@ export const AlertList: React.FC = () => {
                 color={!isConnected ? 'error' : notificationsEnabled ? 'primary' : 'default'}
                 disabled={!isConnected}
                 data-testid="notification-toggle"
+                aria-label={
+                  !isConnected
+                    ? 'Notifications indisponibles : connexion perdue'
+                    : notificationsEnabled
+                      ? 'Désactiver les notifications'
+                      : 'Activer les notifications'
+                }
               >
                 {!isConnected ? (
                   <NotificationsOffIcon />
@@ -287,7 +294,7 @@ export const AlertList: React.FC = () => {
         <Grid item>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Tooltip title="Filtrer">
-              <IconButton size="small">
+              <IconButton size="small" aria-label="Filtrer les alertes">
                 <FilterListIcon />
               </IconButton>
             </Tooltip>
@@ -340,6 +347,7 @@ export const AlertList: React.FC = () => {
                       onClick={() => handleDeleteAlert(alert.id)}
                       data-testid="delete-alert-button"
                       color="error"
+                      aria-label={`Supprimer l'alerte ${alert.symbol}`}
                     >
                       <DeleteIcon />
                     </IconButton>

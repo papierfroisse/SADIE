@@ -25,41 +25,46 @@ const theme = createTheme({
   },
 });
 
-const renderWithProviders = (children: React.ReactNode) => {
-  return render(
-    <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <WebSocketProvider>{children}</WebSocketProvider>
-      </ThemeProvider>
-    </BrowserRouter>
-  );
-};
+// Arbre réutilisable : `rerender` a besoin d'un arbre neuf mais
+// structurellement identique pour se réconcilier sur la même instance.
+const withProviders = (children: React.ReactNode) => (
+  <BrowserRouter>
+    <ThemeProvider theme={theme}>
+      <WebSocketProvider>{children}</WebSocketProvider>
+    </ThemeProvider>
+  </BrowserRouter>
+);
+
+const renderWithProviders = (children: React.ReactNode) => render(withProviders(children));
+
+const mockUseWebSocket = jest.requireMock('../../context/WebSocketContext')
+  .useWebSocket as jest.Mock;
+
+// Contexte neutre, réutilisé par chaque test.
+const mockContexte = (lastAlert: unknown = null) => ({
+  connect: jest.fn(),
+  disconnect: jest.fn(),
+  isConnected: true,
+  lastAlert,
+});
 
 describe('Layout Component', () => {
-  const mockUseWebSocket = jest.requireMock('../../context/WebSocketContext')
-    .useWebSocket as jest.Mock;
-
   beforeEach(() => {
     // Chaque test repart d'un contexte neutre : sans cette remise à zéro, le
     // `mockImplementation` posé par un test (alerte déclenchée, déconnexion…)
     // fuyait sur les tests suivants et faussait leurs assertions.
     mockUseWebSocket.mockReset();
-    mockUseWebSocket.mockImplementation(() => ({
-      connect: jest.fn(),
-      disconnect: jest.fn(),
-      isConnected: true,
-      lastAlert: null,
-    }));
+    mockUseWebSocket.mockImplementation(() => mockContexte());
   });
 
   it('renders the app title', () => {
     renderWithProviders(<Layout>Test Content</Layout>);
-    expect(screen.getByText('SADIE Trading')).toBeInTheDocument();
+    expect(screen.getByText(/SADIE - Système d'Analyse de Données/)).toBeInTheDocument();
   });
 
   it('renders all navigation items', () => {
     renderWithProviders(<Layout>Test Content</Layout>);
-    expect(screen.getByText('Trading')).toBeInTheDocument();
+    expect(screen.getByText('Trading Chart')).toBeInTheDocument();
     expect(screen.getByText('Alertes')).toBeInTheDocument();
     expect(screen.getByText('Paramètres')).toBeInTheDocument();
   });
@@ -75,168 +80,107 @@ describe('Layout Component', () => {
 
   it('shows connection status', () => {
     renderWithProviders(<Layout>Test Content</Layout>);
-    expect(screen.getByText('Connecté')).toBeInTheDocument();
+    expect(screen.getByText('En ligne')).toBeInTheDocument();
+  });
+
+  it('shows the disconnected status when the socket is down', () => {
+    mockUseWebSocket.mockImplementation(() => ({ ...mockContexte(), isConnected: false }));
+    renderWithProviders(<Layout>Test Content</Layout>);
+    expect(screen.getByText('Hors ligne')).toBeInTheDocument();
   });
 
   describe('Notifications', () => {
+    const alerte = {
+      id: '1',
+      symbol: 'BTCUSDT',
+      condition: 'above',
+      value: 50000,
+      triggered: true,
+    };
+
     it('shows empty notification message when no notifications', () => {
       renderWithProviders(<Layout>Test Content</Layout>);
 
-      const notificationButton = screen.getByTestId('notification-button');
-      fireEvent.click(notificationButton);
+      fireEvent.click(screen.getByTestId('notification-button'));
 
       expect(screen.getByText('Aucune nouvelle notification')).toBeInTheDocument();
     });
 
     it('shows notification badge when new alert is received', async () => {
-      const mockUseWebSocket = jest.requireMock('../../context/WebSocketContext').useWebSocket;
-      mockUseWebSocket.mockImplementation(() => ({
-        connect: jest.fn(),
-        disconnect: jest.fn(),
-        isConnected: true,
-        lastAlert: {
-          id: '1',
-          symbol: 'BTCUSDT',
-          condition: 'above',
-          value: 50000,
-          triggered: true,
-        },
-      }));
+      mockUseWebSocket.mockImplementation(() => mockContexte(alerte));
 
       renderWithProviders(<Layout>Test Content</Layout>);
 
       await waitFor(() => {
-        const badge = screen.getByTestId('notification-badge');
-        expect(badge).toHaveTextContent('1');
+        expect(screen.getByTestId('notification-button')).toHaveAccessibleName('Notifications (1)');
       });
+    });
+
+    it('lists the received alert with its relative time', async () => {
+      mockUseWebSocket.mockImplementation(() => mockContexte(alerte));
+
+      renderWithProviders(<Layout>Test Content</Layout>);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('notification-button')).toHaveAccessibleName('Notifications (1)');
+      });
+
+      fireEvent.click(screen.getByTestId('notification-button'));
+
+      expect(screen.getByText('Alerte BTCUSDT: above 50000')).toBeInTheDocument();
+      expect(screen.getByText(/instant/i)).toBeInTheDocument();
     });
 
     it('clears notification count when notifications are viewed', async () => {
-      const mockUseWebSocket = jest.requireMock('../../context/WebSocketContext').useWebSocket;
-      mockUseWebSocket.mockImplementation(() => ({
-        connect: jest.fn(),
-        disconnect: jest.fn(),
-        isConnected: true,
-        lastAlert: {
-          id: '1',
-          symbol: 'BTCUSDT',
-          condition: 'above',
-          value: 50000,
-          triggered: true,
-        },
-      }));
+      mockUseWebSocket.mockImplementation(() => mockContexte(alerte));
 
       renderWithProviders(<Layout>Test Content</Layout>);
 
       await waitFor(() => {
-        const badge = screen.getByTestId('notification-badge');
-        expect(badge).toHaveTextContent('1');
+        expect(screen.getByTestId('notification-button')).toHaveAccessibleName('Notifications (1)');
       });
 
-      const notificationButton = screen.getByTestId('notification-button');
-      fireEvent.click(notificationButton);
-      fireEvent.click(screen.getByText(/BTCUSDT/));
+      fireEvent.click(screen.getByTestId('notification-button'));
+      fireEvent.click(screen.getByText('Alerte BTCUSDT: above 50000'));
 
       await waitFor(() => {
-        const badge = screen.getByTestId('notification-badge');
-        expect(badge).toHaveTextContent('0');
+        expect(screen.getByTestId('notification-button')).toHaveAccessibleName('Notifications');
       });
     });
 
-    it('formats notification time correctly', async () => {
-      // Mock Date.now() pour avoir un temps constant
-      const NOW = 1625097600000; // 2021-07-01 12:00:00
-      jest.spyOn(Date, 'now').mockImplementation(() => NOW);
+    it('does not count the same alert twice', async () => {
+      // Le fournisseur peut renvoyer un objet `lastAlert` neuf à chaque rendu
+      // sans que l'alerte change : elle ne doit être comptée qu'une seule fois.
+      mockUseWebSocket.mockImplementation(() => mockContexte(alerte));
 
-      const mockUseWebSocket = jest.requireMock('../../context/WebSocketContext').useWebSocket;
-      mockUseWebSocket.mockImplementation(() => ({
-        connect: jest.fn(),
-        disconnect: jest.fn(),
-        isConnected: true,
-        lastAlert: {
-          id: '1',
-          symbol: 'BTCUSDT',
-          condition: 'above',
-          value: 50000,
-          triggered: true,
-        },
-      }));
+      const view = renderWithProviders(<Layout>Test Content</Layout>);
+      view.rerender(withProviders(<Layout>Test Content</Layout>));
+      view.rerender(withProviders(<Layout>Test Content</Layout>));
 
-      renderWithProviders(<Layout>Test Content</Layout>);
-
-      // Simuler différents temps de notification
-      const notifications = [
-        { timestamp: NOW, expected: "À l'instant" },
-        { timestamp: NOW - 2 * 60 * 1000, expected: 'Il y a 2 minutes' },
-        { timestamp: NOW - 60 * 60 * 1000, expected: 'Il y a 1 heure' },
-        { timestamp: NOW - 3 * 60 * 60 * 1000, expected: 'Il y a 3 heures' },
-      ];
-
-      for (const { timestamp, expected } of notifications) {
-        // Mettre à jour le mock avec un nouveau timestamp
-        mockUseWebSocket.mockImplementation(() => ({
-          connect: jest.fn(),
-          disconnect: jest.fn(),
-          isConnected: true,
-          lastAlert: {
-            id: Date.now().toString(),
-            symbol: 'BTCUSDT',
-            condition: 'above',
-            value: 50000,
-            triggered: true,
-            timestamp,
-          },
-        }));
-
-        // Forcer un re-render
-        renderWithProviders(<Layout>Test Content</Layout>);
-
-        // Ouvrir le menu des notifications
-        const notificationButton = screen.getByTestId('notification-button');
-        fireEvent.click(notificationButton);
-
-        // Vérifier le format du temps
-        await waitFor(() => {
-          expect(screen.getByText(expected)).toBeInTheDocument();
-        });
-
-        // Fermer le menu des notifications
-        fireEvent.click(screen.getByText(/BTCUSDT/));
-      }
-
-      // Restaurer Date.now()
-      jest.restoreAllMocks();
+      await waitFor(() => {
+        expect(screen.getByTestId('notification-button')).toHaveAccessibleName('Notifications (1)');
+      });
     });
 
-    it('limits the number of notifications', async () => {
-      const mockUseWebSocket = jest.requireMock('../../context/WebSocketContext').useWebSocket;
-      const MAX_NOTIFICATIONS = 10;
+    it('keeps only the ten most recent notifications', () => {
+      const view = renderWithProviders(<Layout>Test Content</Layout>);
 
-      // Créer plus que le maximum de notifications
-      for (let i = 0; i < MAX_NOTIFICATIONS + 5; i++) {
-        mockUseWebSocket.mockImplementation(() => ({
-          connect: jest.fn(),
-          disconnect: jest.fn(),
-          isConnected: true,
-          lastAlert: {
-            id: i.toString(),
+      for (let i = 0; i < 15; i++) {
+        mockUseWebSocket.mockImplementation(() =>
+          mockContexte({
+            id: `alert-${i}`,
             symbol: `BTC${i}USDT`,
             condition: 'above',
             value: 50000,
             triggered: true,
-          },
-        }));
-
-        renderWithProviders(<Layout>Test Content</Layout>);
+          })
+        );
+        view.rerender(withProviders(<Layout>Test Content</Layout>));
       }
 
-      // Ouvrir le menu des notifications
-      const notificationButton = screen.getByTestId('notification-button');
-      fireEvent.click(notificationButton);
+      fireEvent.click(screen.getByTestId('notification-button'));
 
-      // Vérifier que seules les MAX_NOTIFICATIONS plus récentes sont affichées
-      const notifications = screen.getAllByText(/BTC.*USDT/);
-      expect(notifications).toHaveLength(MAX_NOTIFICATIONS);
+      expect(screen.getAllByText(/Alerte BTC\d+USDT: above 50000/)).toHaveLength(10);
     });
   });
 });

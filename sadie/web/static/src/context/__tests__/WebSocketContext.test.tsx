@@ -12,6 +12,10 @@ class MockWebSocket implements WebSocket {
   static readonly CLOSING = 2;
   static readonly CLOSED = 3;
 
+  // Toutes les instances créées : les tests pilotent ainsi le socket réel du
+  // fournisseur au lieu d'un socket détaché qui n'aurait aucun effet.
+  static instances: MockWebSocket[] = [];
+
   readonly CONNECTING = MockWebSocket.CONNECTING;
   readonly OPEN = MockWebSocket.OPEN;
   readonly CLOSING = MockWebSocket.CLOSING;
@@ -31,6 +35,7 @@ class MockWebSocket implements WebSocket {
 
   constructor(url: string) {
     this.url = url;
+    MockWebSocket.instances.push(this);
     setTimeout(() => {
       if (this.onopen) {
         this.onopen.call(this, new Event('open'));
@@ -45,29 +50,27 @@ class MockWebSocket implements WebSocket {
     }
   }
 
+  // Émet le message tel que `sadie/web/stream_manager.py` le diffuse : les
+  // champs sont à plat. Le contre-exemple imbriqué (`{ type, data }`) faisait
+  // ignorer le message par le fournisseur, qui lit `message.symbol`.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void {
-    // Mock implementation
-    if (this.onmessage) {
-      const mockData: MarketData = {
-        symbol: 'BTCUSDT',
-        timestamp: Date.now(),
-        open: 50000,
-        high: 51000,
-        low: 49000,
-        close: 50500,
-        volume: 100,
-      };
-      
-      this.onmessage.call(
-        this,
-        new MessageEvent('message', {
-          data: JSON.stringify({
-            type: 'market_data',
-            data: mockData,
-          }),
-        })
-      );
-    }
+    const message: MarketData = {
+      symbol: 'BTCUSDT',
+      timestamp: Date.now(),
+      open: 50000,
+      high: 51000,
+      low: 49000,
+      close: 50500,
+      volume: 100,
+    };
+
+    this.onmessage?.call(
+      this,
+      new MessageEvent('message', {
+        data: JSON.stringify({ type: 'market_data', ...message }),
+      })
+    );
   }
 
   addEventListener<K extends keyof WebSocketEventMap>(
@@ -139,6 +142,7 @@ const TestComponent = () => {
 describe('WebSocketContext', () => {
   beforeEach(() => {
     jest.useFakeTimers();
+    MockWebSocket.instances = [];
   });
 
   afterEach(() => {
@@ -178,6 +182,16 @@ describe('WebSocketContext', () => {
     fireEvent.click(screen.getByText('Connect'));
 
     await waitFor(() => {
+      expect(screen.getByTestId('connection-status')).toHaveTextContent('connected');
+    });
+
+    // Un message du serveur, émis sur le socket réel du fournisseur (le dernier
+    // créé) : sans cet envoi, aucun test ne pouvait recevoir de données.
+    act(() => {
+      MockWebSocket.instances[MockWebSocket.instances.length - 1].send('');
+    });
+
+    await waitFor(() => {
       const marketDataElement = screen.getByTestId('market-data');
       const data = JSON.parse(marketDataElement.textContent || '{}');
       expect(data).toHaveProperty('BTCUSDT');
@@ -193,14 +207,15 @@ describe('WebSocketContext', () => {
 
     fireEvent.click(screen.getByText('Connect'));
 
-    const ws = new MockWebSocket('ws://localhost:8000/ws/BTCUSDT');
+    // L'erreur est déclenchée sur le socket du fournisseur : un socket détaché
+    // ne modifie aucun état et le test ne prouvait donc rien.
     act(() => {
-      ws.onerror?.(new Event('error'));
+      MockWebSocket.instances[MockWebSocket.instances.length - 1].onerror?.(new Event('error'));
     });
 
     await waitFor(() => {
       expect(screen.getByTestId('connection-status')).toHaveTextContent('disconnected');
-      expect(screen.getByTestId('error-message')).toHaveTextContent('WebSocket connection error');
+      expect(screen.getByTestId('error-message')).toHaveTextContent('Erreur de connexion WebSocket');
     });
   });
 });

@@ -43,6 +43,9 @@ import { useWebSocket } from '../context/WebSocketContext';
 
 const drawerWidth = 240;
 
+// Nombre maximum de notifications conservées dans le menu de la cloche.
+const MAX_NOTIFICATIONS = 10;
+
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -91,22 +94,32 @@ export const Layout: React.FC<LayoutProps> = ({ children, onToggleTheme, isDarkM
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // Limiter le nombre de notifications stockées
-  const MAX_NOTIFICATIONS = 10;
+  // Dernière alerte déjà convertie en notification. La garde par identifiant
+  // évite de compter deux fois la même alerte : `lastAlert` peut changer
+  // d'identité à chaque rendu du fournisseur sans que l'alerte ait changé.
+  const lastHandledAlertIdRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
-    if (lastAlert?.triggered) {
-      const newNotification = {
-        id: lastAlert.id,
-        message: `Alerte ${lastAlert.symbol}: ${lastAlert.condition} ${lastAlert.value}`,
-        timestamp: Date.now(),
-      };
-      setNotifications(prev => [newNotification, ...prev].slice(0, MAX_NOTIFICATIONS));
-      setNotificationCount(prev => prev + 1);
+    if (!lastAlert?.triggered) return;
+    if (lastHandledAlertIdRef.current === lastAlert.id) return;
+    lastHandledAlertIdRef.current = lastAlert.id;
 
-      // Notification sonore
-      const audio = new Audio('/notification.mp3');
-      audio.play().catch(() => {
+    const newNotification = {
+      id: lastAlert.id,
+      message: `Alerte ${lastAlert.symbol}: ${lastAlert.condition} ${lastAlert.value}`,
+      timestamp: Date.now(),
+    };
+    setNotifications(prev => [newNotification, ...prev].slice(0, MAX_NOTIFICATIONS));
+    setNotificationCount(prev => prev + 1);
+
+    // Notification sonore. `HTMLMediaElement.play()` renvoie une promesse dans
+    // les navigateurs modernes, mais pas partout (jsdom, moteurs anciens) : on
+    // ne rattache le `catch` que si une promesse a bien été retournée, sinon
+    // l'appel lève un TypeError qui interrompt tout le rendu.
+    const audio = new Audio('/notification.mp3');
+    const playResult = audio.play();
+    if (playResult && typeof playResult.catch === 'function') {
+      playResult.catch(() => {
         // Ignorer l'erreur si l'autoplay est bloqué
       });
     }
@@ -121,12 +134,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, onToggleTheme, isDarkM
     setNotificationAnchorEl(null);
     setNotificationCount(0);
     setIsNotificationMenuOpen(false);
-  };
-
-  const handleNotificationKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      handleNotificationClick(event as unknown as React.MouseEvent<HTMLElement>);
-    }
   };
 
   const formatNotificationTime = (timestamp: number): string => {
@@ -193,7 +200,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, onToggleTheme, isDarkM
               </Box>
             </Tooltip>
             <Tooltip title="Notifications">
-              <IconButton color="inherit" onClick={handleNotificationClick}>
+              <IconButton
+                color="inherit"
+                onClick={handleNotificationClick}
+                data-testid="notification-button"
+                aria-label={
+                  notificationCount > 0 ? `Notifications (${notificationCount})` : 'Notifications'
+                }
+              >
                 <Badge badgeContent={notificationCount} color="error">
                   <Notifications />
                 </Badge>
@@ -207,6 +221,30 @@ export const Layout: React.FC<LayoutProps> = ({ children, onToggleTheme, isDarkM
           </Box>
         </Toolbar>
       </AppBar>
+      <Menu
+        anchorEl={notificationAnchorEl}
+        open={isNotificationMenuOpen}
+        onClose={handleNotificationClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        {notifications.length === 0 ? (
+          <MenuItem disabled onClick={handleNotificationClose}>
+            Aucune nouvelle notification
+          </MenuItem>
+        ) : (
+          notifications.map(notification => (
+            <MenuItem key={notification.id} onClick={handleNotificationClose}>
+              <Box>
+                <Typography variant="body2">{notification.message}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {formatNotificationTime(notification.timestamp)}
+                </Typography>
+              </Box>
+            </MenuItem>
+          ))
+        )}
+      </Menu>
       <Drawer
         variant="persistent"
         anchor="left"
