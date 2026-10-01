@@ -64,6 +64,9 @@ data/
 .npm/
 .yarn/
 
+# Rapports générés (lint, format, analyse de bundle)
+reports/
+
 # Temporary files
 *.bak
 *.tmp
