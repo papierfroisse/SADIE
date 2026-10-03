@@ -1,6 +1,6 @@
 # Front SADIE — état des lieux et travail restant
 
-Dernière vérification : 01/10/2026, à la racine `sadie/web/static` (Node 26, npm 11).
+Dernière vérification : 03/10/2026, à la racine `sadie/web/static` (Node 26, npm 11).
 
 ## État vérifié
 
@@ -208,6 +208,12 @@ place. En attendant, les alertes passent par l'API REST.
   le passif de lint existe. À retirer quand `npm run check` passera.
 - Cible Node : le poste est en Node 26, la CI en Node 20. À figer (`.nvmrc` +
   `engines`) au prochain passage sur le front.
+- `react-scripts` 5.0.1 est sa dernière version : CRA est abandonné. Tant qu'il
+  reste en place, l'alerte `webpack-dev-middleware` est infermable et le job
+  Dependabot échoue à chaque poussée sur `main` (§6). Deux issues : sortir de
+  `react-scripts` (Vite), la seule qui règle la cause, ou des `overrides` npm,
+  qui masquent l'alerte sans toucher la chaîne et restent à valider sur
+  `npm start` — le paquet ne sert qu'au serveur de développement.
 
 ### 5. Image Docker : le front n'y est jamais construit
 
@@ -223,18 +229,25 @@ avec la racine React (pas le placeholder), `/static/js/main.<hash>.js` renvoie
 200, et `/package.json`, `/src/index.tsx`, `/Dockerfile` renvoient 404 — la fuite
 de l'ancien montage statique (qui exposait les sources) est bien fermée.
 
-### 6. Dépendances vulnérables (Dependabot, relevé du 01/10/2026)
+### 6. Dépendances vulnérables (Dependabot, relevés des 01/10 et 03/10/2026)
 
 - Le front vivant (`sadie/web/static`) porte **la totalité des alertes ouvertes du
-  dépôt : 87** — 3 critiques, 40 hautes, 36 moyennes, 8 basses. Toutes sont sur
+  dépôt** : 87 au relevé du 01/10 (3 critiques, 40 hautes, 36 moyennes, 8 basses),
+  88 au relevé du 03/10 (3 / 41 / 36 / 8). Toutes sont sur
   `sadie/web/static/package-lock.json` ; le backend (Python) n'en a plus aucune.
+  Le total bouge d'une unité sans qu'aucune dépendance ne change : GitHub révise
+  son propre avis sur un paquet. Un chiffre recopié dans un document est donc
+  toujours périmé — `gh api .../dependabot/alerts` reste la référence.
+  Les trois critiques sont nommées : `websocket-driver` (« Message corruption via
+  abuse of protocol length headers »), `shell-quote` (« quote() does not escape
+  newlines ») et `form-data` (« unsafe random function »).
 - **axios concentrait à lui seul 30 alertes**, dont des critiques remontées par
   ses dépendances (`form-data`, `qs`). Il est monté de 1.7.9 à 1.20.0 dans le
   commit `ff3a9cf`. **Résultat mesuré après le rescan** : le dépôt passe de 278 à
   87 alertes, le front vivant de 120 à 87, et les alertes axios de 30 à 0 ; il
   reste 3 critiques (contre 4), sans effet sur les types, la compilation ni les
   tests.
-- Les 87 restantes ne sont atteignables que par la chaîne d'outils de
+- Les alertes restantes ne sont atteignables que par la chaîne d'outils de
   développement, d'après l'arbre npm : `shell-quote` 1.8.2
   (`react-dev-utils`, `webpack-dev-server`), `websocket-driver` 0.7.4 (`sockjs`,
   HMR) et `form-data` 3.0.2 (`jest` 27 → `jsdom` 16, chemin de test). `form-data`
@@ -243,6 +256,22 @@ de l'ancien montage statique (qui exposait les sources) est bien fermée.
 - Le reste vient de cette même chaîne d'outils : `minimatch` (9), `node-forge`
   (7), `webpack-dev-server` (6), `postcss` (5), `svgo` (4), `ws` (3). Les traiter
   suppose de sortir de `react-scripts` (Vite) ou de figer des `overrides`.
+  `qs` (4 alertes) n'est d'ailleurs plus atteint par axios — corrigé — mais par
+  `cypress` et par `react-scripts` → `webpack-dev-server` → `express` →
+  `body-parser`, d'après `npm ls qs`.
+- **Une alerte que Dependabot ne peut pas fermer** — et qui fait échouer son
+  propre job. Le journal du run « Dependabot Updates » du 01/10
+  (`gh run view 36896169779`, log privé récupéré via
+  `curl -H "Authorization: Bearer $(gh auth token)" .../actions/runs/<id>/logs`)
+  donne la cause mot pour mot : « A patched version exists for
+  webpack-dev-middleware, but the available update path would downgrade
+  react-scripts from 5.0.1 to 0.0.0 ». La chaîne est
+  `react-scripts` 5.0.1 → `webpack-dev-server` 4.15.2 → `webpack-dev-middleware`
+  `^5.3.4`. L'outil conseille lui-même soit de mettre `react-scripts` à jour —
+  aucune version publiée ne le permet, CRA est abandonné — soit d'ajouter un
+  `overrides`. C'est la décision du point 4, mais elle a désormais une preuve :
+  tant que `react-scripts` reste en place, ce job échoue à chaque poussée sur
+  `main` (échecs constatés les 27/09 et 01/10, pas une régression de cette passe).
 - **157 des 278 alertes initiales du dépôt** venaient de `old/SADIE_backup/`, une
   copie morte du front, depuis supprimée : leur disparition ne touchait pas le
   code vivant.
